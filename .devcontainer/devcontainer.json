@@ -31,5 +31,11 @@
 
 
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "bin/setup --skip-server"
+  "postCreateCommand": "bin/setup --skip-server",
+
+  // Forward SSH agent into the container. More info: https://containers.dev/implementors/json_reference/#forwardsshagent.
+  "mounts": [
+    "source=${env:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+  ],
+  "remoteUser": "vscode"
 }
