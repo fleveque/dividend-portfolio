@@ -1,0 +1,10 @@
+<div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
+  <h2 class="text-2xl font-bold mb-6 text-center">Update your password</h2>
+  <%= tag.div(flash[:alert], style: "color:red") if flash[:alert] %>
+
+  <%= form_with url: password_path(params[:token]), method: :put do |form| %>
+    <%= form.password_field :password, required: true, autocomplete: "new-password", placeholder: "Enter new password", maxlength: 72 %><br>
+    <%= form.password_field :password_confirmation, required: true, autocomplete: "new-password", placeholder: "Repeat new password", maxlength: 72 %><br>
+    <%= form.submit "Save" %>
+  <% end %>
+</div>
