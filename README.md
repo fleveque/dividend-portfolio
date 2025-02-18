@@ -8,7 +8,7 @@ This is a pet project I will be working on.
 
 Currently, it is in a very early stage, and many things may fail or not work at all. 
 
-- The first iteration will focus on authentication and retrieving stock information using the [yahoo_finance_client](https://github.com/fleveque/yahoo_finance_client) gem.
+- The first iteration will focus on authentication and retrieving stock information using the [yahoo_finance_client](https://github.com/fleveque/yahoo_finance_client) gem. As Yahoo! Finance API doesn't seem to work anymore, I will probably need to create/use another gem for this purpose.
 - The second iteration will likely focus on enabling each user to create their own radar.
 
 Once the project reach an MVP, I will update the doc accordingly.
