@@ -7,3 +7,10 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+# Create a default user
+default_user = User.find_or_create_by!(email_address: "default@example.com") do |user|
+  user.password = "password"
+  user.password_confirmation = "password"
+end
+
+puts "Default user created with email: #{default_user.email_address} and password: password"
