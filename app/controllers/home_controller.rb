@@ -2,6 +2,6 @@ class HomeController < ApplicationController
   allow_unauthenticated_access
 
   def index
-    @aapl = YahooFinanceClient::Stock.get_quote("AAPL")
+    @aapl = FinancialDataService.get_stock("AAPL")
   end
 end
