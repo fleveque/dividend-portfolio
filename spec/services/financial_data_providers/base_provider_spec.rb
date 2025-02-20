@@ -8,8 +8,8 @@ RSpec.describe FinancialDataProviders::BaseProvider, type: :model do
 
   describe '.normalize_stock_data' do
     it 'normalizes the data correctly' do
-      normalized_data = described_class.normalize_stock_data(symbol: 'AAPL', price: 150.00, name: 'Apple Inc.')
-      expect(normalized_data).to eq({ symbol: 'AAPL', price: 150.00, name: 'Apple Inc.' })
+      normalized_data = described_class.normalize_stock_data(symbol: 'AAPL', price: 150.00)
+      expect(normalized_data).to eq({ symbol: 'AAPL', price: 150.00 })
     end
   end
 end

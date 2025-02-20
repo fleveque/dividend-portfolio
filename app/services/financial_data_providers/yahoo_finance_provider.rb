@@ -9,8 +9,7 @@ module FinancialDataProviders
       # return an example hash for now, as YahooFinanceClient is not working now
       super(
         symbol: "EXAMPLE",
-        price: "123.45",
-        name: "Example Inc."
+        price: "123.45"
       )
     end
   end
