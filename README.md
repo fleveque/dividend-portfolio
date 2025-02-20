@@ -89,3 +89,31 @@ You will need foreman gem if it's not installed.
 Open your web browser and go to http://localhost:3000.
 
 You can sign in with the default user `default@example` and `password` as password.
+
+## Development
+
+### Testing
+
+The application uses RSpec for testing. To run the tests:
+
+```sh
+bundle exec rspec
+```
+
+#### Environment Variables
+
+For local development and testing, create a `.env.test` file:
+
+```sh
+ALPHAVANTAGE_API_KEY=dummy_key_for_tests
+```
+
+For GitHub Actions, add the following to your repository secrets:
+
+1. Go to your repository settings
+2. Navigate to Secrets and Variables > Actions
+3. Add a new repository secret:
+   - Name: `ALPHAVANTAGE_API_KEY`
+   - Value: Your Alpha Vantage API key or a dummy key for tests
+
+Note: Tests are configured to mock API calls, so you don't need a real API key for running tests.

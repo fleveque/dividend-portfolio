@@ -1,28 +1,29 @@
-# spec/services/financial_data_providers/alpha_vantage_provider_spec.rb
 RSpec.describe FinancialDataProviders::AlphaVantageProvider, type: :model do
   describe '.get_stock' do
     let(:symbol) { 'AAPL' }
-    let(:quote_data) do
+    let(:raw_data) do
       double(
         symbol: 'AAPL',
-        price: 150.00,
-        name: 'Apple Inc.'
+        price: 150.00
       )
+    end
+
+    let(:expected_result) do
+      {
+        symbol: 'AAPL',
+        price: 150.00
+      }
     end
 
     before do
       allow(Alphavantage::TimeSeries).to receive(:new).with(symbol: symbol).and_return(
-        double(quote: quote_data)
+        double(quote: raw_data)
       )
     end
 
     it 'returns the normalized stock data' do
       result = described_class.get_stock(symbol)
-      expect(result).to eq({
-        symbol: 'AAPL',
-        price: 150.00,
-        name: 'Example Inc.'
-      })
+      expect(result).to eq(expected_result)
     end
 
     it 'calls Alphavantage::TimeSeries with the correct symbol' do
@@ -35,18 +36,20 @@ RSpec.describe FinancialDataProviders::AlphaVantageProvider, type: :model do
     let(:data) do
       double(
         symbol: 'AAPL',
-        price: 150.00,
-        name: 'Apple Inc.'
+        price: 150.00
       )
+    end
+
+    let(:expected_result) do
+      {
+        symbol: 'AAPL',
+        price: 150.00
+      }
     end
 
     it 'normalizes the stock data correctly' do
       normalized_data = described_class.normalize_stock_data(data)
-      expect(normalized_data).to eq({
-        symbol: 'AAPL',
-        price: 150.00,
-        name: 'Example Inc.'
-      })
+      expect(normalized_data).to eq(expected_result)
     end
   end
 end

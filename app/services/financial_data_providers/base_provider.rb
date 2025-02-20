@@ -4,11 +4,10 @@ module FinancialDataProviders
       raise NotImplementedError, "Subclasses must implement the get_stock method"
     end
 
-    def self.normalize_stock_data(symbol:, price:, name:)
+    def self.normalize_stock_data(symbol:, price:)
       {
         symbol:,
-        price:,
-        name:
+        price:
       }
     end
   end

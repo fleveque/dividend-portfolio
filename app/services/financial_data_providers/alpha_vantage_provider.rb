@@ -8,8 +8,7 @@ module FinancialDataProviders
     def self.normalize_stock_data(data)
       super(
         symbol: data.symbol,
-        price: data.price,
-        name: "Example Inc."
+        price: data.price
       )
     end
   end
