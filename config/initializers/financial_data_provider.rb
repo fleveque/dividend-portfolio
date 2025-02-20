@@ -1,5 +1,41 @@
-# You can change the provider to :other_provider if you want to use a different gem
-# Rails.application.config.financial_data_provider = :other_provider
-# Supported providers: :yahoo_finance_client
+module FinancialDataProvider
+  SUPPORTED_PROVIDERS = {
+    alpha_vantage: {
+      gem: "alphavantage",
+      config: ->(config) {
+        Alphavantage.configure do |c|
+          c.api_key = ENV["ALPHAVANTAGE_API_KEY"]
+        end
+      }
+    },
+    yahoo_finance: {
+      gem: "yahoo_finance_client",
+      config: ->(config) {
+        # Add Yahoo Finance specific configuration if needed
+      }
+    }
+  }.freeze
 
-Rails.application.config.financial_data_provider = :yahoo_finance_client
+  def self.configure
+    provider = Rails.application.config.financial_data_provider
+    provider_config = SUPPORTED_PROVIDERS[provider]
+
+    unless provider_config
+      raise "Unsupported financial data provider: #{provider}. " \
+            "Supported providers are: #{SUPPORTED_PROVIDERS.keys.join(", ")}"
+    end
+
+    unless defined?(provider_config[:gem].classify.constantize)
+      raise "#{provider} is configured but #{provider_config[:gem]} gem is not installed. " \
+            "Please add \"gem '#{provider_config[:gem]}'\" to your Gemfile"
+    end
+
+    provider_config[:config].call(Rails.application.config)
+  end
+end
+
+# Set the default provider
+Rails.application.config.financial_data_provider = :alpha_vantage
+
+# Configure the selected provider
+FinancialDataProvider.configure

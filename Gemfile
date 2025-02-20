@@ -45,7 +45,9 @@ gem "faker"
 gem "timecop"
 gem "simplecov", require: false, group: :test
 
+# Financial data providers
 gem "yahoo_finance_client"
+gem "alphavantage"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -60,6 +62,8 @@ group :development, :test do
   # gem "rspec-rails", "~> 7.1" # Waiting for 8.0 release
   gem "rspec-rails", git: "https://github.com/rspec/rspec-rails"
   gem "factory_bot_rails"
+
+  gem "dotenv"
 end
 
 group :development do
