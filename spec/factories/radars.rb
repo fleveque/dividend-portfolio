@@ -1,6 +1,5 @@
 FactoryBot.define do
   factory :radar do
-    user { nil }
-    stock { nil }
+    association :user
   end
 end

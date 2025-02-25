@@ -11,6 +11,8 @@ module FinancialDataProviders
       cached_data = Rails.cache.fetch("stock/#{symbol}", expires_in: 1.hour) do
         # This block only executes on cache miss
         data = fetch_and_normalize_stock(symbol)
+        return nil unless data
+
         store_stock_data(data).to_json
       end
 

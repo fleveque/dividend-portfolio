@@ -28,5 +28,30 @@ RSpec.describe FinancialDataProviders::AlphaVantageProvider, type: :model do
       expect(result).to eq(stock)
       expect(Alphavantage::TimeSeries).to have_received(:new).with(symbol: symbol)
     end
+
+    context 'when API returns nil' do
+      before do
+        allow(Alphavantage::TimeSeries).to receive(:new).with(symbol: 'INVALID')
+          .and_return(double(quote: nil))
+      end
+
+      it 'returns nil' do
+        result = provider.get_stock('INVALID')
+        expect(result).to be_nil
+      end
+    end
+
+    context 'when API raises an error' do
+      before do
+        allow(Alphavantage::TimeSeries).to receive(:new)
+          .and_raise(StandardError.new('API Error'))
+      end
+
+      it 'returns nil and logs error' do
+        expect(Rails.logger).to receive(:error).with(/AlphaVantage API error: API Error/)
+        result = provider.get_stock('AAPL')
+        expect(result).to be_nil
+      end
+    end
   end
 end

@@ -18,20 +18,17 @@ class RadarsController < ApplicationController
     stock = Stock.find(params[:stock_id])
     if params[:action_type] == "add"
       @radar.stocks << stock unless @radar.stocks.include?(stock)
+      message = "Stock was successfully added to radar."
     else
       @radar.stocks.delete(stock)
+      message = "Stock was successfully removed from radar."
     end
-    redirect_to radar_path(@radar), notice: "Stock was successfully #{params[:action_type]}ed to radar."
+    redirect_to radar_path(@radar), notice: message
   end
 
   def search
     @stocks = @radar.stocks || []
-    @search_results = []
-
-    if params[:query].present?
-      stock = FinancialDataService.get_stock(params[:query])
-      @search_results = [ stock ] if stock
-    end
+    @search_results = perform_search(params[:query])
 
     respond_to do |format|
       format.html { render "show", locals: { search_results: @search_results } }
@@ -45,6 +42,13 @@ class RadarsController < ApplicationController
   end
 
   private
+
+  def perform_search(query)
+    return [] unless query.present?
+
+    stock = FinancialDataService.get_stock(query)
+    stock ? [ stock ] : []
+  end
 
   def set_or_create_radar
     @radar = Current.user.radar || Current.user.create_radar

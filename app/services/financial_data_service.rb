@@ -11,9 +11,10 @@ class FinancialDataService
         provider_name = Rails.application.config.financial_data_provider
         provider_class = "FinancialDataProviders::#{provider_name.to_s.classify}Provider".constantize
         provider_class.new
-      rescue StandardError
+      rescue NameError, StandardError => e
         raise "Provider not found: #{provider_name}. " \
-        "Ensure the provider class exists in the FinancialDataProviders module"
+        "Ensure the provider class exists in the FinancialDataProviders module." \
+        "Error: #{e.message}"
       end
     end
   end

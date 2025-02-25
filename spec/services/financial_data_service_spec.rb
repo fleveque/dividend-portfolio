@@ -2,17 +2,20 @@ RSpec.describe FinancialDataService, type: :service do
   describe '.get_stock' do
     let(:symbol) { 'AAPL' }
     let(:stock) { build(:stock, symbol: 'AAPL', price: 150.00, name: 'Apple Inc.') }
-    let(:provider_instance) { instance_double('Provider') }
+
+    after do
+      described_class.instance_variable_set(:@provider, nil)
+    end
 
     context 'when using yahoo_finance provider' do
       before do
         allow(Rails.application.config).to receive(:financial_data_provider).and_return(:yahoo_finance)
-        allow(FinancialDataProviders::YahooFinanceProvider).to receive(:new).and_return(provider_instance)
-        allow(provider_instance).to receive(:get_stock).with(symbol).and_return(stock)
+        allow(FinancialDataProviders::YahooFinanceProvider).to receive(:new).
+          and_return(double('YahooFinanceProvider', get_stock: stock))
       end
 
       it 'returns the stock data' do
-        result = FinancialDataService.get_stock(symbol)
+        result = described_class.get_stock(symbol)
         expect(result.attributes.except('created_at', 'updated_at')).
           to eq(stock.attributes.except('created_at', 'updated_at'))
       end
@@ -21,12 +24,12 @@ RSpec.describe FinancialDataService, type: :service do
     context 'when using alpha_vantage provider' do
       before do
         allow(Rails.application.config).to receive(:financial_data_provider).and_return(:alpha_vantage)
-        allow(FinancialDataProviders::AlphaVantageProvider).to receive(:new).and_return(provider_instance)
-        allow(provider_instance).to receive(:get_stock).with(symbol).and_return(stock)
+        allow(FinancialDataProviders::AlphaVantageProvider).to receive(:new).
+          and_return(double('AlphaVantageProvider', get_stock: stock))
       end
 
       it 'returns the stock data' do
-        result = FinancialDataService.get_stock(symbol)
+        result = described_class.get_stock(symbol)
         expect(result.attributes.except('created_at', 'updated_at')).
           to eq(stock.attributes.except('created_at', 'updated_at'))
       end
@@ -38,7 +41,7 @@ RSpec.describe FinancialDataService, type: :service do
       end
 
       it 'raises an error' do
-        expect { FinancialDataService.get_stock(symbol) }.
+        expect { described_class.get_stock(symbol) }.
           to raise_error(RuntimeError, /Provider not found: unsupported_provider/)
       end
     end

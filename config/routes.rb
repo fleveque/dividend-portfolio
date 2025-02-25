@@ -16,6 +16,6 @@ Rails.application.routes.draw do
   root "home#index"
 
   resource :radar, only: [ :show, :create, :update ] do
-    get "search"
+    get "search", on: :member
   end
 end
