@@ -1,15 +1,18 @@
 module FinancialDataProviders
   class AlphaVantageProvider < BaseProvider
-    def self.get_stock(symbol)
-      data = Alphavantage::TimeSeries.new(symbol:).quote
-      normalize_stock_data(data)
-    end
+    private
 
-    def self.normalize_stock_data(data)
-      super(
+    def fetch_and_normalize_stock(symbol)
+      data = Alphavantage::TimeSeries.new(symbol: symbol).quote
+      return nil unless data
+
+      {
         symbol: data.symbol,
         price: data.price
-      )
+      }
+    rescue StandardError => e
+      Rails.logger.error "AlphaVantage API error: #{e.message}"
+      nil
     end
   end
 end

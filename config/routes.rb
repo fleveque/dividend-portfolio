@@ -14,4 +14,8 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "home#index"
+
+  resource :radar, only: [ :show, :create, :update ] do
+    get "search", on: :member
+  end
 end

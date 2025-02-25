@@ -1,16 +1,18 @@
 module FinancialDataProviders
   class YahooFinanceProvider < BaseProvider
-    def self.get_stock(symbol)
-      data = YahooFinanceClient::Stock.get_quote(symbol)
-      normalize_stock_data(data)
-    end
+    private
 
-    def self.normalize_stock_data(data)
-      # return an example hash for now, as YahooFinanceClient is not working now
-      super(
-        symbol: "EXAMPLE",
-        price: "123.45"
-      )
+    def fetch_and_normalize_stock(symbol)
+      data = YahooFinanceClient::Stock.get_quote(symbol)
+      return nil unless data
+
+      {
+        symbol: data[:symbol],
+        price: data[:price]
+      }
+    rescue StandardError => e
+      Rails.logger.error "Yahoo Finance API error: #{e.message}"
+      nil
     end
   end
 end

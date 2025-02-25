@@ -4,7 +4,19 @@
   </h1>
   <p class="text-lg text-gray-700 text-center mb-6">Work in Progress</p>
   <div class="bg-white shadow-md rounded-lg p-6">
-    <h2 class="text-2xl font-semibold mb-4">Stock Information</h2>
-    <p class="text-lg"><span class="font-bold">AAPL:</span> <%= @aapl %></p>
+    <h2 class="text-2xl font-semibold mb-4">Stock Information sample</h2>
+    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+      <% if @aapl %>
+        <div>
+          <span class="text-2xl font-bold"><%= @aapl.symbol %></span>
+          <% if @aapl.name.present? %>
+            <span class="ml-2 text-gray-600"><%= @aapl.name %></span>
+          <% end %>
+        </div>
+        <div class="text-2xl font-semibold">
+          $<%= number_with_precision(@aapl.price, precision: 2) %>
+        </div>
+      <% end %>
+    </div>
   </div>
 </div>

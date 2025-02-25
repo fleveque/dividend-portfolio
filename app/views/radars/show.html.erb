@@ -1,0 +1,51 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="bg-white rounded-lg shadow-lg p-6">
+    <h1 class="text-3xl font-bold mb-6">My Radar</h1>
+
+    <!-- Search Form -->
+    <div class="mb-8">
+      <%= form_with url: search_radar_path, 
+          method: :get, 
+          class: "flex gap-4",
+          data: { turbo_frame: "search_results" } do |f| %>
+        <%= f.text_field :query, 
+            placeholder: "Search stocks...", 
+            class: "flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" %>
+        <%= f.submit "Search", 
+            class: "bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors" %>
+      <% end %>
+    </div>
+
+    <!-- Search Results -->
+    <div id="search_results" class="mb-8">
+      <%= render 'search_results', search_results: @search_results || [] %>
+    </div>
+
+    <!-- Stocks List -->
+    <div>
+      <h2 class="text-2xl font-semibold mb-4">Stocks on My Radar</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% @stocks.each do |stock| %>
+          <div class="bg-gray-50 p-4 rounded-lg shadow">
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="font-bold"><%= stock.symbol %></h3>
+                <p class="text-gray-600"><%= stock.name %></p>
+                <p class="text-lg">$<%= stock.price %></p>
+              </div>
+              <%= button_to radar_path(stock_id: stock.id, action_type: 'remove'),
+                  method: :patch,
+                  title: "Remove from radar",
+                  class: "flex items-center gap-2 text-red-500 hover:text-red-700" do %>
+                <span class="text-sm">Remove</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
