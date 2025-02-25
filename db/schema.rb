@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_18_163423) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_21_174130) do
   create_table "dividends", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "stock_id", null: false
@@ -46,11 +46,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_18_163423) do
   end
 
   create_table "stocks", force: :cascade do |t|
-    t.string "symbol"
+    t.string "symbol", null: false
     t.string "name"
     t.decimal "price", precision: 10, scale: 2
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["symbol"], name: "index_stocks_on_symbol", unique: true
   end
 
   create_table "transactions", force: :cascade do |t|

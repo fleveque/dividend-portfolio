@@ -1,15 +1,13 @@
 module FinancialDataProviders
   class AlphaVantageProvider < BaseProvider
-    def self.get_stock(symbol)
-      data = Alphavantage::TimeSeries.new(symbol:).quote
-      normalize_stock_data(data)
-    end
+    private
 
-    def self.normalize_stock_data(data)
-      super(
+    def fetch_and_normalize_stock(symbol)
+      data = Alphavantage::TimeSeries.new(symbol: symbol).quote
+      {
         symbol: data.symbol,
         price: data.price
-      )
+      }
     end
   end
 end
