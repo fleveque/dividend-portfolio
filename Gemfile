@@ -45,7 +45,7 @@ gem "faker"
 gem "timecop"
 gem "simplecov", require: false, group: :test
 
-# Financial data providers
+# Financial data providers (You can just pick one and comment out the others)
 gem "yahoo_finance_client"
 gem "alphavantage"
 

@@ -2,21 +2,16 @@
   <h1 class="text-4xl font-bold text-center mb-4">
     Dividend Portfolio
   </h1>
-  <p class="text-lg text-gray-700 text-center mb-6">Work in Progress</p>
-  <div class="bg-white shadow-md rounded-lg p-6">
-    <h2 class="text-2xl font-semibold mb-4">Stock Information sample</h2>
-    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-      <% if @aapl %>
-        <div>
-          <span class="text-2xl font-bold"><%= @aapl.symbol %></span>
-          <% if @aapl.name.present? %>
-            <span class="ml-2 text-gray-600"><%= @aapl.name %></span>
-          <% end %>
-        </div>
-        <div class="text-2xl font-semibold">
-          $<%= number_with_precision(@aapl.price, precision: 2) %>
-        </div>
-      <% end %>
+  <div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <h1 class="text-3xl font-bold mb-6">Last 10 Added Stocks to our app</h1>
+      <%= render partial: 'last_added_stocks', locals: { last_added_stocks: @last_added_stocks } %>
+    </div>
+  </div>
+  <div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <h1 class="text-3xl font-bold mb-6">Top 10 Most Added Stocks to Radar</h1>
+      <%= render partial: 'most_added_stocks', locals: { most_added_stocks: @top_radar_stocks } %>
     </div>
   </div>
 </div>

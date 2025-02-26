@@ -8,15 +8,16 @@ This is a pet project I will be working on.
 
 Currently, it is in a very early stage, and many things may fail or not work at all. 
 
-- The first iteration will focus on authentication and retrieving stock information using the [yahoo_finance_client](https://github.com/fleveque/yahoo_finance_client) gem. As Yahoo! Finance API doesn't seem to work anymore, the application now allows to add/configure other financial data providers. I'm adding Alpha Vantage first, as there is already an available gem.
-- The second iteration will likely focus on enabling each user to create their own radar.
-
-Once the project reach an MVP, I will update the doc accordingly.
+- The first iteration will focus on authentication and retrieving basic stock information using different finance providers client gems.
+- The second iteration is focusing on enabling each user to create their own radar and search, add or remove stocks.
+- Next iterations to be defined.
 
 ## Features
 
 - **User Authentication**: Secure user authentication using Rails 8 built-in authentication.
 - **Multiple Financial Data Providers**: Choose the one that better fits your needs.
+    * Yahoo client: [yahoo_finance_client](https://github.com/fleveque/yahoo_finance_client). Probably not working as Y! closed API
+    * Alpha Vantage: [alphavantage_ruby](https://github.com/codespore/alphavantage_ruby)
 - **Portfolio Management**: Track buys and sales of stocks and ETFs in your portfolio.
 - **Dividend Tracking**: Add and manage dividends received from your investments.
 - **Statistics**: View statistics about your gains, losses, and total dividends.
