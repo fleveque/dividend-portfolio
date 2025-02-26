@@ -30,7 +30,8 @@ module FinancialDataProviders
     # @param symbol [String] the stock symbol
     # @return [Hash] the stock data
     def fetch_and_normalize_stock(symbol)
-      raise NotImplementedError, "Subclasses must implement the fetch_and_normalize_stock method"
+      raise NotImplementedError, "Subclasses must implement the fetch_and_normalize_stock method " \
+      "and be added to config/initializers/financial_data_provider.rb initializer."
     end
 
     def normalize_stock_data(data)

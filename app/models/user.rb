@@ -7,4 +7,6 @@ class User < ApplicationRecord
   has_many :stocks, through: :transactions
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
+  validates :email_address, presence: true, uniqueness: { case_sensitive: false }
+  validates :password, presence: true, length: { minimum: 6 }, on: :create
 end

@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :stock do
-    symbol { 'AAPL' }
-    price { 150.00 }
-    name { 'Apple Inc.' }
+    sequence(:symbol) { |n| "STOCK#{n}" }
+    name { "Stock Name" }
+    price { 100.00 }
   end
 end
