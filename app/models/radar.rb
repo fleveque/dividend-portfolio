@@ -8,4 +8,16 @@ class Radar < ApplicationRecord
          .order("COUNT(radars.id) DESC")
          .limit(limit)
   end
+
+  def sorted_stocks
+    stocks.joins(:radars_stocks)
+          .select("stocks.*, radars_stocks.target_price")
+          .sort_by { |stock| percentage_difference(stock) }
+  end
+
+  def percentage_difference(stock)
+    return nil unless stock.target_price
+
+    ((stock.current_price - stock.target_price) / stock.target_price).abs * 100
+  end
 end

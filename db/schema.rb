@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_21_174130) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_27_174525) do
   create_table "dividends", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "stock_id", null: false
@@ -32,6 +32,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_21_174130) do
   create_table "radars_stocks", id: false, force: :cascade do |t|
     t.integer "radar_id", null: false
     t.integer "stock_id", null: false
+    t.decimal "target_price"
     t.index ["radar_id", "stock_id"], name: "index_radars_stocks_on_radar_id_and_stock_id"
     t.index ["stock_id", "radar_id"], name: "index_radars_stocks_on_stock_id_and_radar_id"
   end
