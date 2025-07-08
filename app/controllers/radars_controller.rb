@@ -1,8 +1,8 @@
 class RadarsController < ApplicationController
-  before_action :set_or_create_radar, only: [ :show, :update, :search ]
+  before_action :set_or_create_radar, only: [ :show, :update, :search, :destroy_stock ]
 
   def show
-    @stocks = @radar.stocks || []
+    @stocks = @radar.sorted_stocks || []
   end
 
   def create
@@ -16,14 +16,14 @@ class RadarsController < ApplicationController
 
   def update
     stock = Stock.find(params[:stock_id])
-    if params[:action_type] == "add"
-      @radar.stocks << stock unless @radar.stocks.include?(stock)
-      message = "Stock was successfully added to radar."
-    else
-      @radar.stocks.delete(stock)
-      message = "Stock was successfully removed from radar."
-    end
+    message = update_target_price(stock) || handle_stock_action(stock)
     redirect_to radar_path(@radar), notice: message
+  end
+
+  def destroy_stock
+    stock = Stock.find(params[:stock_id])
+    @radar.stocks.delete(stock)
+    redirect_to radar_path(@radar), notice: "Stock was successfully removed from radar."
   end
 
   def search
@@ -43,6 +43,27 @@ class RadarsController < ApplicationController
 
   private
 
+  def update_target_price(stock)
+    return unless params[:target_price].present?
+
+    radar_stock = @radar.radars_stocks.find_by(stock_id: stock.id)
+    if radar_stock.update(target_price: params[:target_price])
+      "Target price was successfully updated."
+    else
+      "Failed to update target price."
+    end
+  end
+
+  def handle_stock_action(stock)
+    if params[:action_type] == "add"
+      @radar.stocks << stock unless @radar.stocks.include?(stock)
+      "Stock was successfully added to radar."
+    else
+      @radar.stocks.delete(stock)
+      "Stock was successfully removed from radar."
+    end
+  end
+
   def perform_search(query)
     return [] unless query.present?
 
@@ -55,7 +76,7 @@ class RadarsController < ApplicationController
   end
 
   def radar_params
-    params.require(:radar).permit(:action_type, :stock_symbol)
+    params.require(:radar).permit(:action_type, :stock_symbol, :target_price)
   end
 
   def search_params
