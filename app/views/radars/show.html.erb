@@ -1,4 +1,4 @@
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-8" data-controller="radars" data-radar-id="<%= @radar.id %>">
   <div class="bg-white rounded-lg shadow-lg p-6">
     <h1 class="text-3xl font-bold mb-6">My Radar</h1>
 
@@ -37,13 +37,13 @@
                 <% end %>
                 <p class="text-sm">
                   Target Price:
-                  <span class="editable-target-price" data-stock-id="<%= stock.id %>">
+                  <span class="editable-target-price cursor-pointer text-blue-600 hover:text-blue-800 inline-block min-w-16" 
+                        data-stock-id="<%= stock.id %>"
+                        data-current-value="<%= stock.target_price || '' %>"
+                        title="Click to edit">
                     <%= stock.formatted_target_price %>
                   </span>
                 </p>
-                <div class="target-price-form hidden" id="target-price-form-<%= stock.id %>">
-                  <%= render 'stock_form', radar: @radar, stock: stock %>
-                </div>
               </div>
               <%= button_to destroy_stock_radar_path(@radar, stock_id: stock.id), method: :delete, title: "Remove from radar", class: "flex items-center gap-2 text-red-500 hover:text-red-700" do %>
                 <span class="text-sm">Remove</span>

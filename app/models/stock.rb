@@ -1,7 +1,8 @@
 class Stock < ApplicationRecord
   has_many :transactions
   has_many :dividends
-  has_and_belongs_to_many :radars
+  has_many :radar_stocks
+  has_many :radars, through: :radar_stocks
 
   validates :symbol, presence: true, uniqueness: true
 

@@ -5,9 +5,3 @@
   </div>
   <%= form.submit "Update", class: "bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors" %>
 <% end %>
-<%= button_to destroy_stock_radar_path(radar, stock_id: stock.id), method: :delete, title: "Remove from radar", class: "flex items-center gap-2 text-red-500 hover:text-red-700" do %>
-  <span class="text-sm">Remove</span>
-  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-  </svg>
-<% end %>

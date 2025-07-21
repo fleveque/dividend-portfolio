@@ -5,8 +5,7 @@ class StockDecorator < ApplicationDecorator
   end
 
   def current_price
-    return nil unless object.respond_to?(:current_price)
-    object.current_price
+    price
   end
 
   def formatted_price

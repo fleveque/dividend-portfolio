@@ -1,6 +1,7 @@
 class Radar < ApplicationRecord
   belongs_to :user
-  has_and_belongs_to_many :stocks
+  has_many :radar_stocks
+  has_many :stocks, through: :radar_stocks
 
   def self.most_added_stocks(limit = 10)
     Stock.joins(:radars)
@@ -10,14 +11,15 @@ class Radar < ApplicationRecord
   end
 
   def sorted_stocks
-    stocks.joins(:radars_stocks)
-          .select("stocks.*, radars_stocks.target_price")
-          .sort_by { |stock| percentage_difference(stock) }
+    Stock.joins("INNER JOIN radars_stocks ON stocks.id = radars_stocks.stock_id")
+         .select("stocks.*, radars_stocks.target_price")
+         .where("radars_stocks.radar_id = ?", id)
+         .sort_by { |stock| percentage_difference(stock) || Float::INFINITY }
   end
 
   def percentage_difference(stock)
-    return nil unless stock.target_price
+    return nil unless stock.target_price && stock.price
 
-    ((stock.current_price - stock.target_price) / stock.target_price).abs * 100
+    ((stock.price - stock.target_price) / stock.target_price).abs * 100
   end
 end

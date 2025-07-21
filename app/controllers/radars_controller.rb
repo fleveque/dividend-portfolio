@@ -49,8 +49,8 @@ class RadarsController < ApplicationController
   def update_target_price(stock)
     return unless params[:target_price].present?
 
-    radar_stock = @radar.radars_stocks.find_by(stock_id: stock.id)
-    if radar_stock.update(target_price: params[:target_price])
+    radar_stock = RadarStock.find_by(radar: @radar, stock: stock)
+    if radar_stock&.update(target_price: params[:target_price])
       "Target price was successfully updated."
     else
       "Failed to update target price."
