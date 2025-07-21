@@ -6,7 +6,7 @@ RSpec.describe StockDecorator do
 
   describe '#formatted_price' do
     it 'formats price with dollar sign' do
-      expect(decorated_stock.formatted_price).to eq('$150.0')
+      expect(decorated_stock.formatted_price).to eq('$150.00')
     end
 
     it 'returns N/A when price is nil' do
@@ -19,7 +19,7 @@ RSpec.describe StockDecorator do
     it 'formats target price with dollar sign' do
       # Simulate how target_price gets added via join table
       stock.define_singleton_method(:target_price) { 145.00 }
-      expect(decorated_stock.formatted_target_price).to eq('$145.0')
+      expect(decorated_stock.formatted_target_price).to eq('$145.00')
     end
 
     it 'returns N/A when target price is nil' do

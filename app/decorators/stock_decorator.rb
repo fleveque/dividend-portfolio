@@ -10,12 +10,12 @@ class StockDecorator < ApplicationDecorator
 
   def formatted_price
     return "N/A" unless price
-    "$#{price}"
+    format_currency(price)
   end
 
   def formatted_target_price
     return "N/A" unless target_price
-    "$#{target_price}"
+    format_currency(target_price)
   end
 
   def display_name
@@ -72,5 +72,11 @@ class StockDecorator < ApplicationDecorator
     else
       "At target"
     end
+  end
+
+  private
+
+  def format_currency(value)
+    "$#{sprintf('%.2f', value)}"
   end
 end

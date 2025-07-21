@@ -54,7 +54,7 @@ RSpec.describe Stock, type: :model do
     it 'can be decorated with StockDecorator' do
       decorated_stock = StockDecorator.new(stock)
       expect(decorated_stock.display_name).to eq('AAPL - Apple Inc.')
-      expect(decorated_stock.formatted_price).to eq('$150.0')
+      expect(decorated_stock.formatted_price).to eq('$150.00')
     end
   end
 end
