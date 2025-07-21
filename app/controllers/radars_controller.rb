@@ -107,8 +107,11 @@ class RadarsController < ApplicationController
       @radar.stocks.delete(stock)
       "Stock was successfully removed from radar."
     else
-      return redirect_to radar_path(@radar), alert: "Invalid action" unless request.xhr?
-      render json: { success: false, error: "Invalid action" }, status: :bad_request
+      if request.xhr?
+        render json: { success: false, error: "Invalid action" }, status: :bad_request
+      else
+        redirect_to radar_path(@radar), alert: "Invalid action"
+      end
     end
   end
 

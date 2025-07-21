@@ -103,12 +103,22 @@ export default class extends Controller {
     })
     .then(response => {
       if (response.ok) {
-        // Update the display with new value
-        displayElement.innerHTML = `$${parseFloat(newValue).toFixed(2)}`;
-        displayElement.setAttribute("data-current-value", newValue);
-        
-        // Refresh the page to update colors and percentages
-        window.location.reload();
+        return response.json().then(data => {
+          // Use the server-formatted value to maintain consistency with Ruby decorator
+          displayElement.innerHTML = data.target_price;
+          displayElement.setAttribute("data-current-value", newValue);
+          
+          // Update the row styling if price_status_class is provided
+          if (data.price_status_class) {
+            const row = displayElement.closest('tr');
+            if (row) {
+              // Remove existing border classes
+              row.className = row.className.replace(/border-\w+-\d+/g, '').replace(/bg-gradient-to-r/g, '').replace(/from-\w+-\d+/g, '').replace(/to-\w+-\d+/g, '');
+              // Add new classes
+              row.className += ` ${data.price_status_class}`;
+            }
+          }
+        });
       } else {
         throw new Error("Update failed");
       }
