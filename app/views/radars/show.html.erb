@@ -26,29 +26,19 @@
       <h2 class="text-2xl font-semibold mb-4">Stocks on My Radar</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <% @stocks.each do |stock| %>
-          <% percentage_diff = @radar.percentage_difference(stock) %>
-          <% color_class = if percentage_diff.nil?
-                             'border-gray-500'
-                           elsif stock.current_price < stock.target_price
-                             "border-green-500 bg-gradient-to-r from-green-100 to-green-300"
-                           elsif stock.current_price > stock.target_price
-                             "border-red-500 bg-gradient-to-r from-red-100 to-red-300"
-                           else
-                             'border-black'
-                           end %>
-          <div class="p-4 rounded-lg shadow <%= color_class %>">
+          <div class="p-4 rounded-lg shadow <%= stock.price_status_class %>">
             <div class="flex justify-between items-center">
               <div>
                 <h3 class="font-bold"><%= stock.symbol %></h3>
                 <p class="text-gray-600"><%= stock.name %></p>
-                <p class="text-lg">$<%= stock.price %></p>
-                <% if percentage_diff %>
-                  <p class="text-sm">Difference: <%= percentage_diff.round(2) %>%</p>
+                <p class="text-lg"><%= stock.formatted_price %></p>
+                <% if stock.formatted_percentage_difference %>
+                  <p class="text-sm">Difference: <%= stock.formatted_percentage_difference %></p>
                 <% end %>
                 <p class="text-sm">
                   Target Price:
                   <span class="editable-target-price" data-stock-id="<%= stock.id %>">
-                    $<%= stock.target_price %>
+                    <%= stock.formatted_target_price %>
                   </span>
                 </p>
                 <div class="target-price-form hidden" id="target-price-form-<%= stock.id %>">

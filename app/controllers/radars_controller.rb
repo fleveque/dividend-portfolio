@@ -2,7 +2,8 @@ class RadarsController < ApplicationController
   before_action :set_or_create_radar, only: [ :show, :update, :search, :destroy_stock ]
 
   def show
-    @stocks = @radar.sorted_stocks || []
+    stocks = @radar.sorted_stocks || []
+    @stocks = stocks.map { |stock| StockDecorator.new(stock) }
   end
 
   def create
@@ -27,8 +28,10 @@ class RadarsController < ApplicationController
   end
 
   def search
-    @stocks = @radar.stocks || []
-    @search_results = perform_search(params[:query])
+    stocks = @radar.stocks || []
+    @stocks = stocks.map { |stock| StockDecorator.new(stock) }
+    search_results = perform_search(params[:query])
+    @search_results = search_results.map { |stock| StockDecorator.new(stock) }
 
     respond_to do |format|
       format.html { render "show", locals: { search_results: @search_results } }
