@@ -1,8 +1,9 @@
 class RadarsController < ApplicationController
-  before_action :set_or_create_radar, only: [ :show, :update, :search ]
+  before_action :set_or_create_radar, only: [ :show, :update, :search, :destroy_stock ]
 
   def show
-    @stocks = @radar.stocks || []
+    stocks = @radar.sorted_stocks || []
+    @stocks = stocks.map { |stock| StockDecorator.new(stock) }
   end
 
   def create
@@ -15,20 +16,36 @@ class RadarsController < ApplicationController
   end
 
   def update
-    stock = Stock.find(params[:stock_id])
-    if params[:action_type] == "add"
-      @radar.stocks << stock unless @radar.stocks.include?(stock)
-      message = "Stock was successfully added to radar."
-    else
-      @radar.stocks.delete(stock)
-      message = "Stock was successfully removed from radar."
+    begin
+      stock = Stock.find(params[:stock_id])
+
+      # Handle AJAX target price updates
+      if request.xhr? && params[:action_type] == "update_target"
+        return update_target_price_ajax(stock)
+      end
+
+      message = update_target_price(stock) || handle_stock_action(stock)
+      redirect_to radar_path(@radar), notice: message
+    rescue ActiveRecord::RecordNotFound
+      if request.xhr?
+        render json: { success: false, error: "Stock not found on radar" }, status: :not_found
+      else
+        redirect_to radar_path(@radar), alert: "Stock not found."
+      end
     end
-    redirect_to radar_path(@radar), notice: message
+  end
+
+  def destroy_stock
+    stock = Stock.find(params[:stock_id])
+    @radar.stocks.delete(stock)
+    redirect_to radar_path(@radar), notice: "Stock was successfully removed from radar."
   end
 
   def search
-    @stocks = @radar.stocks || []
-    @search_results = perform_search(params[:query])
+    stocks = @radar.stocks || []
+    @stocks = stocks.map { |stock| StockDecorator.new(stock) }
+    search_results = perform_search(params[:query])
+    @search_results = search_results.map { |stock| StockDecorator.new(stock) }
 
     respond_to do |format|
       format.html { render "show", locals: { search_results: @search_results } }
@@ -43,6 +60,61 @@ class RadarsController < ApplicationController
 
   private
 
+  def update_target_price_ajax(stock)
+    radar_stock = RadarStock.find_by(radar: @radar, stock: stock)
+
+    unless radar_stock
+      return render json: { success: false, error: "Stock not found on radar" }, status: :not_found
+    end
+
+    target_price = params[:target_price].present? ? params[:target_price] : nil
+
+    if radar_stock.update(target_price: target_price)
+      decorated_stock = StockDecorator.new(stock.tap { |s| s.define_singleton_method(:target_price) { radar_stock.target_price } })
+      render json: {
+        success: true,
+        target_price: decorated_stock.formatted_target_price,
+        price_status_class: decorated_stock.price_status_class
+      }
+    else
+      render json: {
+        success: false,
+        errors: radar_stock.errors.full_messages
+      }, status: :unprocessable_entity
+    end
+  end
+
+  def update_target_price(stock)
+    return unless params[:target_price].present?
+
+    radar_stock = RadarStock.find_by(radar: @radar, stock: stock)
+    if radar_stock&.update(target_price: params[:target_price])
+      "Target price was successfully updated."
+    else
+      "Failed to update target price."
+    end
+  end
+
+  def handle_stock_action(stock)
+    case params[:action_type]
+    when "add"
+      unless @radar.stocks.include?(stock)
+        target_price = params[:target_price].present? ? params[:target_price] : nil
+        RadarStock.create!(radar: @radar, stock: stock, target_price: target_price)
+      end
+      "Stock was successfully added to radar."
+    when "remove"
+      @radar.stocks.delete(stock)
+      "Stock was successfully removed from radar."
+    else
+      if request.xhr?
+        render json: { success: false, error: "Invalid action" }, status: :bad_request
+      else
+        redirect_to radar_path(@radar), alert: "Invalid action"
+      end
+    end
+  end
+
   def perform_search(query)
     return [] unless query.present?
 
@@ -55,7 +127,7 @@ class RadarsController < ApplicationController
   end
 
   def radar_params
-    params.require(:radar).permit(:action_type, :stock_symbol)
+    params.require(:radar).permit(:action_type, :stock_symbol, :target_price)
   end
 
   def search_params

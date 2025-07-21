@@ -9,7 +9,7 @@
               <div>
                 <h3 class="font-bold"><%= stock.symbol %></h3>
                 <p class="text-gray-600"><%= stock.name %></p>
-                <p class="text-lg">$<%= stock.price %></p>
+                <p class="text-lg"><%= stock.formatted_price %></p>
               </div>
               <%= button_to radar_path(stock_id: stock.id, action_type: 'add'),
                   method: :patch,

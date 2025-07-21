@@ -1,5 +1,5 @@
 <header class="flex justify-between items-center p-4 bg-gray-800 text-white">
-  <h1 class="text-xl font-bold">Dividend Portfolio</h1>
+  <h1 class="text-xl font-bold"><%= link_to "Dividend Portfolio", root_path %></h1>
   <nav>
     <% if authenticated? %>
       <%= link_to "My Radar", radar_path, class: "ml-4" %>
