@@ -16,9 +16,23 @@ class RadarsController < ApplicationController
   end
 
   def update
-    stock = Stock.find(params[:stock_id])
-    message = update_target_price(stock) || handle_stock_action(stock)
-    redirect_to radar_path(@radar), notice: message
+    begin
+      stock = Stock.find(params[:stock_id])
+
+      # Handle AJAX target price updates
+      if request.xhr? && params[:action_type] == "update_target"
+        return update_target_price_ajax(stock)
+      end
+
+      message = update_target_price(stock) || handle_stock_action(stock)
+      redirect_to radar_path(@radar), notice: message
+    rescue ActiveRecord::RecordNotFound
+      if request.xhr?
+        render json: { success: false, error: "Stock not found on radar" }, status: :not_found
+      else
+        redirect_to radar_path(@radar), alert: "Stock not found."
+      end
+    end
   end
 
   def destroy_stock
@@ -46,6 +60,30 @@ class RadarsController < ApplicationController
 
   private
 
+  def update_target_price_ajax(stock)
+    radar_stock = RadarStock.find_by(radar: @radar, stock: stock)
+
+    unless radar_stock
+      return render json: { success: false, error: "Stock not found on radar" }, status: :not_found
+    end
+
+    target_price = params[:target_price].present? ? params[:target_price] : nil
+
+    if radar_stock.update(target_price: target_price)
+      decorated_stock = StockDecorator.new(stock.tap { |s| s.define_singleton_method(:target_price) { radar_stock.target_price } })
+      render json: {
+        success: true,
+        target_price: decorated_stock.formatted_target_price,
+        price_status_class: decorated_stock.price_status_class
+      }
+    else
+      render json: {
+        success: false,
+        errors: radar_stock.errors.full_messages
+      }, status: :unprocessable_entity
+    end
+  end
+
   def update_target_price(stock)
     return unless params[:target_price].present?
 
@@ -58,12 +96,19 @@ class RadarsController < ApplicationController
   end
 
   def handle_stock_action(stock)
-    if params[:action_type] == "add"
-      @radar.stocks << stock unless @radar.stocks.include?(stock)
+    case params[:action_type]
+    when "add"
+      unless @radar.stocks.include?(stock)
+        target_price = params[:target_price].present? ? params[:target_price] : nil
+        RadarStock.create!(radar: @radar, stock: stock, target_price: target_price)
+      end
       "Stock was successfully added to radar."
-    else
+    when "remove"
       @radar.stocks.delete(stock)
       "Stock was successfully removed from radar."
+    else
+      return redirect_to radar_path(@radar), alert: "Invalid action" unless request.xhr?
+      render json: { success: false, error: "Invalid action" }, status: :bad_request
     end
   end
 
