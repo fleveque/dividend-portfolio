@@ -3,7 +3,7 @@
 Dividend Portfolio will be a multi-user web application built with Rails 8 that allows users to track their stock and ETF investments, record transactions, add dividends, and view statistics about their gains, losses, and dividends. The application also includes a radar feature where users can add stocks they are interested in and view basic stock information.
 
 ## Work in progress
-[![Build Status](https://github.com/fleveque/dividend-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/dividend-portfolio/actions)
+[![Build Status](https://github.com/fleveque/dividend-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/fleveque/dividend-portfolio/actions)
 
 This is a pet project I will be working on. 
 
