@@ -24,6 +24,11 @@ class RadarsController < ApplicationController
         return update_target_price_ajax(stock)
       end
 
+      # Handle Turbo Stream inline target price updates
+      if params[:action_type] == "update_target_inline"
+        return update_target_price_turbo(stock)
+      end
+
       message = update_target_price(stock) || handle_stock_action(stock)
       redirect_to radar_path(@radar), notice: message
     rescue ActiveRecord::RecordNotFound
@@ -49,12 +54,12 @@ class RadarsController < ApplicationController
 
     respond_to do |format|
       format.html { render "show", locals: { search_results: @search_results } }
-      format.turbo_stream {
+      format.turbo_stream do
         render turbo_stream: turbo_stream.update(
           "search_results", partial: "search_results",
           locals: { search_results: @search_results }
         )
-      }
+      end
     end
   end
 
@@ -81,6 +86,49 @@ class RadarsController < ApplicationController
         success: false,
         errors: radar_stock.errors.full_messages
       }, status: :unprocessable_entity
+    end
+  end
+
+  def update_target_price_turbo(stock)
+    radar_stock = RadarStock.find_by(radar: @radar, stock: stock)
+
+    unless radar_stock
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            "stock_#{stock.id}_target_price",
+            partial: "error_message",
+            locals: { message: "Stock not found on radar" }
+          )
+        end
+      end
+      return
+    end
+
+    target_price = params[:target_price].present? ? params[:target_price] : nil
+
+    if radar_stock.update(target_price: target_price)
+      # Refresh the decorated stock with updated target price
+      decorated_stock = StockDecorator.new(stock.tap { |s| s.define_singleton_method(:target_price) { radar_stock.target_price } })
+
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.replace("stock_#{stock.id}_target_price", partial: "target_price_display", locals: { stock: decorated_stock }),
+            turbo_stream.replace("stock_#{stock.id}_row", partial: "stock_row", locals: { stock: decorated_stock })
+          ]
+        end
+      end
+    else
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            "stock_#{stock.id}_target_price",
+            partial: "error_message",
+            locals: { message: radar_stock.errors.full_messages.join(", ") }
+          )
+        end
+      end
     end
   end
 

@@ -1,0 +1,40 @@
+<%= turbo_frame_tag "stock_#{stock.id}_row", class: "border rounded-lg p-4 mb-4 #{stock.price_status_class}" do %>
+  <div class="flex justify-between items-center">
+    <div class="flex-1">
+      <h3 class="text-xl font-semibold text-gray-800"><%= stock.display_name %></h3>
+      <div class="text-gray-600 space-y-1">
+        <p>Current Price: <span class="font-medium"><%= stock.formatted_price %></span></p>
+        <p>
+          Target Price:
+          <%= turbo_frame_tag "stock_#{stock.id}_target_price", class: "inline" do %>
+            <span class="cursor-pointer text-blue-600 hover:text-blue-800 inline-block min-w-16"
+                  data-action="click->inline-edit#edit"
+                  data-inline-edit-url-value="<%= radar_path(@radar) %>"
+                  data-inline-edit-stock-id-value="<%= stock.id %>"
+                  data-inline-edit-current-value="<%= stock.target_price || '' %>"
+                  title="Click to edit">
+              <%= stock.formatted_target_price %>
+            </span>
+          <% end %>
+        </p>
+        <% if stock.current_price && stock.target_price %>
+          <p class="text-sm">
+            Difference: <span class="<%= stock.current_price > stock.target_price ? 'text-red-600' : 'text-green-600' %>">
+              <%= stock.formatted_percentage_difference %>
+            </span>
+          </p>
+        <% end %>
+      </div>
+    </div>
+    <%= button_to destroy_stock_radar_path(@radar, stock_id: stock.id),
+        method: :delete,
+        title: "Remove from radar",
+        class: "flex items-center gap-2 text-red-500 hover:text-red-700",
+        data: { turbo_method: :delete, turbo_confirm: "Remove #{stock.symbol} from radar?" } do %>
+      <span class="text-sm">Remove</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    <% end %>
+  </div>
+<% end %>
