@@ -54,12 +54,12 @@ class RadarsController < ApplicationController
 
     respond_to do |format|
       format.html { render "show", locals: { search_results: @search_results } }
-      format.turbo_stream {
+      format.turbo_stream do
         render turbo_stream: turbo_stream.update(
           "search_results", partial: "search_results",
           locals: { search_results: @search_results }
         )
-      }
+      end
     end
   end
 
@@ -94,13 +94,13 @@ class RadarsController < ApplicationController
 
     unless radar_stock
       respond_to do |format|
-        format.turbo_stream { 
+        format.turbo_stream do
           render turbo_stream: turbo_stream.replace(
-            "stock_#{stock.id}_target_price", 
-            partial: "error_message", 
+            "stock_#{stock.id}_target_price",
+            partial: "error_message",
             locals: { message: "Stock not found on radar" }
           )
-        }
+        end
       end
       return
     end
@@ -110,24 +110,24 @@ class RadarsController < ApplicationController
     if radar_stock.update(target_price: target_price)
       # Refresh the decorated stock with updated target price
       decorated_stock = StockDecorator.new(stock.tap { |s| s.define_singleton_method(:target_price) { radar_stock.target_price } })
-      
+
       respond_to do |format|
-        format.turbo_stream { 
+        format.turbo_stream do
           render turbo_stream: [
             turbo_stream.replace("stock_#{stock.id}_target_price", partial: "target_price_display", locals: { stock: decorated_stock }),
             turbo_stream.replace("stock_#{stock.id}_row", partial: "stock_row", locals: { stock: decorated_stock })
           ]
-        }
+        end
       end
     else
       respond_to do |format|
-        format.turbo_stream { 
+        format.turbo_stream do
           render turbo_stream: turbo_stream.replace(
-            "stock_#{stock.id}_target_price", 
-            partial: "error_message", 
+            "stock_#{stock.id}_target_price",
+            partial: "error_message",
             locals: { message: radar_stock.errors.full_messages.join(", ") }
           )
-        }
+        end
       end
     end
   end

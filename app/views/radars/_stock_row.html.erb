@@ -5,9 +5,9 @@
       <div class="text-gray-600 space-y-1">
         <p>Current Price: <span class="font-medium"><%= stock.formatted_price %></span></p>
         <p>
-          Target Price: 
+          Target Price:
           <%= turbo_frame_tag "stock_#{stock.id}_target_price", class: "inline" do %>
-            <span class="cursor-pointer text-blue-600 hover:text-blue-800 inline-block min-w-16" 
+            <span class="cursor-pointer text-blue-600 hover:text-blue-800 inline-block min-w-16"
                   data-action="click->inline-edit#edit"
                   data-inline-edit-url-value="<%= radar_path(@radar) %>"
                   data-inline-edit-stock-id-value="<%= stock.id %>"
@@ -26,9 +26,9 @@
         <% end %>
       </div>
     </div>
-    <%= button_to destroy_stock_radar_path(@radar, stock_id: stock.id), 
-        method: :delete, 
-        title: "Remove from radar", 
+    <%= button_to destroy_stock_radar_path(@radar, stock_id: stock.id),
+        method: :delete,
+        title: "Remove from radar",
         class: "flex items-center gap-2 text-red-500 hover:text-red-700",
         data: { turbo_method: :delete, turbo_confirm: "Remove #{stock.symbol} from radar?" } do %>
       <span class="text-sm">Remove</span>
