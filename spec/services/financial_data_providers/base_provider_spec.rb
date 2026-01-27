@@ -16,20 +16,24 @@ RSpec.describe FinancialDataProviders::BaseProvider, type: :model do
       before do
         allow(Stock).to receive(:find_or_initialize_by).and_return(stock)
         allow(stock).to receive(:update!).and_return(true)
-        allow(stock).to receive(:to_json).and_return(stock.attributes.to_json)
-        allow(stock).to receive(:assign_attributes).and_return(true)
 
         Rails.cache.clear
       end
 
-      it 'caches the serialized stock data and returns stock instance' do
+      it 'caches the stock object and returns it directly' do
         result = test_provider.get_stock(symbol)
-        expect(result).to eq(stock)
-        expect(stock).to have_received(:to_json).once
+        expect(result.symbol).to eq(stock.symbol)
+        expect(result.price).to eq(stock.price)
 
+        # Second call should return cached stock without calling update! again
         cached_result = test_provider.get_stock(symbol)
-        expect(cached_result).to eq(stock)
-        expect(stock).to have_received(:to_json).once
+        expect(cached_result.symbol).to eq(stock.symbol)
+        expect(stock).to have_received(:update!).once
+      end
+
+      it 'normalizes symbol to uppercase' do
+        test_provider.get_stock('aapl')
+        expect(Stock).to have_received(:find_or_initialize_by).with(symbol: 'AAPL')
       end
 
       it 'stores the stock data in the database' do

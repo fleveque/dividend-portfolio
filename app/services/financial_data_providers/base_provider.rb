@@ -8,19 +8,14 @@ module FinancialDataProviders
     # @param symbol [String] the stock symbol
     # @return [Stock] the stock instance
     def get_stock(symbol)
-      cached_data = Rails.cache.fetch("stock/#{symbol}", expires_in: 1.hour) do
-        # This block only executes on cache miss
-        data = fetch_and_normalize_stock(symbol)
+      normalized_symbol = symbol.upcase.strip
+
+      Rails.cache.fetch("stock/#{normalized_symbol}", expires_in: 1.hour) do
+        data = fetch_and_normalize_stock(normalized_symbol)
         return nil unless data
 
-        store_stock_data(data).to_json
+        store_stock_data(data)
       end
-
-      # Convert cached JSON back to Stock instance
-      parsed_data = JSON.parse(cached_data)
-      stock = Stock.find_or_initialize_by(symbol: parsed_data["symbol"])
-      stock.assign_attributes(parsed_data)
-      stock
     end
 
     private

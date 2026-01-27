@@ -2,6 +2,7 @@ class RadarsController < ApplicationController
   include StockDecoration
 
   before_action :set_or_create_radar, only: [ :show, :update, :search, :destroy_stock ]
+  before_action :set_stock_radar_service, only: [ :update, :destroy_stock ]
 
   def show
     stocks = @radar.sorted_stocks || []
@@ -11,7 +12,7 @@ class RadarsController < ApplicationController
   def create
     @radar = Current.user.build_radar
     if @radar.save
-      redirect_to radar_path(@radar), notice: "Radar was successfully created."
+      redirect_to radar_path, notice: "Radar was successfully created."
     else
       redirect_to root_path, alert: "Unable to create radar."
     end
@@ -33,20 +34,20 @@ class RadarsController < ApplicationController
 
       message = update_target_price(stock) || handle_stock_action(stock)
       return if message == :rendered
-      redirect_to radar_path(@radar), notice: message
+      redirect_to radar_path, notice: message
     rescue ActiveRecord::RecordNotFound
       if request.xhr?
         render json: { success: false, error: "Stock not found on radar" }, status: :not_found
       else
-        redirect_to radar_path(@radar), alert: "Stock not found."
+        redirect_to radar_path, alert: "Stock not found."
       end
     end
   end
 
   def destroy_stock
     stock = Stock.find(params[:stock_id])
-    @radar.stocks.delete(stock)
-    redirect_to radar_path(@radar), notice: "Stock was successfully removed from radar."
+    @service.remove_stock(stock)
+    redirect_to radar_path, notice: "Stock was successfully removed from radar."
   end
 
   def search
@@ -69,68 +70,46 @@ class RadarsController < ApplicationController
   private
 
   def update_target_price_ajax(stock)
-    radar_stock = RadarStock.find_by(radar: @radar, stock: stock)
+    result = @service.update_target_price(stock, params[:target_price])
 
-    unless radar_stock
-      return render json: { success: false, error: "Stock not found on radar" }, status: :not_found
+    unless result.success?
+      return render json: { success: false, error: result.error }, status: :not_found
     end
 
-    target_price = params[:target_price].present? ? params[:target_price] : nil
-
-    if radar_stock.update(target_price: target_price)
-      decorated_stock = StockDecorator.new(stock.tap { |s| s.define_singleton_method(:target_price) { radar_stock.target_price } })
-      render json: {
-        success: true,
-        target_price: decorated_stock.formatted_target_price,
-        price_status_class: decorated_stock.price_status_class
-      }
-    else
-      render json: {
-        success: false,
-        errors: radar_stock.errors.full_messages
-      }, status: :unprocessable_entity
-    end
+    radar_stock = result.data
+    decorated_stock = StockDecorator.new(stock.tap { |s| s.define_singleton_method(:target_price) { radar_stock.target_price } })
+    render json: {
+      success: true,
+      target_price: decorated_stock.formatted_target_price,
+      price_status_class: decorated_stock.price_status_class
+    }
   end
 
   def update_target_price_turbo(stock)
-    radar_stock = RadarStock.find_by(radar: @radar, stock: stock)
+    result = @service.update_target_price(stock, params[:target_price])
 
-    unless radar_stock
+    unless result.success?
       respond_to do |format|
         format.turbo_stream do
           render turbo_stream: turbo_stream.replace(
             "stock_#{stock.id}_target_price",
             partial: "error_message",
-            locals: { message: "Stock not found on radar" }
+            locals: { message: result.error }
           )
         end
       end
       return
     end
 
-    target_price = params[:target_price].present? ? params[:target_price] : nil
+    radar_stock = result.data
+    decorated_stock = StockDecorator.new(stock.tap { |s| s.define_singleton_method(:target_price) { radar_stock.target_price } })
 
-    if radar_stock.update(target_price: target_price)
-      # Refresh the decorated stock with updated target price
-      decorated_stock = StockDecorator.new(stock.tap { |s| s.define_singleton_method(:target_price) { radar_stock.target_price } })
-
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: [
-            turbo_stream.replace("stock_#{stock.id}_target_price", partial: "target_price_display", locals: { stock: decorated_stock }),
-            turbo_stream.replace("stock_#{stock.id}_row", partial: "stock_row", locals: { stock: decorated_stock })
-          ]
-        end
-      end
-    else
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "stock_#{stock.id}_target_price",
-            partial: "error_message",
-            locals: { message: radar_stock.errors.full_messages.join(", ") }
-          )
-        end
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: [
+          turbo_stream.replace("stock_#{stock.id}_target_price", partial: "target_price_display", locals: { stock: decorated_stock }),
+          turbo_stream.replace("stock_#{stock.id}_row", partial: "stock_row", locals: { stock: decorated_stock })
+        ]
       end
     end
   end
@@ -138,30 +117,23 @@ class RadarsController < ApplicationController
   def update_target_price(stock)
     return unless params[:target_price].present?
 
-    radar_stock = RadarStock.find_by(radar: @radar, stock: stock)
-    if radar_stock&.update(target_price: params[:target_price])
-      "Target price was successfully updated."
-    else
-      "Failed to update target price."
-    end
+    result = @service.update_target_price(stock, params[:target_price])
+    result.success? ? "Target price was successfully updated." : "Failed to update target price."
   end
 
   def handle_stock_action(stock)
     case params[:action_type]
     when "add"
-      unless @radar.stocks.include?(stock)
-        target_price = params[:target_price].present? ? params[:target_price] : nil
-        RadarStock.create!(radar: @radar, stock: stock, target_price: target_price)
-      end
-      "Stock was successfully added to radar."
+      result = @service.add_stock(stock, target_price: params[:target_price])
+      result.success? ? "Stock was successfully added to radar." : result.error
     when "remove"
-      @radar.stocks.delete(stock)
+      @service.remove_stock(stock)
       "Stock was successfully removed from radar."
     else
       if request.xhr?
         render json: { success: false, error: "Invalid action" }, status: :bad_request
       else
-        redirect_to radar_path(@radar), alert: "Invalid action"
+        redirect_to radar_path, alert: "Invalid action"
       end
       :rendered # Signal that response was already sent
     end
@@ -176,6 +148,10 @@ class RadarsController < ApplicationController
 
   def set_or_create_radar
     @radar = Current.user.radar || Current.user.create_radar
+  end
+
+  def set_stock_radar_service
+    @service = StockRadarService.new(@radar)
   end
 
   def radar_params

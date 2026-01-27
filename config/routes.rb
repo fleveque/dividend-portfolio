@@ -17,12 +17,9 @@ Rails.application.routes.draw do
 
   resource :radar, only: [ :show, :create, :update ] do
     get "search", on: :member
-  end
-
-  resources :radars do
     member do
-      patch "stocks/:stock_id", to: "radars#update", as: "update_stock"
-      delete "stocks/:stock_id", to: "radars#destroy_stock", as: "destroy_stock"
+      patch "stocks/:stock_id", action: :update, as: :update_stock
+      delete "stocks/:stock_id", action: :destroy_stock, as: :destroy_stock
     end
   end
 end
