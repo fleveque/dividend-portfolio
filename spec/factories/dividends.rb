@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :dividend do
-    user { nil }
-    stock { nil }
-    amount { "9.99" }
-    date { "2025-02-15" }
+    association :user
+    association :stock
+    amount { 9.99 }
+    date { Date.current }
   end
 end
