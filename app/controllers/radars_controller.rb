@@ -77,7 +77,7 @@ class RadarsController < ApplicationController
     end
 
     radar_stock = result.data
-    decorated_stock = StockDecorator.new(stock.tap { |s| s.define_singleton_method(:target_price) { radar_stock.target_price } })
+    decorated_stock = StockDecorator.new(stock, target_price: radar_stock.target_price)
     render json: {
       success: true,
       target_price: decorated_stock.formatted_target_price,
@@ -102,7 +102,7 @@ class RadarsController < ApplicationController
     end
 
     radar_stock = result.data
-    decorated_stock = StockDecorator.new(stock.tap { |s| s.define_singleton_method(:target_price) { radar_stock.target_price } })
+    decorated_stock = StockDecorator.new(stock, target_price: radar_stock.target_price)
 
     respond_to do |format|
       format.turbo_stream do

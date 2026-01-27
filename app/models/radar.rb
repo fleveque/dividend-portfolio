@@ -6,14 +6,12 @@ class Radar < ApplicationRecord
   def self.most_added_stocks(limit = 10)
     Stock.joins(:radar_stocks)
          .group("stocks.id")
-         .order("COUNT(radars_stocks.radar_id) DESC")
+         .order("COUNT(radar_stocks.radar_id) DESC")
          .limit(limit)
   end
 
   def sorted_stocks
-    stocks_with_targets = Stock.joins("INNER JOIN radars_stocks ON stocks.id = radars_stocks.stock_id")
-                               .select("stocks.*, radars_stocks.target_price")
-                               .where("radars_stocks.radar_id = ?", id)
+    stocks_with_targets = stocks.select("stocks.*, radar_stocks.target_price")
     StockSorter.new(stocks_with_targets).sort
   end
 end

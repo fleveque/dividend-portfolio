@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_27_163006) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_27_173447) do
   create_table "dividends", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "stock_id", null: false
@@ -22,19 +22,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_27_163006) do
     t.index ["user_id"], name: "index_dividends_on_user_id"
   end
 
+  create_table "radar_stocks", id: false, force: :cascade do |t|
+    t.integer "radar_id", null: false
+    t.integer "stock_id", null: false
+    t.decimal "target_price"
+    t.index ["radar_id", "stock_id"], name: "index_radar_stocks_on_radar_id_and_stock_id"
+    t.index ["stock_id", "radar_id"], name: "index_radar_stocks_on_stock_id_and_radar_id"
+  end
+
   create_table "radars", force: :cascade do |t|
     t.integer "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_radars_on_user_id"
-  end
-
-  create_table "radars_stocks", id: false, force: :cascade do |t|
-    t.integer "radar_id", null: false
-    t.integer "stock_id", null: false
-    t.decimal "target_price"
-    t.index ["radar_id", "stock_id"], name: "index_radars_stocks_on_radar_id_and_stock_id"
-    t.index ["stock_id", "radar_id"], name: "index_radars_stocks_on_stock_id_and_radar_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -77,9 +77,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_27_163006) do
 
   add_foreign_key "dividends", "stocks"
   add_foreign_key "dividends", "users"
+  add_foreign_key "radar_stocks", "radars", on_delete: :cascade
+  add_foreign_key "radar_stocks", "stocks", on_delete: :cascade
   add_foreign_key "radars", "users"
-  add_foreign_key "radars_stocks", "radars", on_delete: :cascade
-  add_foreign_key "radars_stocks", "stocks", on_delete: :cascade
   add_foreign_key "sessions", "users"
   add_foreign_key "transactions", "stocks"
   add_foreign_key "transactions", "users"

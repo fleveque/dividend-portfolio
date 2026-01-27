@@ -24,6 +24,8 @@ class StockSorter
   end
 
   def percentage_difference(stock)
+    return 0 if stock.target_price.nil? || stock.target_price.zero?
+
     ((stock.price - stock.target_price).to_f / stock.target_price) * 100
   end
 end

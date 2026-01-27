@@ -1,6 +1,13 @@
 class StockDecorator < ApplicationDecorator
+  def initialize(stock, target_price: nil)
+    super(stock)
+    @explicit_target_price = target_price
+  end
+
   def target_price
+    return @explicit_target_price if @explicit_target_price
     return nil unless object.respond_to?(:target_price)
+
     object.target_price
   end
 
