@@ -23,7 +23,7 @@ class StockDecorator < ApplicationDecorator
   end
 
   def price_status_class
-    return "border-gray-500" unless target_price && current_price
+    return "border-gray-500" unless prices_available?
 
     if current_price < target_price
       "border-green-500 bg-gradient-to-r from-green-100 to-green-300"
@@ -35,7 +35,7 @@ class StockDecorator < ApplicationDecorator
   end
 
   def percentage_difference_from_target
-    return nil unless target_price && current_price
+    return nil unless prices_available?
 
     ((current_price - target_price) / target_price).abs * 100
   end
@@ -48,18 +48,15 @@ class StockDecorator < ApplicationDecorator
   end
 
   def above_target?
-    return false unless target_price && current_price
-    current_price > target_price
+    prices_available? && current_price > target_price
   end
 
   def below_target?
-    return false unless target_price && current_price
-    current_price < target_price
+    prices_available? && current_price < target_price
   end
 
   def at_target?
-    return false unless target_price && current_price
-    current_price == target_price
+    prices_available? && current_price == target_price
   end
 
   def target_status_text
@@ -75,6 +72,10 @@ class StockDecorator < ApplicationDecorator
   end
 
   private
+
+  def prices_available?
+    target_price.present? && current_price.present?
+  end
 
   def format_currency(value)
     "$#{sprintf('%.2f', value)}"

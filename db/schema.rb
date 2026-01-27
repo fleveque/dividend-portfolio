@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_27_174525) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_27_163006) do
   create_table "dividends", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "stock_id", null: false
@@ -78,6 +78,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_27_174525) do
   add_foreign_key "dividends", "stocks"
   add_foreign_key "dividends", "users"
   add_foreign_key "radars", "users"
+  add_foreign_key "radars_stocks", "radars", on_delete: :cascade
+  add_foreign_key "radars_stocks", "stocks", on_delete: :cascade
   add_foreign_key "sessions", "users"
   add_foreign_key "transactions", "stocks"
   add_foreign_key "transactions", "users"
