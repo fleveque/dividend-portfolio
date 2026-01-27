@@ -32,6 +32,7 @@ class RadarsController < ApplicationController
       end
 
       message = update_target_price(stock) || handle_stock_action(stock)
+      return if message == :rendered
       redirect_to radar_path(@radar), notice: message
     rescue ActiveRecord::RecordNotFound
       if request.xhr?
@@ -162,6 +163,7 @@ class RadarsController < ApplicationController
       else
         redirect_to radar_path(@radar), alert: "Invalid action"
       end
+      :rendered # Signal that response was already sent
     end
   end
 

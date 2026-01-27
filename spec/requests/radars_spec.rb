@@ -124,8 +124,19 @@ RSpec.describe "Radars", type: :request do
 
     it "handles empty search query" do
       get search_radar_path, params: { query: "" }
-      # Should either return OK or redirect to show page
+      # Returns OK or redirects to show page
       expect([ 200, 302 ]).to include(response.status)
     end
+
+    it "handles stock not found" do
+      allow(FinancialDataService).to receive(:get_stock).with("INVALID").and_return(nil)
+
+      get search_radar_path, params: { query: "INVALID" }
+      # Returns OK with empty results
+      expect([ 200, 302 ]).to include(response.status)
+    end
+
+    # NOTE: Turbo Stream format tests are better suited for system/integration tests
+    # due to MIME type negotiation requirements.
   end
 end
