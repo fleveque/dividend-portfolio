@@ -35,7 +35,7 @@ module FinancialDataProvider
 end
 
 # Set the default provider
-Rails.application.config.financial_data_provider = :alpha_vantage
+Rails.application.config.financial_data_provider = :yahoo_finance
 
 # Configure the selected provider
 FinancialDataProvider.configure
