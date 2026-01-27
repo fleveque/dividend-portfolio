@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  # React test page - visit /react-test to verify Vite + React setup
+  # Remove this route once the migration is complete
+  get "react-test", to: "react_test#index"
+
   get "home/index"
   resource :session
   resources :passwords, param: :token

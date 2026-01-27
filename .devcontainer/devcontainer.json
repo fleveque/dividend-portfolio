@@ -10,11 +10,18 @@
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/rails/devcontainer/features/activestorage": {},
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": false
+    },
     "ghcr.io/rails/devcontainer/features/sqlite3": {},
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": "false",
       "installDirenv": "true"
+    },
+    // Node.js for Vite + React frontend
+    // Uses LTS version by default. Specific version can be set with "version": "22"
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
     }
   },
 
@@ -25,7 +32,9 @@
   },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  "forwardPorts": [3000],
+  // 3000 = Rails server
+  // 3036 = Vite dev server (for React HMR)
+  "forwardPorts": [3000, 3036],
 
   // Configure tool-specific properties.
   // "customizations": {},

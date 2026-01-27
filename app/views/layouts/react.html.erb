@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Dividend Portfolio" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <%# CSRF token - React will read this for API requests %>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%#
+      Vite Tags Explained:
+      ====================
+
+      vite_client_tag:
+        In development: loads Vite's HMR (Hot Module Replacement) client
+        In production: outputs nothing (not needed)
+
+      vite_javascript_tag 'application.jsx':
+        In development: points to Vite dev server
+          <script type="module" src="http://localhost:3036/entrypoints/application.jsx"></script>
+
+        In production: points to fingerprinted, minified bundle
+          <script type="module" src="/assets/application-abc123.js"></script>
+
+      The 'application.jsx' matches the filename in app/frontend/entrypoints/
+    %>
+    <%= vite_client_tag %>
+    <%= vite_javascript_tag 'application.jsx' %>
+
+    <%# Keep Tailwind CSS from the existing setup for now %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+  </head>
+
+  <body class="bg-gray-100 min-h-screen">
+    <%#
+      React Root Element:
+      ==================
+      This <div> is where React will mount and take over.
+      Everything inside it will be controlled by React.
+
+      The id="react-root" matches what we look for in application.jsx:
+        document.getElementById('react-root')
+    %>
+    <div id="react-root" class="min-h-screen"></div>
+  </body>
+</html>

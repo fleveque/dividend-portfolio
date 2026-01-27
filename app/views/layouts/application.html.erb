@@ -19,6 +19,15 @@
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%#
+      Importmap for Hotwire/Stimulus (existing pages)
+      ================================================
+      This loads the Stimulus controllers for Hotwire-based pages.
+      During the React migration, we keep this for existing pages.
+
+      Once all pages are migrated to React, we can remove this
+      and switch to the React layout (layouts/react.html.erb).
+    %>
     <%= javascript_importmap_tags %>
   </head>
 

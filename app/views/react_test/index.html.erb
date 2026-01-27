@@ -1,0 +1,18 @@
+<%#
+  React Test Page
+  ===============
+  This view is intentionally empty because React handles all rendering.
+
+  The layout (layouts/react.html.erb) provides:
+  - The <div id="react-root"> where React mounts
+  - The vite_javascript_tag that loads our React code
+
+  When you visit this page:
+  1. Rails renders this (empty) template inside the layout
+  2. The browser loads the JavaScript from Vite
+  3. React finds <div id="react-root"> and takes over
+  4. StockCard component renders inside the div
+
+  In later phases, we'll have React Router handle multiple "pages"
+  within this single mount point.
+%>
