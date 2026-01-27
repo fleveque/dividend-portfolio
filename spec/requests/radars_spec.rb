@@ -42,7 +42,7 @@ RSpec.describe "Radars", type: :request do
         post radar_path
       }.to change(Radar, :count).by(1)
 
-      expect(response).to redirect_to(radar_path(Radar.last))
+      expect(response).to redirect_to(radar_path)
       expect(flash[:notice]).to eq("Radar was successfully created.")
     end
   end
@@ -53,10 +53,10 @@ RSpec.describe "Radars", type: :request do
     context "when adding a stock" do
       it "adds stock to radar" do
         expect {
-          patch radar_path(radar), params: { stock_id: stock.id, action_type: 'add' }
+          patch radar_path, params: { stock_id: stock.id, action_type: 'add' }
         }.to change { radar.reload.stocks.count }.by(1)
 
-        expect(response).to redirect_to(radar_path(radar))
+        expect(response).to redirect_to(radar_path)
         expect(flash[:notice]).to eq("Stock was successfully added to radar.")
       end
 
@@ -64,10 +64,10 @@ RSpec.describe "Radars", type: :request do
         RadarStock.create!(radar: radar, stock: stock, target_price: 100.00)
 
         expect {
-          patch radar_path(radar), params: { stock_id: stock.id, action_type: 'add' }
+          patch radar_path, params: { stock_id: stock.id, action_type: 'add' }
         }.not_to change { radar.reload.stocks.count }
 
-        expect(response).to redirect_to(radar_path(radar))
+        expect(response).to redirect_to(radar_path)
       end
     end
 
@@ -76,10 +76,10 @@ RSpec.describe "Radars", type: :request do
 
       it "removes stock from radar" do
         expect {
-          patch radar_path(radar), params: { stock_id: stock.id, action_type: 'remove' }
+          patch radar_path, params: { stock_id: stock.id, action_type: 'remove' }
         }.to change { radar.reload.stocks.count }.by(-1)
 
-        expect(response).to redirect_to(radar_path(radar))
+        expect(response).to redirect_to(radar_path)
         expect(flash[:notice]).to eq("Stock was successfully removed from radar.")
       end
     end
@@ -88,23 +88,23 @@ RSpec.describe "Radars", type: :request do
       let!(:radar_stock) { RadarStock.create!(radar: radar, stock: stock, target_price: 100.00) }
 
       it "updates target price" do
-        patch radar_path(radar), params: {
+        patch radar_path, params: {
           stock_id: stock.id,
           target_price: '175.50'
         }
 
-        expect(response).to redirect_to(radar_path(radar))
+        expect(response).to redirect_to(radar_path)
         expect(flash[:notice]).to eq("Target price was successfully updated.")
         expect(radar_stock.reload.target_price).to eq(BigDecimal('175.50'))
       end
 
       it "handles non-existent stock gracefully" do
-        patch radar_path(radar), params: {
+        patch radar_path, params: {
           stock_id: 99999,
           target_price: '150.00'
         }
 
-        expect(response).to redirect_to(radar_path(radar))
+        expect(response).to redirect_to(radar_path)
         expect(flash[:alert]).to eq("Stock not found.")
       end
     end
@@ -124,8 +124,19 @@ RSpec.describe "Radars", type: :request do
 
     it "handles empty search query" do
       get search_radar_path, params: { query: "" }
-      # Should either return OK or redirect to show page
+      # Returns OK or redirects to show page
       expect([ 200, 302 ]).to include(response.status)
     end
+
+    it "handles stock not found" do
+      allow(FinancialDataService).to receive(:get_stock).with("INVALID").and_return(nil)
+
+      get search_radar_path, params: { query: "INVALID" }
+      # Returns OK with empty results
+      expect([ 200, 302 ]).to include(response.status)
+    end
+
+    # NOTE: Turbo Stream format tests are better suited for system/integration tests
+    # due to MIME type negotiation requirements.
   end
 end
