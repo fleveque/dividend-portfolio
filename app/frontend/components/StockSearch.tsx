@@ -25,20 +25,8 @@
 
 import { useState } from 'react'
 import { Stock } from '../types'
+import { stocksApi } from '../lib/api'
 import StockCard from './StockCard'
-
-// Mock search function - will be replaced with real API in Phase 5
-async function searchStock(query: string): Promise<Stock | null> {
-  await new Promise(resolve => setTimeout(resolve, 500))
-
-  const stocks: Record<string, Stock> = {
-    'AAPL': { id: 1, symbol: 'AAPL', name: 'Apple Inc.', price: 178.50, formattedPrice: '$178.50' },
-    'GOOGL': { id: 2, symbol: 'GOOGL', name: 'Alphabet Inc.', price: 141.80, formattedPrice: '$141.80' },
-    'MSFT': { id: 3, symbol: 'MSFT', name: 'Microsoft Corporation', price: 378.91, formattedPrice: '$378.91' },
-  }
-
-  return stocks[query.toUpperCase()] || null
-}
 
 function StockSearch() {
   // Input value state
@@ -68,14 +56,14 @@ function StockSearch() {
     setResult(null)
 
     try {
-      const stock = await searchStock(query)
-      if (stock) {
-        setResult(stock)
+      const stocks = await stocksApi.search(query)
+      if (stocks.length > 0) {
+        setResult(stocks[0])
       } else {
-        setMessage(`Stock "${query.toUpperCase()}" not found. Try AAPL, GOOGL, or MSFT.`)
+        setMessage(`Stock "${query.toUpperCase()}" not found.`)
       }
-    } catch {
-      setMessage('Search failed. Please try again.')
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Search failed. Please try again.')
     } finally {
       setSearching(false)
     }

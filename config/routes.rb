@@ -26,4 +26,29 @@ Rails.application.routes.draw do
       delete "stocks/:stock_id", action: :destroy_stock, as: :destroy_stock
     end
   end
+
+  # JSON API for React frontend
+  # Versioned namespace allows future API changes without breaking existing clients
+  namespace :api do
+    namespace :v1 do
+      # Stock endpoints - public (no auth required for browsing)
+      resources :stocks, only: [ :index, :show ] do
+        collection do
+          get :last_added   # GET /api/v1/stocks/last_added
+          get :most_added   # GET /api/v1/stocks/most_added
+          get :search       # GET /api/v1/stocks/search?query=AAPL
+        end
+      end
+
+      # Radar endpoints - authenticated (user's personal watchlist)
+      resource :radar, only: [ :show ] do
+        post "stocks/:stock_id", action: :add_stock, as: :add_stock
+        delete "stocks/:stock_id", action: :remove_stock, as: :remove_stock
+        patch "stocks/:stock_id/target_price", action: :update_target_price, as: :update_target_price
+      end
+
+      # Session endpoints - for React authentication
+      resource :session, only: [ :show, :create, :destroy ]
+    end
+  end
 end

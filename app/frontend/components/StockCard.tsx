@@ -46,10 +46,9 @@ function StockCard({ stock }: StockCardProps) {
         {stock.name}
       </p>
 
-      {/* TypeScript knows stock.price is number | null */}
-      {/* The ternary handles the null case */}
+      {/* Use formattedPrice from API - already formatted as "$123.45" or "N/A" */}
       <p className="text-xl font-semibold mt-2 text-green-600">
-        {stock.price !== null ? `$${stock.price.toFixed(2)}` : 'N/A'}
+        {stock.formattedPrice}
       </p>
     </div>
   )

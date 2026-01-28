@@ -25,32 +25,8 @@
 
 import { useState, useEffect } from 'react'
 import { Stock } from '../types'
+import { stocksApi } from '../lib/api'
 import StockCard from './StockCard'
-
-/**
- * Simulated API fetch
- *
- * In Phase 5, we'll replace this with a real API call.
- * For now, this demonstrates the loading/error/success pattern.
- */
-async function fetchStocks(): Promise<Stock[]> {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000))
-
-  // Simulate occasional errors (10% chance)
-  if (Math.random() < 0.1) {
-    throw new Error('Failed to fetch stocks')
-  }
-
-  // Return mock data
-  return [
-    { id: 1, symbol: 'AAPL', name: 'Apple Inc.', price: 178.50, formattedPrice: '$178.50' },
-    { id: 2, symbol: 'GOOGL', name: 'Alphabet Inc.', price: 141.80, formattedPrice: '$141.80' },
-    { id: 3, symbol: 'MSFT', name: 'Microsoft Corporation', price: 378.91, formattedPrice: '$378.91' },
-    { id: 4, symbol: 'AMZN', name: 'Amazon.com Inc.', price: 178.25, formattedPrice: '$178.25' },
-    { id: 5, symbol: 'NVDA', name: 'NVIDIA Corporation', price: 721.33, formattedPrice: '$721.33' },
-  ]
-}
 
 function StockList() {
   // State for the fetched data
@@ -72,7 +48,7 @@ function StockList() {
         setLoading(true)
         setError(null)
 
-        const data = await fetchStocks()
+        const data = await stocksApi.getLastAdded()
         setStocks(data)
       } catch (err) {
         // Type guard: err could be anything
