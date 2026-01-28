@@ -1,22 +1,16 @@
 /**
- * RadarStockCard - Component demonstrating advanced patterns
+ * RadarStockCard - Stock card with target price editing for radar
  *
- * Phase 10: React Query Integration
- * =================================
- *
- * This component now uses:
- * - useUpdateTargetPrice mutation (React Query)
- * - useInlineEdit custom hook for editing UI logic
- *
- * When target price is saved:
- * 1. useUpdateTargetPrice.mutate() calls the API
- * 2. On success, it invalidates the ['radar'] query
- * 3. React Query automatically refetches the radar
- * 4. Component re-renders with updated data
+ * Features:
+ * - Company logo with fallback
+ * - Inline target price editing
+ * - Visual status indicators (below/above/at target)
+ * - Theme-aware styling
  */
 
 import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateTargetPrice } from '../hooks/useRadarQueries'
+import { StockLogo } from './StockLogo'
 import type { RadarStock } from '../types'
 
 interface RadarStockCardProps {
@@ -26,13 +20,8 @@ interface RadarStockCardProps {
 }
 
 export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardProps) {
-  // React Query mutation for updating target price
   const updateTargetPrice = useUpdateTargetPrice()
 
-  /**
-   * useInlineEdit hook manages all the editing state and logic.
-   * Now uses React Query mutation for the save operation.
-   */
   const {
     isEditing,
     value,
@@ -48,49 +37,66 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
     initialValue: stock.targetPrice?.toString() ?? '',
     onSave: async (newValue) => {
       const price = newValue === '' ? 0 : parseFloat(newValue)
-      // Use React Query mutation - it will invalidate radar query on success
       await updateTargetPrice.mutateAsync({ stockId: stock.id, price })
     },
   })
 
-  return (
-    <div
-      className={`p-4 rounded-lg border-2 ${stock.priceStatusClass} transition-all`}
-    >
-      {/* Stock Header */}
-      <div className="flex justify-between items-start mb-2">
-        <div>
-          <h3 className="text-lg font-bold">{stock.symbol}</h3>
-          <p className="text-sm text-gray-600 truncate" title={stock.name}>
-            {stock.name}
-          </p>
-        </div>
+  // Determine card border color based on price status
+  const getStatusClasses = () => {
+    if (stock.belowTarget) {
+      return 'border-l-4 border-l-emerald-500 dark:border-l-emerald-400'
+    }
+    if (stock.aboveTarget) {
+      return 'border-l-4 border-l-red-500 dark:border-l-red-400'
+    }
+    return 'border-l-4 border-l-gray-300 dark:border-l-gray-600'
+  }
 
-        {/* Remove Button */}
-        {onRemove && (
-          <button
-            onClick={onRemove}
-            disabled={isRemoving}
-            className="text-red-500 hover:text-red-700 text-sm disabled:text-red-300"
-            title="Remove from radar"
-          >
-            {isRemoving ? 'Removing...' : 'Remove'}
-          </button>
-        )}
+  return (
+    <div className={`card p-4 ${getStatusClasses()}`}>
+      {/* Stock Header */}
+      <div className="flex items-start gap-3 mb-3">
+        {/* Logo */}
+        <StockLogo symbol={stock.symbol} name={stock.name} size="md" />
+
+        {/* Stock Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-lg font-bold text-theme-primary">{stock.symbol}</h3>
+              <p className="text-sm text-theme-secondary truncate" title={stock.name}>
+                {stock.name}
+              </p>
+            </div>
+
+            {/* Remove Button */}
+            {onRemove && (
+              <button
+                onClick={onRemove}
+                disabled={isRemoving}
+                className="text-red-500 hover:text-red-700 dark:hover:text-red-400 text-sm
+                           disabled:text-red-300 dark:disabled:text-red-800 transition-colors"
+                title="Remove from radar"
+              >
+                {isRemoving ? 'Removing...' : 'Remove'}
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Price Information */}
-      <div className="grid grid-cols-2 gap-2 text-sm">
+      <div className="grid grid-cols-2 gap-3 text-sm border-t border-theme pt-3">
         <div>
-          <span className="text-gray-500">Current:</span>
-          <span className="ml-1 font-semibold">{stock.formattedPrice}</span>
+          <span className="text-theme-muted block text-xs uppercase tracking-wide">Current</span>
+          <span className="font-semibold text-theme-primary">{stock.formattedPrice}</span>
         </div>
 
         {/* Target Price - Inline Editable */}
         <div>
-          <span className="text-gray-500">Target:</span>
+          <span className="text-theme-muted block text-xs uppercase tracking-wide">Target</span>
           {isEditing ? (
-            <span className="ml-1 inline-flex items-center gap-1">
+            <span className="inline-flex items-center gap-1">
               <input
                 ref={inputRef}
                 type="number"
@@ -99,20 +105,26 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
                 onChange={(e) => setValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 disabled={isSaving}
-                className="w-20 px-1 py-0.5 border rounded text-sm focus:ring-2 focus:ring-blue-500"
+                className="w-20 px-2 py-1 border border-theme rounded-lg text-sm
+                           bg-theme-base text-theme-primary
+                           focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="0.00"
               />
               <button
                 onClick={save}
                 disabled={isSaving}
-                className="px-2 py-0.5 bg-green-500 text-white rounded text-xs hover:bg-green-600 disabled:bg-green-300"
+                className="p-1.5 bg-emerald-500 text-white rounded-lg text-xs
+                           hover:bg-emerald-600 disabled:bg-emerald-300 dark:disabled:bg-emerald-800
+                           transition-colors"
               >
                 {isSaving ? '...' : '✓'}
               </button>
               <button
                 onClick={cancelEdit}
                 disabled={isSaving}
-                className="px-2 py-0.5 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 disabled:bg-gray-300"
+                className="p-1.5 bg-gray-500 text-white rounded-lg text-xs
+                           hover:bg-gray-600 disabled:bg-gray-300 dark:disabled:bg-gray-700
+                           transition-colors"
               >
                 ✕
               </button>
@@ -120,7 +132,8 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
           ) : (
             <span
               onClick={startEdit}
-              className="ml-1 font-semibold cursor-pointer hover:text-blue-600"
+              className="font-semibold text-theme-primary cursor-pointer
+                         hover:text-brand transition-colors"
               title="Click to edit"
             >
               {stock.formattedTargetPrice}
@@ -131,24 +144,26 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
 
       {/* Error Message */}
       {error && (
-        <p className="mt-2 text-xs text-red-600">{error}</p>
+        <p className="mt-2 text-xs text-red-600 dark:text-red-400">{error}</p>
       )}
 
       {/* Status Indicator */}
       {stock.percentageDifference && (
-        <div className="mt-2 text-xs">
+        <div className="mt-3 pt-3 border-t border-theme">
           {stock.belowTarget && (
-            <span className="text-green-600">
+            <span className="badge badge-success">
               ↓ {stock.percentageDifference} below target
             </span>
           )}
           {stock.aboveTarget && (
-            <span className="text-red-600">
+            <span className="badge badge-danger">
               ↑ {stock.percentageDifference} above target
             </span>
           )}
           {stock.atTarget && (
-            <span className="text-gray-600">At target price</span>
+            <span className="badge bg-theme-muted text-theme-secondary">
+              At target price
+            </span>
           )}
         </div>
       )}

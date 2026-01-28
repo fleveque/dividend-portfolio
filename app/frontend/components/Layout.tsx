@@ -1,33 +1,17 @@
 /**
- * Layout - Shared layout with React Router integration
+ * Layout - Shared layout with header, footer, and theme support
  *
- * React Router Concepts:
- * ======================
- *
- * <Link> - Navigation without page reload
- *   Replaces <a> tags for internal navigation.
- *   <Link to="/radar">My Radar</Link>
- *
- * <NavLink> - Link with active state
- *   Like Link but knows if it's the current route.
- *   Useful for styling active nav items.
- *
- * <Outlet> - Where child routes render
- *   In a layout route, Outlet is where nested routes appear.
- *   Layout wraps all pages, Outlet shows the current page.
- *
- * useLocation() - Current URL info
- *   Returns { pathname, search, hash, state }
- *   We use pathname to highlight the active nav item.
- *
- * useNavigate() - Programmatic navigation
- *   const navigate = useNavigate()
- *   navigate('/login') - go to login
- *   navigate(-1) - go back
+ * Features:
+ * - Sticky header with logo and navigation
+ * - Theme toggle for dark/light modes
+ * - Emerald green color scheme
+ * - Responsive navigation
  */
 
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { Logo } from './Logo'
+import { ThemeToggle } from './ThemeToggle'
 
 export function Layout() {
   const { user, isAuthenticated, isLoading, logout } = useAuth()
@@ -39,40 +23,40 @@ export function Layout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-theme-surface flex flex-col">
       {/* Header */}
-      <header className="bg-blue-600 text-white shadow-lg">
+      <header className="sticky top-0 z-50 bg-theme-elevated border-b border-theme shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center py-4">
-            {/* Logo/Title - Link to home */}
-            <Link
-              to="/"
-              className="text-2xl font-bold hover:text-blue-200 transition-colors"
-            >
-              Dividend Portfolio
+          <div className="flex justify-between items-center py-3">
+            {/* Logo */}
+            <Link to="/" className="hover:opacity-80 transition-opacity">
+              <Logo size="md" showText={true} />
             </Link>
 
             {/* Navigation */}
-            <nav className="flex items-center gap-6">
-              {/* Home - always visible */}
+            <nav className="flex items-center gap-2 sm:gap-4">
+              {/* Nav Links */}
               <NavLink
                 to="/"
                 className={({ isActive }) =>
-                  `hover:text-blue-200 transition-colors ${
-                    isActive ? 'text-white font-semibold' : 'text-blue-100'
+                  `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-primary-100 dark:bg-primary-900 text-brand'
+                      : 'text-theme-secondary hover:text-brand hover:bg-theme-muted'
                   }`
                 }
               >
                 Home
               </NavLink>
 
-              {/* My Radar - only when authenticated */}
               {isAuthenticated && (
                 <NavLink
                   to="/radar"
                   className={({ isActive }) =>
-                    `hover:text-blue-200 transition-colors ${
-                      isActive ? 'text-white font-semibold' : 'text-blue-100'
+                    `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-primary-100 dark:bg-primary-900 text-brand'
+                        : 'text-theme-secondary hover:text-brand hover:bg-theme-muted'
                     }`
                   }
                 >
@@ -80,18 +64,27 @@ export function Layout() {
                 </NavLink>
               )}
 
+              {/* Divider */}
+              <div className="h-6 w-px bg-theme-muted mx-1 hidden sm:block" />
+
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
               {/* Auth Section */}
-              <div className="ml-4 pl-4 border-l border-blue-500">
+              <div className="flex items-center gap-2 ml-1">
                 {isLoading ? (
-                  <span className="text-blue-200 text-sm">Loading...</span>
+                  <span className="text-theme-muted text-sm">Loading...</span>
                 ) : isAuthenticated && user ? (
-                  <div className="flex items-center gap-3">
-                    <span className="text-blue-200 text-sm hidden md:inline">
+                  <div className="flex items-center gap-2">
+                    <span className="text-theme-secondary text-sm hidden md:inline truncate max-w-48">
                       {user.emailAddress}
                     </span>
                     <button
                       onClick={handleLogout}
-                      className="px-3 py-1 bg-blue-500 hover:bg-blue-400 rounded text-sm transition-colors"
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium
+                                 bg-theme-muted hover:bg-red-100 dark:hover:bg-red-900
+                                 text-theme-secondary hover:text-red-600 dark:hover:text-red-400
+                                 transition-colors"
                     >
                       Logout
                     </button>
@@ -99,7 +92,7 @@ export function Layout() {
                 ) : (
                   <Link
                     to="/login"
-                    className="px-3 py-1 bg-blue-500 hover:bg-blue-400 rounded text-sm transition-colors"
+                    className="btn-primary text-sm px-4 py-1.5"
                   >
                     Sign In
                   </Link>
@@ -110,18 +103,34 @@ export function Layout() {
         </div>
       </header>
 
-      {/* Main Content - Outlet renders the current route's component */}
+      {/* Main Content */}
       <main className="flex-1">
         <Outlet />
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-gray-400 py-6">
-        <div className="container mx-auto px-4 text-center text-sm">
-          <p>Dividend Portfolio - React Migration Demo</p>
-          <p className="mt-1">
-            Built with React, TypeScript, Vite, Tailwind CSS, and React Router
-          </p>
+      <footer className="bg-theme-elevated border-t border-theme py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            {/* Logo in footer */}
+            <Logo size="sm" showText={true} />
+
+            {/* Footer text */}
+            <div className="text-theme-muted text-sm text-center">
+              <p>Built with Ruby on Rails, React, TypeScript, and Tailwind CSS</p>
+              <p className="mt-1">
+                &copy; {new Date().getFullYear()}{' '}
+                <a
+                  href="https://github.com/fleveque"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand hover:underline"
+                >
+                  Francesc Leveque
+                </a>
+              </p>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

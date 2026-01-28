@@ -1,65 +1,368 @@
 /**
  * Tailwind CSS v4 Entry Point
  *
- * Tailwind v4 uses a single import instead of @tailwind directives.
- * Configuration is done via @theme in CSS or a config file.
+ * Theme: Emerald green with dark/light mode support
  */
 
 @import "tailwindcss";
 
 /**
  * Source paths for class detection
- * Tell Tailwind where to look for class usage
  */
 @source "../../components/**/*.tsx";
+@source "../../contexts/**/*.tsx";
+@source "../../pages/**/*.tsx";
 @source "../../../views/**/*.html.erb";
 
 /**
- * Custom Component Classes
- *
- * Use @utility for custom utilities or plain CSS for components.
- * @apply still works in Tailwind v4.
+ * Tailwind v4 Theme Customization
+ * Emerald green color scheme with semantic colors
+ */
+@theme {
+  /* Primary: Emerald Green (growth/money theme) */
+  --color-primary-50: #ecfdf5;
+  --color-primary-100: #d1fae5;
+  --color-primary-200: #a7f3d0;
+  --color-primary-300: #6ee7b7;
+  --color-primary-400: #34d399;
+  --color-primary-500: #10b981;
+  --color-primary-600: #059669;
+  --color-primary-700: #047857;
+  --color-primary-800: #065f46;
+  --color-primary-900: #064e3b;
+  --color-primary-950: #022c22;
+}
+
+/**
+ * CSS Custom Properties for Theme Switching
+ * Light theme (default)
+ */
+:root {
+  /* Background colors */
+  --bg-base: #ffffff;
+  --bg-surface: #f8fafc;
+  --bg-muted: #f1f5f9;
+  --bg-elevated: #ffffff;
+
+  /* Text colors */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-inverted: #ffffff;
+
+  /* Border colors */
+  --border-default: #e2e8f0;
+  --border-muted: #f1f5f9;
+
+  /* Primary brand colors */
+  --brand-primary: #059669;
+  --brand-primary-hover: #047857;
+  --brand-primary-light: #d1fae5;
+  --brand-primary-text: #065f46;
+
+  /* Semantic colors */
+  --color-success: #10b981;
+  --color-success-light: #d1fae5;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-danger: #ef4444;
+  --color-danger-light: #fee2e2;
+  --color-info: #3b82f6;
+  --color-info-light: #dbeafe;
+}
+
+/**
+ * Dark theme
+ */
+.dark {
+  /* Background colors */
+  --bg-base: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-muted: #334155;
+  --bg-elevated: #1e293b;
+
+  /* Text colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-inverted: #0f172a;
+
+  /* Border colors */
+  --border-default: #334155;
+  --border-muted: #1e293b;
+
+  /* Primary brand colors (adjusted for dark) */
+  --brand-primary: #10b981;
+  --brand-primary-hover: #34d399;
+  --brand-primary-light: #065f46;
+  --brand-primary-text: #6ee7b7;
+
+  /* Semantic colors (adjusted for dark) */
+  --color-success: #34d399;
+  --color-success-light: #065f46;
+  --color-warning: #fbbf24;
+  --color-warning-light: #78350f;
+  --color-danger: #f87171;
+  --color-danger-light: #7f1d1d;
+  --color-info: #60a5fa;
+  --color-info-light: #1e3a5f;
+}
+
+/**
+ * Base Styles
+ */
+html {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/**
+ * Component Classes
  */
 
-/* Primary button style */
+/* Primary Button - Emerald themed */
 .btn-primary {
-  @apply px-6 py-2 bg-blue-500 text-white font-medium rounded-lg
-         hover:bg-blue-600 focus:outline-none focus:ring-2
-         focus:ring-blue-500 focus:ring-offset-2
-         disabled:bg-blue-300 disabled:cursor-not-allowed
-         transition-colors;
+  @apply px-6 py-2.5 font-medium rounded-xl
+         shadow-sm hover:shadow-md
+         focus:outline-none focus:ring-2 focus:ring-offset-2
+         disabled:cursor-not-allowed
+         transition-all duration-200;
+  background-color: var(--brand-primary);
+  color: var(--text-inverted);
 }
 
-/* Secondary button style */
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--brand-primary-hover);
+}
+
+.btn-primary:focus {
+  --tw-ring-color: var(--brand-primary);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+}
+
+/* Secondary Button */
 .btn-secondary {
-  @apply px-6 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg
-         hover:bg-gray-300 focus:outline-none focus:ring-2
-         focus:ring-gray-500 focus:ring-offset-2
-         transition-colors;
+  @apply px-6 py-2.5 font-medium rounded-xl
+         shadow-sm hover:shadow-md
+         focus:outline-none focus:ring-2 focus:ring-offset-2
+         disabled:cursor-not-allowed
+         transition-all duration-200;
+  background-color: var(--bg-muted);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
 }
 
-/* Danger button style */
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--border-default);
+}
+
+.btn-secondary:focus {
+  --tw-ring-color: var(--border-default);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+}
+
+/* Danger Button */
 .btn-danger {
-  @apply px-6 py-2 bg-red-500 text-white font-medium rounded-lg
-         hover:bg-red-600 focus:outline-none focus:ring-2
-         focus:ring-red-500 focus:ring-offset-2
-         transition-colors;
+  @apply px-6 py-2.5 font-medium rounded-xl
+         shadow-sm hover:shadow-md
+         focus:outline-none focus:ring-2 focus:ring-offset-2
+         disabled:cursor-not-allowed
+         transition-all duration-200;
+  background-color: var(--color-danger);
+  color: var(--text-inverted);
 }
 
-/* Form input style */
+.btn-danger:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.btn-danger:focus {
+  --tw-ring-color: var(--color-danger);
+}
+
+.btn-danger:disabled {
+  opacity: 0.5;
+}
+
+/* Form Input */
 .input-field {
-  @apply w-full px-4 py-2 border border-gray-300 rounded-lg
-         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-         disabled:bg-gray-100 disabled:cursor-not-allowed;
+  @apply w-full px-4 py-2.5 rounded-xl
+         focus:outline-none focus:ring-2
+         disabled:cursor-not-allowed
+         transition-all duration-200;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
 }
 
-/* Card container */
+.input-field:focus {
+  --tw-ring-color: var(--brand-primary);
+  border-color: var(--brand-primary);
+}
+
+.input-field:disabled {
+  background-color: var(--bg-muted);
+  opacity: 0.7;
+}
+
+.input-field::placeholder {
+  color: var(--text-muted);
+}
+
+/* Card Container */
 .card {
-  @apply bg-white rounded-lg shadow-md p-6;
+  @apply rounded-xl shadow-md p-6 transition-all duration-200;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-muted);
 }
 
-/* Card with hover effect */
+/* Card with Hover Effect */
 .card-hover {
-  @apply bg-white rounded-lg shadow-md p-6
-         hover:shadow-lg transition-shadow;
+  @apply rounded-xl shadow-md p-6 cursor-pointer
+         transition-all duration-200;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-muted);
+}
+
+.card-hover:hover {
+  @apply shadow-lg;
+  transform: translateY(-2px);
+  border-color: var(--brand-primary);
+}
+
+/* Page Section */
+.section {
+  @apply rounded-xl shadow-lg p-6;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-muted);
+}
+
+/**
+ * Utility Classes
+ */
+
+/* Badge Styles */
+.badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-success {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.badge-warning {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.badge-danger {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.badge-info {
+  background-color: var(--color-info-light);
+  color: var(--color-info);
+}
+
+/* Spinner */
+.spinner {
+  @apply animate-spin rounded-full border-2 border-current border-t-transparent;
+}
+
+.spinner-sm {
+  @apply w-4 h-4;
+}
+
+.spinner-md {
+  @apply w-6 h-6;
+}
+
+.spinner-lg {
+  @apply w-8 h-8;
+}
+
+/* Alert Styles */
+.alert {
+  @apply px-4 py-3 rounded-xl border;
+}
+
+.alert-success {
+  background-color: var(--color-success-light);
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.alert-warning {
+  background-color: var(--color-warning-light);
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+
+.alert-danger {
+  background-color: var(--color-danger-light);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.alert-info {
+  background-color: var(--color-info-light);
+  border-color: var(--color-info);
+  color: var(--color-info);
+}
+
+/* Text color utilities using CSS vars */
+.text-theme-primary {
+  color: var(--text-primary);
+}
+
+.text-theme-secondary {
+  color: var(--text-secondary);
+}
+
+.text-theme-muted {
+  color: var(--text-muted);
+}
+
+.text-brand {
+  color: var(--brand-primary);
+}
+
+/* Background utilities using CSS vars */
+.bg-theme-base {
+  background-color: var(--bg-base);
+}
+
+.bg-theme-surface {
+  background-color: var(--bg-surface);
+}
+
+.bg-theme-muted {
+  background-color: var(--bg-muted);
+}
+
+.bg-theme-elevated {
+  background-color: var(--bg-elevated);
+}
+
+/* Border utilities */
+.border-theme {
+  border-color: var(--border-default);
+}
+
+.border-theme-muted {
+  border-color: var(--border-muted);
 }
