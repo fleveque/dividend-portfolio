@@ -1,45 +1,113 @@
 /**
  * App - Main application component
  *
- * Component Composition:
- * ======================
+ * Phase 6 Additions:
+ * ==================
  *
- * React apps are built by composing smaller components into larger ones.
- * This App component is the "root" that renders all other components.
+ * 1. AuthProvider wraps the entire app to provide auth context
+ * 2. AuthHeader uses useAuth() to show login/logout state
+ * 3. RadarDemo tab shows the useInlineEdit hook in action
  *
- * In Phase 9, we'll add React Router here for navigation.
- * For now, it's a simple demo of our Phase 1-3 components.
+ * Context Flow:
+ *   <AuthProvider>           ← Provides auth state
+ *     <AppContent>           ← Can use useAuth()
+ *       <AuthHeader />       ← Uses useAuth() for user info
+ *       <RadarDemo />        ← Uses useAuth() to check if logged in
+ *     </AppContent>
+ *   </AuthProvider>
  */
 
 import { useState } from 'react'
+import { AuthProvider, useAuth } from '../contexts/AuthContext'
 import StockList from './StockList'
 import StockSearch from './StockSearch'
 import Counter from './Counter'
+import RadarDemo from './RadarDemo'
 
 // Tab type for switching between demos
-type Tab = 'list' | 'search' | 'counter'
+type Tab = 'list' | 'search' | 'counter' | 'radar'
 
-function App() {
+/**
+ * AuthHeader - Displays auth state and login/logout controls.
+ *
+ * This component demonstrates useAuth() hook usage.
+ * It can access the auth context because it's rendered
+ * inside the AuthProvider.
+ */
+function AuthHeader() {
+  const { user, isAuthenticated, isLoading, logout } = useAuth()
+
+  if (isLoading) {
+    return (
+      <div className="text-blue-200 text-sm">
+        Checking auth...
+      </div>
+    )
+  }
+
+  if (isAuthenticated && user) {
+    return (
+      <div className="flex items-center gap-4">
+        <span className="text-blue-200 text-sm">
+          Logged in as: {user.emailAddress}
+        </span>
+        <button
+          onClick={logout}
+          className="px-3 py-1 bg-blue-500 hover:bg-blue-400 rounded text-sm"
+        >
+          Logout
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="text-blue-200 text-sm">
+      Not logged in
+      <span className="ml-2 text-blue-300">
+        (Login via Rails at /session/new)
+      </span>
+    </div>
+  )
+}
+
+/**
+ * AppContent - The main app content.
+ *
+ * This is separated from App so it can use useAuth()
+ * (needs to be inside AuthProvider).
+ */
+function AppContent() {
   // State for active tab
   const [activeTab, setActiveTab] = useState<Tab>('list')
 
+  const tabs = [
+    { id: 'list' as const, label: 'Stock List' },
+    { id: 'search' as const, label: 'Search' },
+    { id: 'counter' as const, label: 'Counter' },
+    { id: 'radar' as const, label: 'Radar (Phase 6)' },
+  ]
+
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
+      {/* Header with Auth State */}
       <header className="bg-blue-600 text-white py-4 px-6 shadow-lg">
-        <h1 className="text-2xl font-bold">Dividend Portfolio</h1>
-        <p className="text-blue-200 text-sm">React + TypeScript Demo (Phase 3)</p>
+        <div className="max-w-4xl mx-auto flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">Dividend Portfolio</h1>
+            <p className="text-blue-200 text-sm">
+              React + TypeScript Demo (Phase 6: Context & Hooks)
+            </p>
+          </div>
+          <AuthHeader />
+        </div>
       </header>
 
       {/* Tab Navigation */}
       <nav className="bg-white shadow">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex space-x-4">
-            {([
-              { id: 'list', label: 'Stock List (useEffect)' },
-              { id: 'search', label: 'Search (Forms)' },
-              { id: 'counter', label: 'Counter (useState)' },
-            ] as const).map((tab) => (
+            {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -58,30 +126,36 @@ function App() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto p-6">
-        {/*
-          Conditional rendering with &&:
-          - If left side is true, render right side
-          - If left side is false, render nothing
-        */}
         {activeTab === 'list' && <StockList />}
         {activeTab === 'search' && <StockSearch />}
         {activeTab === 'counter' && <Counter />}
+        {activeTab === 'radar' && <RadarDemo />}
       </main>
 
-      {/* Footer with learning notes */}
+      {/* Footer */}
       <footer className="max-w-4xl mx-auto px-6 py-8 text-sm text-gray-500">
-        <h3 className="font-bold text-gray-700 mb-2">Phase 3 Concepts Demonstrated:</h3>
+        <h3 className="font-bold text-gray-700 mb-2">Phase 6 Concepts:</h3>
         <ul className="list-disc list-inside space-y-1">
-          <li><strong>useState</strong> - Counter (increment/decrement), Search (form input)</li>
-          <li><strong>useEffect</strong> - StockList (data fetching on mount)</li>
-          <li><strong>Loading states</strong> - Spinner while fetching data</li>
-          <li><strong>Error handling</strong> - Display error messages gracefully</li>
-          <li><strong>Controlled inputs</strong> - Search form tracks input value in state</li>
-          <li><strong>Conditional rendering</strong> - Show different UI based on state</li>
-          <li><strong>List rendering</strong> - Map over array to create elements</li>
+          <li><strong>Context (useAuth)</strong> - Global auth state without prop drilling</li>
+          <li><strong>Custom Hook (useInlineEdit)</strong> - Reusable editing logic</li>
+          <li><strong>Provider Pattern</strong> - AuthProvider wraps app to provide context</li>
         </ul>
       </footer>
     </div>
+  )
+}
+
+/**
+ * App - Root component that sets up providers.
+ *
+ * The AuthProvider must wrap everything that needs access to auth state.
+ * We can add more providers here as needed (e.g., ThemeProvider, QueryClientProvider).
+ */
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   )
 }
 
