@@ -33,11 +33,15 @@
 
       The 'application.jsx' matches the filename in app/frontend/entrypoints/
     %>
+    <%#
+      Vite CSS:
+      vite_stylesheet_tag loads the CSS entry point.
+      This includes Tailwind processed through PostCSS.
+    %>
+    <%= vite_stylesheet_tag 'application.css' %>
+
     <%= vite_client_tag %>
     <%= vite_javascript_tag 'application.tsx' %>
-
-    <%# Keep Tailwind CSS from the existing setup for now %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
   </head>
 
   <body class="bg-gray-100 min-h-screen">
