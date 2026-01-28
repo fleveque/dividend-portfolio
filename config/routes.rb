@@ -1,40 +1,13 @@
 Rails.application.routes.draw do
-  # React SPA routes - React Router handles client-side navigation
-  # These routes all serve the same React app, which uses React Router
-  # to determine which component to render based on the URL.
-  # Visit /react to access the React SPA.
-  scope "/react" do
-    get "/", to: "react#index", as: :react_app
-    get "/login", to: "react#index", as: :react_login
-    get "/radar", to: "react#index", as: :react_radar
-  end
-
-  # Redirect old react-test to new /react route
-  get "react-test", to: redirect("/react")
-
-  get "home/index"
-  resource :session
+  # Password reset routes (not migrated to React)
   resources :passwords, param: :token
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  # Health check for load balancers and uptime monitors
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
-
-  # Defines the root path route ("/")
-  root "home#index"
-
-  resource :radar, only: [ :show, :create, :update ] do
-    get "search", on: :member
-    member do
-      patch "stocks/:stock_id", action: :update, as: :update_stock
-      delete "stocks/:stock_id", action: :destroy_stock, as: :destroy_stock
-    end
-  end
+  # React SPA - served at root
+  # React Router handles client-side navigation for all non-API routes
+  root "react#index"
 
   # JSON API for React frontend
   # Versioned namespace allows future API changes without breaking existing clients
@@ -60,4 +33,10 @@ Rails.application.routes.draw do
       resource :session, only: [ :show, :create, :destroy ]
     end
   end
+
+  # Catch-all route for React Router (must be last)
+  # Excludes API routes and asset paths so they don't get handled by React
+  get "*path", to: "react#index", constraints: ->(req) {
+    !req.path.start_with?("/api/", "/assets/", "/up", "/passwords")
+  }
 end

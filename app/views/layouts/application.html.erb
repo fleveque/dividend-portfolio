@@ -10,30 +10,17 @@
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <%#
-      Importmap for Hotwire/Stimulus (existing pages)
-      ================================================
-      This loads the Stimulus controllers for Hotwire-based pages.
-      During the React migration, we keep this for existing pages.
-
-      Once all pages are migrated to React, we can remove this
-      and switch to the React layout (layouts/react.html.erb).
-    %>
+    <%= stylesheet_link_tag :app %>
     <%= javascript_importmap_tags %>
   </head>
 
   <body>
-    <%= render 'layouts/header' %>
-    <main class="container mx-auto mt-28 px-5 flex">
+    <main class="container mx-auto mt-8 px-5">
       <%= yield %>
     </main>
   </body>

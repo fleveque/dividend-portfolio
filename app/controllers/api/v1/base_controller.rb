@@ -17,6 +17,9 @@ module Api
       skip_before_action :allow_browser, raise: false
 
       # Handle common exceptions with JSON responses
+      # Order matters: Rails processes rescue_from in reverse order (last declared first)
+      # So we put StandardError first as the fallback, then more specific handlers
+      rescue_from StandardError, with: :internal_server_error
       rescue_from ActiveRecord::RecordNotFound, with: :not_found
       rescue_from ActionController::ParameterMissing, with: :bad_request
 
@@ -42,6 +45,12 @@ module Api
 
       def bad_request(exception)
         render_error(exception.message, status: :bad_request)
+      end
+
+      def internal_server_error(exception)
+        Rails.logger.error "API Error: #{exception.class} - #{exception.message}"
+        Rails.logger.error exception.backtrace.first(10).join("\n") if exception.backtrace
+        render_error("Internal server error", status: :internal_server_error)
       end
 
       # Override the default authentication redirect for API requests.

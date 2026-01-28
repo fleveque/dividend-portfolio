@@ -56,8 +56,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        {/* basename="/react" - React app is served from /react/* */}
-        <BrowserRouter basename="/react">
+        {/* React app is served from root "/" */}
+        <BrowserRouter>
           <Routes>
             {/* Layout wraps all pages with header/footer */}
             <Route element={<Layout />}>

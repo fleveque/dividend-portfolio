@@ -49,6 +49,11 @@ module Api
         else
           render_success([])
         end
+      rescue StandardError => e
+        # Log the error but return empty results to the user
+        # This handles cases where the financial provider fails or returns invalid data
+        Rails.logger.warn "Stock search failed for '#{params[:query]}': #{e.message}"
+        render_success([])
       end
 
       private

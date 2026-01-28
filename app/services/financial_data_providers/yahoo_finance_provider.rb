@@ -4,7 +4,7 @@ module FinancialDataProviders
 
     def fetch_and_normalize_stock(symbol)
       data = YahooFinanceClient::Stock.get_quote(symbol)
-      return nil unless data
+      return nil unless data && data[:symbol].present? && data[:price].present?
 
       {
         symbol: data[:symbol],

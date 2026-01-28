@@ -152,6 +152,13 @@ export function RadarPage() {
           </div>
         )}
 
+        {/* No Results Found */}
+        {submittedQuery && !searchLoading && searchResults && searchResults.length === 0 && (
+          <div className="mb-8 p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg">
+            No stocks found for "{submittedQuery.toUpperCase()}". Please check the symbol and try again.
+          </div>
+        )}
+
         {/* Radar Stocks */}
         <div>
           <div className="flex justify-between items-center mb-4">

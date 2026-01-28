@@ -4,7 +4,7 @@ module FinancialDataProviders
 
     def fetch_and_normalize_stock(symbol)
       data = Alphavantage::TimeSeries.new(symbol: symbol).quote
-      return nil unless data
+      return nil unless data && data.symbol.present? && data.price.present?
 
       {
         symbol: data.symbol,
