@@ -173,7 +173,6 @@ export function RadarDemo() {
             key={stock.id}
             stock={stock}
             onRemove={() => handleRemove(stock.id)}
-            onUpdate={fetchRadar}
           />
         ))}
       </div>

@@ -4,15 +4,24 @@ import RubyPlugin from 'vite-plugin-ruby'
 export default defineConfig({
   plugins: [
     // RubyPlugin connects Vite to Rails
+    // Note: @vitejs/plugin-react-swc conflicts with vite-plugin-ruby (preamble error)
     RubyPlugin(),
-    // Temporarily not using React plugin to debug preamble issue
   ],
 
   // Use esbuild for JSX transformation (built into Vite)
-  // This works without the React plugin's Fast Refresh
   esbuild: {
     jsx: 'automatic',
     jsxImportSource: 'react',
+  },
+
+  // Ensure all packages use the same React instance
+  resolve: {
+    dedupe: ['react', 'react-dom'],
+  },
+
+  // Pre-bundle dependencies for faster dev startup
+  optimizeDeps: {
+    include: ['react', 'react-dom', '@tanstack/react-query'],
   },
 
   // Server configuration for devcontainers

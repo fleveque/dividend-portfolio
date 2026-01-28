@@ -1,120 +1,83 @@
 /**
- * RadarPage - React version of radars/show.html.erb
- *
- * This page provides:
- * - Stock search functionality
- * - Search results with "Add to Radar" button
- * - List of stocks on user's radar with inline editing
- *
- * Uses AuthContext for auth state and RadarStockCard for display.
- */
-
-/**
  * RadarPage - User's stock radar/watchlist
  *
- * Note: Authentication is now handled by ProtectedRoute wrapper.
- * This component only renders when user is authenticated.
+ * Phase 10: React Query Integration
+ * =================================
+ *
+ * This page now uses React Query for all data operations:
+ * - useRadar(): Fetch radar stocks with caching
+ * - useStockSearch(): Search with automatic caching per query
+ * - useAddStock(): Mutation to add stocks
+ * - useRemoveStock(): Mutation to remove stocks
+ *
+ * Benefits over manual fetch:
+ * - Mutations automatically invalidate and refetch radar
+ * - Search results are cached (search same term = instant)
+ * - Less boilerplate, cleaner code
+ *
+ * Note: Authentication is handled by ProtectedRoute wrapper.
  */
 
-import { useState, useEffect, useCallback } from 'react'
-import { stocksApi, radarApi } from '../lib/api'
+import { useState } from 'react'
 import { RadarStockCard } from '../components/RadarStockCard'
 import StockCard from '../components/StockCard'
-import type { Stock, RadarStock } from '../types'
+import { useRadar, useAddStock, useRemoveStock } from '../hooks/useRadarQueries'
+import { useStockSearch } from '../hooks/useStockQueries'
+import type { Stock } from '../types'
 
 export function RadarPage() {
-  // Auth is guaranteed by ProtectedRoute - no need to check here
-
-  // Radar stocks state
-  const [radarStocks, setRadarStocks] = useState<RadarStock[]>([])
-  const [radarLoading, setRadarLoading] = useState(false)
-  const [radarError, setRadarError] = useState<string | null>(null)
-
-  // Search state
+  // Search input state (React Query handles the actual search)
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<Stock[]>([])
-  const [searchLoading, setSearchLoading] = useState(false)
-  const [searchError, setSearchError] = useState<string | null>(null)
+  const [submittedQuery, setSubmittedQuery] = useState('')
 
-  // Adding stock state
-  const [addingStockId, setAddingStockId] = useState<number | null>(null)
+  // React Query hooks
+  const {
+    data: radarData,
+    isLoading: radarLoading,
+    error: radarError,
+    refetch: refetchRadar,
+  } = useRadar()
+
+  const {
+    data: searchResults,
+    isLoading: searchLoading,
+    error: searchError,
+  } = useStockSearch(submittedQuery)
+
+  // Mutations
+  const addStock = useAddStock()
+  const removeStock = useRemoveStock()
+
+  // Get radar stocks from query data
+  const radarStocks = radarData?.stocks ?? []
 
   /**
-   * Fetch radar stocks from API
+   * Handle search form submission
    */
-  const fetchRadar = useCallback(async () => {
-    setRadarLoading(true)
-    setRadarError(null)
-
-    try {
-      const data = await radarApi.get()
-      setRadarStocks(data.stocks)
-    } catch (err) {
-      setRadarError(err instanceof Error ? err.message : 'Failed to load radar')
-    } finally {
-      setRadarLoading(false)
-    }
-  }, [])
-
-  /**
-   * Search for stocks
-   */
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!searchQuery.trim()) {
-      setSearchResults([])
-      return
-    }
-
-    setSearchLoading(true)
-    setSearchError(null)
-
-    try {
-      const results = await stocksApi.search(searchQuery)
-      setSearchResults(results)
-    } catch (err) {
-      setSearchError(err instanceof Error ? err.message : 'Search failed')
-    } finally {
-      setSearchLoading(false)
-    }
+    setSubmittedQuery(searchQuery.trim())
   }
 
   /**
-   * Add a stock to the radar
+   * Add a stock to the radar using mutation
    */
-  const handleAddStock = async (stock: Stock) => {
-    setAddingStockId(stock.id)
-
-    try {
-      await radarApi.addStock(stock.id)
-      // Refresh radar and clear search
-      await fetchRadar()
-      setSearchResults([])
-      setSearchQuery('')
-    } catch (err) {
-      setSearchError(err instanceof Error ? err.message : 'Failed to add stock')
-    } finally {
-      setAddingStockId(null)
-    }
+  const handleAddStock = (stock: Stock) => {
+    addStock.mutate(stock.id, {
+      onSuccess: () => {
+        // Clear search after successful add
+        setSearchQuery('')
+        setSubmittedQuery('')
+      },
+    })
   }
 
   /**
-   * Remove a stock from the radar
+   * Remove a stock from the radar using mutation
    */
-  const handleRemoveStock = async (stockId: number) => {
-    try {
-      await radarApi.removeStock(stockId)
-      await fetchRadar()
-    } catch (err) {
-      setRadarError(err instanceof Error ? err.message : 'Failed to remove stock')
-    }
+  const handleRemoveStock = (stockId: number) => {
+    removeStock.mutate(stockId)
   }
-
-  // Fetch radar on mount
-  useEffect(() => {
-    fetchRadar()
-  }, [fetchRadar])
 
   // Check if a stock is already on the radar
   const isOnRadar = (stockId: number) => {
@@ -149,12 +112,19 @@ export function RadarPage() {
         {/* Search Error */}
         {searchError && (
           <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {searchError}
+            {searchError instanceof Error ? searchError.message : 'Search failed'}
+          </div>
+        )}
+
+        {/* Add Stock Error */}
+        {addStock.error && (
+          <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {addStock.error instanceof Error ? addStock.error.message : 'Failed to add stock'}
           </div>
         )}
 
         {/* Search Results */}
-        {searchResults.length > 0 && (
+        {searchResults && searchResults.length > 0 && (
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-4">Search Results</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -169,10 +139,10 @@ export function RadarPage() {
                     ) : (
                       <button
                         onClick={() => handleAddStock(stock)}
-                        disabled={addingStockId === stock.id}
+                        disabled={addStock.isPending}
                         className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 disabled:bg-green-300 text-sm"
                       >
-                        {addingStockId === stock.id ? 'Adding...' : 'Add to Radar'}
+                        {addStock.isPending ? 'Adding...' : 'Add to Radar'}
                       </button>
                     )}
                   </div>
@@ -189,7 +159,7 @@ export function RadarPage() {
               Stocks on My Radar ({radarStocks.length})
             </h2>
             <button
-              onClick={fetchRadar}
+              onClick={() => refetchRadar()}
               disabled={radarLoading}
               className="text-sm text-blue-500 hover:text-blue-700"
             >
@@ -200,7 +170,14 @@ export function RadarPage() {
           {/* Radar Error */}
           {radarError && (
             <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {radarError}
+              {radarError instanceof Error ? radarError.message : 'Failed to load radar'}
+            </div>
+          )}
+
+          {/* Remove Stock Error */}
+          {removeStock.error && (
+            <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              {removeStock.error instanceof Error ? removeStock.error.message : 'Failed to remove stock'}
             </div>
           )}
 
@@ -230,7 +207,7 @@ export function RadarPage() {
                   key={stock.id}
                   stock={stock}
                   onRemove={() => handleRemoveStock(stock.id)}
-                  onUpdate={fetchRadar}
+                  isRemoving={removeStock.isPending}
                 />
               ))}
             </div>

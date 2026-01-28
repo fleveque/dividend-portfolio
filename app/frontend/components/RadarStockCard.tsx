@@ -1,30 +1,37 @@
 /**
  * RadarStockCard - Component demonstrating advanced patterns
  *
- * This component shows:
- * 1. Using Context (useAuth) for auth state
- * 2. Using Custom Hooks (useInlineEdit) for editing logic
- * 3. Conditional rendering based on state
- * 4. Handling async operations with loading/error states
+ * Phase 10: React Query Integration
+ * =================================
+ *
+ * This component now uses:
+ * - useUpdateTargetPrice mutation (React Query)
+ * - useInlineEdit custom hook for editing UI logic
+ *
+ * When target price is saved:
+ * 1. useUpdateTargetPrice.mutate() calls the API
+ * 2. On success, it invalidates the ['radar'] query
+ * 3. React Query automatically refetches the radar
+ * 4. Component re-renders with updated data
  */
 
 import { useInlineEdit } from '../hooks/useInlineEdit'
-import { radarApi } from '../lib/api'
+import { useUpdateTargetPrice } from '../hooks/useRadarQueries'
 import type { RadarStock } from '../types'
 
 interface RadarStockCardProps {
   stock: RadarStock
   onRemove?: () => void
-  onUpdate?: () => void
+  isRemoving?: boolean
 }
 
-export function RadarStockCard({ stock, onRemove, onUpdate }: RadarStockCardProps) {
+export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardProps) {
+  // React Query mutation for updating target price
+  const updateTargetPrice = useUpdateTargetPrice()
+
   /**
    * useInlineEdit hook manages all the editing state and logic.
-   * We just need to:
-   * 1. Provide the initial value
-   * 2. Provide the save function
-   * 3. Use the returned state/handlers in our JSX
+   * Now uses React Query mutation for the save operation.
    */
   const {
     isEditing,
@@ -40,12 +47,9 @@ export function RadarStockCard({ stock, onRemove, onUpdate }: RadarStockCardProp
   } = useInlineEdit({
     initialValue: stock.targetPrice?.toString() ?? '',
     onSave: async (newValue) => {
-      const price = newValue === '' ? null : parseFloat(newValue)
-      await radarApi.updateTargetPrice(stock.id, price)
-    },
-    onSuccess: () => {
-      // Notify parent to refresh data if needed
-      onUpdate?.()
+      const price = newValue === '' ? 0 : parseFloat(newValue)
+      // Use React Query mutation - it will invalidate radar query on success
+      await updateTargetPrice.mutateAsync({ stockId: stock.id, price })
     },
   })
 
@@ -66,10 +70,11 @@ export function RadarStockCard({ stock, onRemove, onUpdate }: RadarStockCardProp
         {onRemove && (
           <button
             onClick={onRemove}
-            className="text-red-500 hover:text-red-700 text-sm"
+            disabled={isRemoving}
+            className="text-red-500 hover:text-red-700 text-sm disabled:text-red-300"
             title="Remove from radar"
           >
-            Remove
+            {isRemoving ? 'Removing...' : 'Remove'}
           </button>
         )}
       </div>

@@ -1,58 +1,43 @@
 /**
  * HomePage - React version of home/index.html.erb
  *
- * This page displays:
- * - Last 10 added stocks
- * - Top 10 most added stocks to radars
+ * Phase 10: React Query Integration
+ * =================================
  *
- * It fetches data from the API and uses StockCard for display.
+ * This page now uses React Query hooks instead of manual fetch + useState.
+ *
+ * Before (manual):
+ *   const [data, setData] = useState([])
+ *   const [loading, setLoading] = useState(true)
+ *   const [error, setError] = useState(null)
+ *   useEffect(() => { fetch()... }, [])
+ *
+ * After (React Query):
+ *   const { data, isLoading, error } = useLastAddedStocks()
+ *
+ * Benefits:
+ * - Less boilerplate code
+ * - Automatic caching (navigate away and back = instant data)
+ * - Background refetching when data becomes stale
+ * - Built-in retry on failure
  */
 
-import { useState, useEffect } from 'react'
-import { stocksApi } from '../lib/api'
 import StockCard from '../components/StockCard'
-import type { Stock } from '../types'
+import { useLastAddedStocks, useMostAddedStocks } from '../hooks/useStockQueries'
 
 export function HomePage() {
-  // State for last added stocks
-  const [lastAdded, setLastAdded] = useState<Stock[]>([])
-  const [lastAddedLoading, setLastAddedLoading] = useState(true)
-  const [lastAddedError, setLastAddedError] = useState<string | null>(null)
+  // React Query handles loading, error, and data states
+  const {
+    data: lastAdded,
+    isLoading: lastAddedLoading,
+    error: lastAddedError,
+  } = useLastAddedStocks()
 
-  // State for most added stocks
-  const [mostAdded, setMostAdded] = useState<Stock[]>([])
-  const [mostAddedLoading, setMostAddedLoading] = useState(true)
-  const [mostAddedError, setMostAddedError] = useState<string | null>(null)
-
-  // Fetch last added stocks
-  useEffect(() => {
-    async function fetchLastAdded() {
-      try {
-        const data = await stocksApi.getLastAdded()
-        setLastAdded(data)
-      } catch (err) {
-        setLastAddedError(err instanceof Error ? err.message : 'Failed to load')
-      } finally {
-        setLastAddedLoading(false)
-      }
-    }
-    fetchLastAdded()
-  }, [])
-
-  // Fetch most added stocks
-  useEffect(() => {
-    async function fetchMostAdded() {
-      try {
-        const data = await stocksApi.getMostAdded()
-        setMostAdded(data)
-      } catch (err) {
-        setMostAddedError(err instanceof Error ? err.message : 'Failed to load')
-      } finally {
-        setMostAddedLoading(false)
-      }
-    }
-    fetchMostAdded()
-  }, [])
+  const {
+    data: mostAdded,
+    isLoading: mostAddedLoading,
+    error: mostAddedError,
+  } = useMostAddedStocks()
 
   return (
     <div className="container mx-auto p-4">
@@ -73,15 +58,15 @@ export function HomePage() {
 
         {lastAddedError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {lastAddedError}
+            {lastAddedError instanceof Error ? lastAddedError.message : 'Failed to load'}
           </div>
         )}
 
-        {!lastAddedLoading && !lastAddedError && lastAdded.length === 0 && (
+        {!lastAddedLoading && !lastAddedError && (!lastAdded || lastAdded.length === 0) && (
           <p className="text-gray-500 text-center py-4">No stocks found.</p>
         )}
 
-        {!lastAddedLoading && !lastAddedError && lastAdded.length > 0 && (
+        {!lastAddedLoading && !lastAddedError && lastAdded && lastAdded.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {lastAdded.map((stock) => (
               <StockCard key={stock.id} stock={stock} />
@@ -103,15 +88,15 @@ export function HomePage() {
 
         {mostAddedError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {mostAddedError}
+            {mostAddedError instanceof Error ? mostAddedError.message : 'Failed to load'}
           </div>
         )}
 
-        {!mostAddedLoading && !mostAddedError && mostAdded.length === 0 && (
+        {!mostAddedLoading && !mostAddedError && (!mostAdded || mostAdded.length === 0) && (
           <p className="text-gray-500 text-center py-4">No stocks found.</p>
         )}
 
-        {!mostAddedLoading && !mostAddedError && mostAdded.length > 0 && (
+        {!mostAddedLoading && !mostAddedError && mostAdded && mostAdded.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {mostAdded.map((stock) => (
               <StockCard key={stock.id} stock={stock} />
