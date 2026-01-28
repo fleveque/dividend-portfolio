@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    // Target modern JavaScript (ES2020 features like optional chaining, nullish coalescing)
+    "target": "ES2020",
+
+    // Libraries available (DOM for browser APIs, ES2020 for modern JS)
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+
+    // Module system (ESNext for modern imports/exports)
+    "module": "ESNext",
+
+    // How to resolve imports (bundler mode works best with Vite)
+    "moduleResolution": "bundler",
+
+    // JSX transformation mode
+    // "react-jsx" = automatic runtime (no need to import React)
+    // "react" = classic runtime (must import React in every file)
+    "jsx": "react-jsx",
+
+    // Allow importing JSON files
+    "resolveJsonModule": true,
+
+    // Ensure imports are compatible with ESM
+    "esModuleInterop": true,
+
+    // Type checking strictness
+    "strict": true,              // Enable all strict checks
+    "noUnusedLocals": true,      // Error on unused variables
+    "noUnusedParameters": true,  // Error on unused function parameters
+    "noFallthroughCasesInSwitch": true,  // Error on switch fallthrough
+
+    // Skip type checking node_modules (faster compilation)
+    "skipLibCheck": true,
+
+    // Don't emit JS files (Vite handles that)
+    "noEmit": true,
+
+    // Allow importing TypeScript files without extension
+    "allowImportingTsExtensions": true
+  },
+
+  // Which files to include in compilation
+  "include": ["app/frontend"],
+
+  // Which files to exclude
+  "exclude": ["node_modules"]
+}

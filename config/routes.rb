@@ -1,25 +1,42 @@
 Rails.application.routes.draw do
-  get "home/index"
-  resource :session
+  # Password reset routes (not migrated to React)
   resources :passwords, param: :token
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  # Health check for load balancers and uptime monitors
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  # React SPA - served at root
+  # React Router handles client-side navigation for all non-API routes
+  root "react#index"
 
-  # Defines the root path route ("/")
-  root "home#index"
+  # JSON API for React frontend
+  # Versioned namespace allows future API changes without breaking existing clients
+  namespace :api do
+    namespace :v1 do
+      # Stock endpoints - public (no auth required for browsing)
+      resources :stocks, only: [ :index, :show ] do
+        collection do
+          get :last_added   # GET /api/v1/stocks/last_added
+          get :most_added   # GET /api/v1/stocks/most_added
+          get :search       # GET /api/v1/stocks/search?query=AAPL
+        end
+      end
 
-  resource :radar, only: [ :show, :create, :update ] do
-    get "search", on: :member
-    member do
-      patch "stocks/:stock_id", action: :update, as: :update_stock
-      delete "stocks/:stock_id", action: :destroy_stock, as: :destroy_stock
+      # Radar endpoints - authenticated (user's personal watchlist)
+      resource :radar, only: [ :show ] do
+        post "stocks/:stock_id", action: :add_stock, as: :add_stock
+        delete "stocks/:stock_id", action: :remove_stock, as: :remove_stock
+        patch "stocks/:stock_id/target_price", action: :update_target_price, as: :update_target_price
+      end
+
+      # Session endpoints - for React authentication
+      resource :session, only: [ :show, :create, :destroy ]
     end
   end
+
+  # Catch-all route for React Router (must be last)
+  # Excludes API routes and asset paths so they don't get handled by React
+  get "*path", to: "react#index", constraints: ->(req) {
+    !req.path.start_with?("/api/", "/assets/", "/up", "/passwords")
+  }
 end

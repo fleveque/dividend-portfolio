@@ -1,0 +1,65 @@
+/**
+ * Tailwind CSS v4 Entry Point
+ *
+ * Tailwind v4 uses a single import instead of @tailwind directives.
+ * Configuration is done via @theme in CSS or a config file.
+ */
+
+@import "tailwindcss";
+
+/**
+ * Source paths for class detection
+ * Tell Tailwind where to look for class usage
+ */
+@source "../../components/**/*.tsx";
+@source "../../../views/**/*.html.erb";
+
+/**
+ * Custom Component Classes
+ *
+ * Use @utility for custom utilities or plain CSS for components.
+ * @apply still works in Tailwind v4.
+ */
+
+/* Primary button style */
+.btn-primary {
+  @apply px-6 py-2 bg-blue-500 text-white font-medium rounded-lg
+         hover:bg-blue-600 focus:outline-none focus:ring-2
+         focus:ring-blue-500 focus:ring-offset-2
+         disabled:bg-blue-300 disabled:cursor-not-allowed
+         transition-colors;
+}
+
+/* Secondary button style */
+.btn-secondary {
+  @apply px-6 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg
+         hover:bg-gray-300 focus:outline-none focus:ring-2
+         focus:ring-gray-500 focus:ring-offset-2
+         transition-colors;
+}
+
+/* Danger button style */
+.btn-danger {
+  @apply px-6 py-2 bg-red-500 text-white font-medium rounded-lg
+         hover:bg-red-600 focus:outline-none focus:ring-2
+         focus:ring-red-500 focus:ring-offset-2
+         transition-colors;
+}
+
+/* Form input style */
+.input-field {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-lg
+         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+         disabled:bg-gray-100 disabled:cursor-not-allowed;
+}
+
+/* Card container */
+.card {
+  @apply bg-white rounded-lg shadow-md p-6;
+}
+
+/* Card with hover effect */
+.card-hover {
+  @apply bg-white rounded-lg shadow-md p-6
+         hover:shadow-lg transition-shadow;
+}

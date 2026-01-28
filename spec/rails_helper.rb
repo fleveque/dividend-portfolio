@@ -50,6 +50,11 @@ RSpec.configure do |config|
   # Include authentication helper for request specs
   config.include AuthenticationHelper, type: :request
 
+  # Clear Rails cache before each test to reset rate limiting
+  config.before(:each) do
+    Rails.cache.clear
+  end
+
   # You can uncomment this line to turn off ActiveRecord support entirely.
   # config.use_active_record = false
 

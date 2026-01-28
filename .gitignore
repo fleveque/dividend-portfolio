@@ -30,6 +30,12 @@
 
 /public/assets
 
+# Node.js and Vite
+/node_modules
+/public/vite-dev
+/public/vite-test
+/public/vite
+
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
@@ -37,3 +43,6 @@ coverage
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
+
+.claude/settings.local.json
+.claude/plans/*
