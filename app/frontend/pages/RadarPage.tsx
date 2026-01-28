@@ -9,15 +9,21 @@
  * Uses AuthContext for auth state and RadarStockCard for display.
  */
 
+/**
+ * RadarPage - User's stock radar/watchlist
+ *
+ * Note: Authentication is now handled by ProtectedRoute wrapper.
+ * This component only renders when user is authenticated.
+ */
+
 import { useState, useEffect, useCallback } from 'react'
-import { useAuth } from '../contexts/AuthContext'
 import { stocksApi, radarApi } from '../lib/api'
 import { RadarStockCard } from '../components/RadarStockCard'
 import StockCard from '../components/StockCard'
 import type { Stock, RadarStock } from '../types'
 
 export function RadarPage() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth()
+  // Auth is guaranteed by ProtectedRoute - no need to check here
 
   // Radar stocks state
   const [radarStocks, setRadarStocks] = useState<RadarStock[]>([])
@@ -37,8 +43,6 @@ export function RadarPage() {
    * Fetch radar stocks from API
    */
   const fetchRadar = useCallback(async () => {
-    if (!isAuthenticated) return
-
     setRadarLoading(true)
     setRadarError(null)
 
@@ -50,7 +54,7 @@ export function RadarPage() {
     } finally {
       setRadarLoading(false)
     }
-  }, [isAuthenticated])
+  }, [])
 
   /**
    * Search for stocks
@@ -107,50 +111,14 @@ export function RadarPage() {
     }
   }
 
-  // Fetch radar on mount and when auth changes
+  // Fetch radar on mount
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchRadar()
-    }
-  }, [isAuthenticated, fetchRadar])
+    fetchRadar()
+  }, [fetchRadar])
 
   // Check if a stock is already on the radar
   const isOnRadar = (stockId: number) => {
     return radarStocks.some((s) => s.id === stockId)
-  }
-
-  // Show loading while checking auth
-  if (authLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Show login prompt if not authenticated
-  if (!isAuthenticated) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center max-w-md mx-auto">
-          <h2 className="text-xl font-semibold text-yellow-800 mb-2">
-            Sign In Required
-          </h2>
-          <p className="text-yellow-700 mb-4">
-            Please sign in to view your radar.
-          </p>
-          <a
-            href="/session/new"
-            className="inline-block bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
-          >
-            Sign In
-          </a>
-        </div>
-      </div>
-    )
   }
 
   return (

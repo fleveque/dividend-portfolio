@@ -1,94 +1,57 @@
 /**
- * App - Main application component
+ * App - Main application component with React Router
  *
- * Phase 7-8: Full Page Migration
- * ==============================
+ * Phase 9: React Router Integration
+ * =================================
  *
- * This component now serves as a simple router, rendering different pages
- * based on state. In Phase 9, we'll replace this with React Router for
- * proper URL-based navigation.
+ * React Router Concepts Used:
  *
- * Current navigation:
- * - State-based (currentPage)
- * - No URL changes
- * - Browser back/forward doesn't work
+ * BrowserRouter - Enables client-side routing using HTML5 history API
+ *   Wraps the entire app to provide routing context.
  *
- * After Phase 9 (React Router):
- * - URL-based routing
- * - Browser history works
- * - Shareable URLs
+ * Routes/Route - Define which component renders at which URL
+ *   <Route path="/" element={<HomePage />} />
+ *
+ * Nested Routes - Routes can be nested for layouts
+ *   Layout route contains Outlet where child routes render.
+ *
+ * Protected Routes - Auth guard pattern
+ *   ProtectedRoute checks auth and redirects to login if needed.
  */
 
-import { useState, useEffect } from 'react'
-import { AuthProvider, useAuth } from '../contexts/AuthContext'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from '../contexts/AuthContext'
 import Layout from './Layout'
+import ProtectedRoute from './ProtectedRoute'
 import HomePage from '../pages/HomePage'
 import LoginPage from '../pages/LoginPage'
 import RadarPage from '../pages/RadarPage'
 
-// Page type for simple routing
-type Page = 'home' | 'login' | 'radar'
-
 /**
- * AppContent - The main app with routing logic.
- *
- * Separated from App so it can use useAuth()
- * (needs to be inside AuthProvider).
- */
-function AppContent() {
-  const { isAuthenticated } = useAuth()
-
-  // Simple state-based routing (will be replaced by React Router in Phase 9)
-  const [currentPage, setCurrentPage] = useState<Page>('home')
-
-  // Redirect to home after login
-  const handleLoginSuccess = () => {
-    setCurrentPage('home')
-  }
-
-  // Navigate to a page
-  const handleNavigate = (page: string) => {
-    setCurrentPage(page as Page)
-  }
-
-  // Redirect from radar to login if not authenticated
-  useEffect(() => {
-    if (currentPage === 'radar' && !isAuthenticated) {
-      // In Phase 9 with React Router, we'll use proper redirect with "from" state
-      // For now, just show the page (it handles auth internally)
-    }
-  }, [currentPage, isAuthenticated])
-
-  // Render the current page
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return <HomePage />
-      case 'login':
-        return <LoginPage onLoginSuccess={handleLoginSuccess} />
-      case 'radar':
-        return <RadarPage />
-      default:
-        return <HomePage />
-    }
-  }
-
-  return (
-    <Layout currentPage={currentPage} onNavigate={handleNavigate}>
-      {renderPage()}
-    </Layout>
-  )
-}
-
-/**
- * App - Root component that sets up providers.
+ * App - Root component that sets up providers and routing.
  *
  * The AuthProvider must wrap everything that needs access to auth state.
+ * BrowserRouter enables client-side navigation without page reloads.
  */
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      {/* basename="/react" - React app is served from /react/* */}
+      <BrowserRouter basename="/react">
+        <Routes>
+          {/* Layout wraps all pages with header/footer */}
+          <Route element={<Layout />}>
+            {/* Public routes */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+
+            {/* Protected routes - require authentication */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/radar" element={<RadarPage />} />
+            </Route>
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </AuthProvider>
   )
 }

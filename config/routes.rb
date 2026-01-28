@@ -1,7 +1,16 @@
 Rails.application.routes.draw do
-  # React test page - visit /react-test to verify Vite + React setup
-  # Remove this route once the migration is complete
-  get "react-test", to: "react_test#index"
+  # React SPA routes - React Router handles client-side navigation
+  # These routes all serve the same React app, which uses React Router
+  # to determine which component to render based on the URL.
+  # Visit /react to access the React SPA.
+  scope "/react" do
+    get "/", to: "react#index", as: :react_app
+    get "/login", to: "react#index", as: :react_login
+    get "/radar", to: "react#index", as: :react_radar
+  end
+
+  # Redirect old react-test to new /react route
+  get "react-test", to: redirect("/react")
 
   get "home/index"
   resource :session

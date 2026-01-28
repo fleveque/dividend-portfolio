@@ -1,31 +1,42 @@
 /**
- * Layout - Shared layout wrapper for all pages
+ * Layout - Shared layout with React Router integration
  *
- * Provides:
- * - Header with navigation and auth state
- * - Main content area
- * - Footer
+ * React Router Concepts:
+ * ======================
  *
- * In Phase 9, this will work with React Router's <Outlet>.
- * For now, it takes children as props.
+ * <Link> - Navigation without page reload
+ *   Replaces <a> tags for internal navigation.
+ *   <Link to="/radar">My Radar</Link>
+ *
+ * <NavLink> - Link with active state
+ *   Like Link but knows if it's the current route.
+ *   Useful for styling active nav items.
+ *
+ * <Outlet> - Where child routes render
+ *   In a layout route, Outlet is where nested routes appear.
+ *   Layout wraps all pages, Outlet shows the current page.
+ *
+ * useLocation() - Current URL info
+ *   Returns { pathname, search, hash, state }
+ *   We use pathname to highlight the active nav item.
+ *
+ * useNavigate() - Programmatic navigation
+ *   const navigate = useNavigate()
+ *   navigate('/login') - go to login
+ *   navigate(-1) - go back
  */
 
-import { type ReactNode } from 'react'
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
-interface LayoutProps {
-  children: ReactNode
-  currentPage?: string
-  onNavigate?: (page: string) => void
-}
-
-export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
+export function Layout() {
   const { user, isAuthenticated, isLoading, logout } = useAuth()
+  const navigate = useNavigate()
 
-  const navItems = [
-    { id: 'home', label: 'Home', requiresAuth: false },
-    { id: 'radar', label: 'My Radar', requiresAuth: true },
-  ]
+  const handleLogout = async () => {
+    await logout()
+    navigate('/')
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -33,34 +44,41 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
       <header className="bg-blue-600 text-white shadow-lg">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center py-4">
-            {/* Logo/Title */}
-            <button
-              onClick={() => onNavigate?.('home')}
+            {/* Logo/Title - Link to home */}
+            <Link
+              to="/"
               className="text-2xl font-bold hover:text-blue-200 transition-colors"
             >
               Dividend Portfolio
-            </button>
+            </Link>
 
             {/* Navigation */}
             <nav className="flex items-center gap-6">
-              {navItems.map((item) => {
-                // Hide auth-required items if not logged in
-                if (item.requiresAuth && !isAuthenticated) return null
+              {/* Home - always visible */}
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  `hover:text-blue-200 transition-colors ${
+                    isActive ? 'text-white font-semibold' : 'text-blue-100'
+                  }`
+                }
+              >
+                Home
+              </NavLink>
 
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => onNavigate?.(item.id)}
-                    className={`hover:text-blue-200 transition-colors ${
-                      currentPage === item.id
-                        ? 'text-white font-semibold'
-                        : 'text-blue-100'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                )
-              })}
+              {/* My Radar - only when authenticated */}
+              {isAuthenticated && (
+                <NavLink
+                  to="/radar"
+                  className={({ isActive }) =>
+                    `hover:text-blue-200 transition-colors ${
+                      isActive ? 'text-white font-semibold' : 'text-blue-100'
+                    }`
+                  }
+                >
+                  My Radar
+                </NavLink>
+              )}
 
               {/* Auth Section */}
               <div className="ml-4 pl-4 border-l border-blue-500">
@@ -72,19 +90,19 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
                       {user.emailAddress}
                     </span>
                     <button
-                      onClick={logout}
+                      onClick={handleLogout}
                       className="px-3 py-1 bg-blue-500 hover:bg-blue-400 rounded text-sm transition-colors"
                     >
                       Logout
                     </button>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => onNavigate?.('login')}
+                  <Link
+                    to="/login"
                     className="px-3 py-1 bg-blue-500 hover:bg-blue-400 rounded text-sm transition-colors"
                   >
                     Sign In
-                  </button>
+                  </Link>
                 )}
               </div>
             </nav>
@@ -92,9 +110,9 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main Content - Outlet renders the current route's component */}
       <main className="flex-1">
-        {children}
+        <Outlet />
       </main>
 
       {/* Footer */}
@@ -102,7 +120,7 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
         <div className="container mx-auto px-4 text-center text-sm">
           <p>Dividend Portfolio - React Migration Demo</p>
           <p className="mt-1">
-            Built with React, TypeScript, Vite, and Tailwind CSS
+            Built with React, TypeScript, Vite, Tailwind CSS, and React Router
           </p>
         </div>
       </footer>
