@@ -5,6 +5,7 @@
  * - Horizontal single-line layout
  * - Inline target price editing
  * - Visual status indicators
+ * - Expandable metrics display
  * - Theme-aware styling
  */
 
@@ -17,9 +18,10 @@ interface RadarStockRowProps {
   stock: RadarStock
   onRemove?: () => void
   isRemoving?: boolean
+  showMetrics?: boolean
 }
 
-export function RadarStockRow({ stock, onRemove, isRemoving }: RadarStockRowProps) {
+export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false }: RadarStockRowProps) {
   const updateTargetPrice = useUpdateTargetPrice()
 
   const {
@@ -100,12 +102,12 @@ export function RadarStockRow({ stock, onRemove, isRemoving }: RadarStockRowProp
         </span>
 
         {/* Current Price */}
-        <span className="font-semibold text-theme-primary w-24 text-right shrink-0">
+        <span className="font-semibold text-theme-primary w-20 text-right shrink-0">
           {stock.formattedPrice}
         </span>
 
         {/* Target Price - Inline Editable */}
-        <div className="w-28 shrink-0">
+        <div className="w-24 shrink-0">
           {isEditing ? (
             <span className="inline-flex items-center gap-1">
               <input
@@ -156,6 +158,33 @@ export function RadarStockRow({ stock, onRemove, isRemoving }: RadarStockRowProp
         <div className="w-16 text-right shrink-0">
           {getStatusBadge()}
         </div>
+
+        {/* Metrics - Only shown when expanded */}
+        {showMetrics && (
+          <>
+            <span className="text-xs text-theme-primary w-14 text-right shrink-0">
+              {stock.formattedPeRatio}
+            </span>
+            <span className="text-xs text-theme-primary w-16 text-right shrink-0">
+              {stock.formattedEps}
+            </span>
+            <span className="text-xs text-theme-primary w-14 text-right shrink-0">
+              {stock.formattedDividend}
+            </span>
+            <span className="text-xs text-theme-primary w-14 text-right shrink-0">
+              {stock.formattedDividendYield}
+            </span>
+            <span className="text-xs text-theme-primary w-14 text-right shrink-0">
+              {stock.formattedPayoutRatio}
+            </span>
+            <span className="text-xs text-theme-primary w-18 text-right shrink-0">
+              {stock.formattedMa50}
+            </span>
+            <span className="text-xs text-theme-primary w-18 text-right shrink-0">
+              {stock.formattedMa200}
+            </span>
+          </>
+        )}
 
         {/* Remove Button */}
         {onRemove && (

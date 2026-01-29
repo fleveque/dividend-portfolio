@@ -43,7 +43,7 @@ gem "timecop"
 gem "simplecov", require: false, group: :test
 
 # Financial data providers (You can just pick one and comment out the others)
-gem "yahoo_finance_client", "~> 0.2.0"
+gem "yahoo_finance_client", "~> 0.2.1"
 gem "alphavantage"
 
 group :development, :test do

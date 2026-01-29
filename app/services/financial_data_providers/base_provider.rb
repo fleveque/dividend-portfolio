@@ -1,7 +1,10 @@
 module FinancialDataProviders
   class BaseProvider
     REQUIRED_FIELDS = [ :symbol, :price ].freeze
-    OPTIONAL_FIELDS = [ :name ].freeze
+    OPTIONAL_FIELDS = [
+      :name, :eps, :pe_ratio, :dividend, :dividend_yield,
+      :payout_ratio, :ma_50, :ma_200
+    ].freeze
 
     # Fetches stock data from the provider's API, stores it in the database and caches the result.
     #
