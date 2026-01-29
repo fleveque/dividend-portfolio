@@ -9,14 +9,18 @@
 
 import { useState } from 'react'
 import { RadarStockCard } from '../components/RadarStockCard'
+import { RadarStockRow } from '../components/RadarStockRow'
+import { ViewToggle } from '../components/ViewToggle'
 import StockCard from '../components/StockCard'
 import { useRadar, useAddStock, useRemoveStock } from '../hooks/useRadarQueries'
 import { useStockSearch } from '../hooks/useStockQueries'
+import { useViewPreference } from '../contexts/ViewPreferenceContext'
 import type { Stock } from '../types'
 
 export function RadarPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [submittedQuery, setSubmittedQuery] = useState('')
+  const { viewMode } = useViewPreference()
 
   const {
     data: radarData,
@@ -142,13 +146,16 @@ export function RadarPage() {
             <h2 className="text-2xl font-semibold text-theme-primary">
               Stocks on My Radar ({radarStocks.length})
             </h2>
-            <button
-              onClick={() => refetchRadar()}
-              disabled={radarLoading}
-              className="text-sm text-brand hover:underline disabled:opacity-50"
-            >
-              {radarLoading ? 'Refreshing...' : 'Refresh'}
-            </button>
+            <div className="flex items-center gap-4">
+              <ViewToggle />
+              <button
+                onClick={() => refetchRadar()}
+                disabled={radarLoading}
+                className="text-sm text-brand hover:underline disabled:opacity-50"
+              >
+                {radarLoading ? 'Refreshing...' : 'Refresh'}
+              </button>
+            </div>
           </div>
 
           {/* Radar Error */}
@@ -188,11 +195,35 @@ export function RadarPage() {
             </div>
           )}
 
-          {/* Stocks Grid */}
-          {radarStocks.length > 0 && (
+          {/* Stocks Grid/List */}
+          {radarStocks.length > 0 && viewMode === 'card' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {radarStocks.map((stock) => (
                 <RadarStockCard
+                  key={stock.id}
+                  stock={stock}
+                  onRemove={() => handleRemoveStock(stock.id)}
+                  isRemoving={removeStock.isPending}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Compact List View */}
+          {radarStocks.length > 0 && viewMode === 'compact' && (
+            <div className="flex flex-col gap-2">
+              {/* Header Row */}
+              <div className="px-4 py-2 flex items-center gap-4 text-xs font-medium text-theme-muted uppercase tracking-wide border-b border-theme">
+                <span className="w-8 shrink-0"></span>
+                <span className="w-16 shrink-0">Symbol</span>
+                <span className="flex-1 min-w-0">Name</span>
+                <span className="w-24 text-right shrink-0">Price</span>
+                <span className="w-28 shrink-0">Target</span>
+                <span className="w-16 text-right shrink-0">Status</span>
+                <span className="w-6 shrink-0"></span>
+              </div>
+              {radarStocks.map((stock) => (
+                <RadarStockRow
                   key={stock.id}
                   stock={stock}
                   onRemove={() => handleRemoveStock(stock.id)}
