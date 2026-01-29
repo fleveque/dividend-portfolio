@@ -437,7 +437,7 @@ GEM
     websocket-extensions (0.1.5)
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    yahoo_finance_client (0.2.0)
+    yahoo_finance_client (0.2.1)
       csv
       httparty (~> 0.21.0)
     zeitwerk (2.7.3)
@@ -483,7 +483,7 @@ DEPENDENCIES
   tzinfo-data
   vite_rails
   web-console
-  yahoo_finance_client (~> 0.2.0)
+  yahoo_finance_client (~> 0.2.1)
 
 BUNDLED WITH
    2.6.2

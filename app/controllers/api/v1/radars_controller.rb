@@ -76,7 +76,8 @@ module Api
           percentageDifference: decorated.formatted_percentage_difference,
           aboveTarget: decorated.above_target?,
           belowTarget: decorated.below_target?,
-          atTarget: decorated.at_target?
+          atTarget: decorated.at_target?,
+          **serialize_stock_metrics(stock, decorated)
         }
       end
 
@@ -96,7 +97,28 @@ module Api
           percentageDifference: decorated.formatted_percentage_difference,
           aboveTarget: decorated.above_target?,
           belowTarget: decorated.below_target?,
-          atTarget: decorated.at_target?
+          atTarget: decorated.at_target?,
+          **serialize_stock_metrics(stock, decorated)
+        }
+      end
+
+      # Serialize extended stock metrics
+      def serialize_stock_metrics(stock, decorated)
+        {
+          eps: stock.eps,
+          peRatio: stock.pe_ratio,
+          dividend: stock.dividend,
+          dividendYield: stock.dividend_yield,
+          payoutRatio: stock.payout_ratio,
+          ma50: stock.ma_50,
+          ma200: stock.ma_200,
+          formattedEps: decorated.formatted_eps,
+          formattedPeRatio: decorated.formatted_pe_ratio,
+          formattedDividend: decorated.formatted_dividend,
+          formattedDividendYield: decorated.formatted_dividend_yield,
+          formattedPayoutRatio: decorated.formatted_payout_ratio,
+          formattedMa50: decorated.formatted_ma_50,
+          formattedMa200: decorated.formatted_ma_200
         }
       end
     end

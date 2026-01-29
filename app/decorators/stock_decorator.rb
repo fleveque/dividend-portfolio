@@ -78,6 +78,41 @@ class StockDecorator < ApplicationDecorator
     end
   end
 
+  def formatted_eps
+    return "N/A" unless eps
+    "$#{sprintf('%.2f', eps)}"
+  end
+
+  def formatted_pe_ratio
+    return "N/A" unless pe_ratio
+    "#{sprintf('%.1f', pe_ratio)}x"
+  end
+
+  def formatted_dividend
+    return "N/A" unless dividend
+    "$#{sprintf('%.2f', dividend)}"
+  end
+
+  def formatted_dividend_yield
+    return "N/A" unless dividend_yield
+    "#{sprintf('%.2f', dividend_yield)}%"
+  end
+
+  def formatted_payout_ratio
+    return "N/A" unless payout_ratio
+    "#{sprintf('%.1f', payout_ratio)}%"
+  end
+
+  def formatted_ma_50
+    return "N/A" unless ma_50
+    "$#{sprintf('%.2f', ma_50)}"
+  end
+
+  def formatted_ma_200
+    return "N/A" unless ma_200
+    "$#{sprintf('%.2f', ma_200)}"
+  end
+
   private
 
   def prices_available?

@@ -22,6 +22,22 @@ export interface Stock {
   name: string
   price: number | null  // null when price unavailable
   formattedPrice: string  // "$123.45" or "N/A"
+  // Financial metrics
+  eps: number | null
+  peRatio: number | null
+  dividend: number | null
+  dividendYield: number | null
+  payoutRatio: number | null
+  ma50: number | null
+  ma200: number | null
+  // Formatted versions
+  formattedEps: string
+  formattedPeRatio: string
+  formattedDividend: string
+  formattedDividendYield: string
+  formattedPayoutRatio: string
+  formattedMa50: string
+  formattedMa200: string
 }
 
 /**

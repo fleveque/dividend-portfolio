@@ -147,6 +147,38 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
         <p className="mt-2 text-xs text-red-600 dark:text-red-400">{error}</p>
       )}
 
+      {/* Financial Metrics */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs border-t border-theme pt-3 mt-3">
+        <div className="flex justify-between">
+          <span className="text-theme-muted">PER:</span>
+          <span className="text-theme-primary font-medium">{stock.formattedPeRatio}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-theme-muted">EPS:</span>
+          <span className="text-theme-primary font-medium">{stock.formattedEps}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-theme-muted">Div:</span>
+          <span className="text-theme-primary font-medium">{stock.formattedDividend}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-theme-muted">Yield:</span>
+          <span className="text-theme-primary font-medium">{stock.formattedDividendYield}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-theme-muted">Payout:</span>
+          <span className="text-theme-primary font-medium">{stock.formattedPayoutRatio}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-theme-muted">MA50:</span>
+          <span className="text-theme-primary font-medium">{stock.formattedMa50}</span>
+        </div>
+        <div className="col-span-2 flex justify-between">
+          <span className="text-theme-muted">MA200:</span>
+          <span className="text-theme-primary font-medium">{stock.formattedMa200}</span>
+        </div>
+      </div>
+
       {/* Status Indicator */}
       {stock.percentageDifference && (
         <div className="mt-3 pt-3 border-t border-theme">
