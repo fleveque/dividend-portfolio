@@ -6,6 +6,9 @@
     // Libraries available (DOM for browser APIs, ES2020 for modern JS)
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
 
+    // Include Vite client types for import.meta.env
+    "types": ["vite/client"],
+
     // Module system (ESNext for modern imports/exports)
     "module": "ESNext",
 
