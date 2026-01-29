@@ -131,7 +131,7 @@ body {
   @apply px-6 py-2.5 font-medium rounded-xl
          shadow-sm hover:shadow-md
          focus:outline-none focus:ring-2 focus:ring-offset-2
-         disabled:cursor-not-allowed
+         cursor-pointer disabled:cursor-not-allowed
          transition-all duration-200;
   background-color: var(--brand-primary);
   color: var(--text-inverted);
@@ -154,7 +154,7 @@ body {
   @apply px-6 py-2.5 font-medium rounded-xl
          shadow-sm hover:shadow-md
          focus:outline-none focus:ring-2 focus:ring-offset-2
-         disabled:cursor-not-allowed
+         cursor-pointer disabled:cursor-not-allowed
          transition-all duration-200;
   background-color: var(--bg-muted);
   color: var(--text-primary);
@@ -178,7 +178,7 @@ body {
   @apply px-6 py-2.5 font-medium rounded-xl
          shadow-sm hover:shadow-md
          focus:outline-none focus:ring-2 focus:ring-offset-2
-         disabled:cursor-not-allowed
+         cursor-pointer disabled:cursor-not-allowed
          transition-all duration-200;
   background-color: var(--color-danger);
   color: var(--text-inverted);
