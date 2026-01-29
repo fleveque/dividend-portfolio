@@ -35,6 +35,7 @@
 /public/vite-dev
 /public/vite-test
 /public/vite
+/.vite
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
