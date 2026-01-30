@@ -222,8 +222,8 @@ export function RadarPage() {
           {/* Compact List View */}
           {radarStocks.length > 0 && viewMode === 'compact' && (
             <div className="flex flex-col gap-2">
-              {/* Controls Row */}
-              <div className="flex justify-end mb-2">
+              {/* Controls Row - Hidden on mobile (each row expands individually) */}
+              <div className="hidden md:flex justify-end mb-2">
                 <button
                   onClick={() => setShowMetrics(!showMetrics)}
                   className="text-xs px-3 py-1.5 rounded-lg border border-theme
@@ -248,8 +248,12 @@ export function RadarPage() {
                   )}
                 </button>
               </div>
-              {/* Header Row */}
-              <div className="px-4 py-2 flex items-center gap-4 text-xs font-medium text-theme-muted uppercase tracking-wide border-b border-theme overflow-x-auto">
+              {/* Mobile hint */}
+              <p className="md:hidden text-xs text-theme-muted text-center mb-2">
+                Tap a row to expand details
+              </p>
+              {/* Header Row - Hidden on mobile */}
+              <div className="hidden md:flex px-4 py-2 items-center gap-4 text-xs font-medium text-theme-muted uppercase tracking-wide border-b border-theme">
                 <span className="w-8 shrink-0"></span>
                 <span className="w-16 shrink-0">Symbol</span>
                 <span className="flex-1 min-w-0">Name</span>
@@ -270,7 +274,7 @@ export function RadarPage() {
                 <span className="w-6 shrink-0"></span>
               </div>
               {/* Stock Rows */}
-              <div className="overflow-x-auto">
+              <div>
                 {radarStocks.map((stock) => (
                   <RadarStockRow
                     key={stock.id}

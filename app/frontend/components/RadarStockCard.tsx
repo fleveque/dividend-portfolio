@@ -60,9 +60,9 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
         <StockLogo symbol={stock.symbol} name={stock.name} size="md" />
 
         {/* Stock Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-start">
-            <div>
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <div className="flex justify-between items-start gap-2">
+            <div className="min-w-0 flex-1">
               <h3 className="text-lg font-bold text-theme-primary">{stock.symbol}</h3>
               <p className="text-sm text-theme-secondary truncate" title={stock.name}>
                 {stock.name}
@@ -74,11 +74,12 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
               <button
                 onClick={onRemove}
                 disabled={isRemoving}
-                className="text-red-500 hover:text-red-700 dark:hover:text-red-400 text-sm
-                           disabled:text-red-300 dark:disabled:text-red-800 transition-colors"
+                className="text-red-500 hover:text-red-700 dark:hover:text-red-400 text-xs
+                           disabled:text-red-300 dark:disabled:text-red-800 transition-colors
+                           shrink-0 whitespace-nowrap"
                 title="Remove from radar"
               >
-                {isRemoving ? 'Removing...' : 'Remove'}
+                {isRemoving ? '...' : 'Remove'}
               </button>
             )}
           </div>
