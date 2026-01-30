@@ -75,3 +75,5 @@ asset_path: /rails/public/assets
 # Configure the image builder.
 builder:
   arch: arm64
+  secrets:
+    - VITE_BRANDFETCH_CLIENT_ID
