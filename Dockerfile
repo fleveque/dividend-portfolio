@@ -51,7 +51,10 @@ RUN npm ci
 RUN bundle exec bootsnap precompile app/ lib/
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+# Mount VITE_BRANDFETCH_CLIENT_ID secret for Vite build
+RUN --mount=type=secret,id=VITE_BRANDFETCH_CLIENT_ID \
+    VITE_BRANDFETCH_CLIENT_ID="$(cat /run/secrets/VITE_BRANDFETCH_CLIENT_ID)" \
+    SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 
 
