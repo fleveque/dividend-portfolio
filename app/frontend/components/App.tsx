@@ -18,6 +18,7 @@ import Layout from './Layout'
 import ProtectedRoute from './ProtectedRoute'
 import HomePage from '../pages/HomePage'
 import LoginPage from '../pages/LoginPage'
+import SignUpPage from '../pages/SignUpPage'
 import RadarPage from '../pages/RadarPage'
 
 /**
@@ -58,6 +59,7 @@ function App() {
                 <Route element={<Layout />}>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/login" element={<LoginPage />} />
+                  <Route path="/signup" element={<SignUpPage />} />
                   <Route element={<ProtectedRoute />}>
                     <Route path="/radar" element={<RadarPage />} />
                   </Route>

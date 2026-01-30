@@ -50,6 +50,7 @@ interface AuthContextType {
 
   // Auth actions
   login: (email: string, password: string) => Promise<void>
+  signUp: (email: string, password: string, passwordConfirmation: string) => Promise<void>
   logout: () => Promise<void>
 
   // Force refresh auth state (useful after external changes)
@@ -110,6 +111,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   /**
+   * Sign up with email and password.
+   * Throws an error if sign up fails (caller should handle).
+   */
+  const signUp = useCallback(async (email: string, password: string, passwordConfirmation: string) => {
+    const userData = await sessionApi.signUp(email, password, passwordConfirmation)
+    setUser(userData)
+  }, [])
+
+  /**
    * Logout the current user.
    */
   const logout = useCallback(async () => {
@@ -139,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: user !== null,
     isLoading,
     login,
+    signUp,
     logout,
     refreshAuth: checkAuth,
   }

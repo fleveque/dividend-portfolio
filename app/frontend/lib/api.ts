@@ -172,4 +172,17 @@ export const sessionApi = {
     apiFetch<{ logged_out: boolean }>('/session', {
       method: 'DELETE',
     }),
+
+  /**
+   * Register a new user with email and password
+   */
+  signUp: (emailAddress: string, password: string, passwordConfirmation: string) =>
+    apiFetch<User>('/users', {
+      method: 'POST',
+      body: JSON.stringify({
+        email_address: emailAddress,
+        password,
+        password_confirmation: passwordConfirmation,
+      }),
+    }),
 }
