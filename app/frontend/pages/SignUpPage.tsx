@@ -1,10 +1,11 @@
 /**
- * LoginPage - Login form with theme support
+ * SignUpPage - Registration form with theme support
  *
  * Features:
  * - React Router integration
  * - Theme-aware styling
- * - Redirect after login
+ * - Password confirmation
+ * - Redirect after registration
  */
 
 import { useState, type FormEvent } from 'react'
@@ -18,8 +19,8 @@ interface LocationState {
   }
 }
 
-export function LoginPage() {
-  const { login, isAuthenticated } = useAuth()
+export function SignUpPage() {
+  const { signUp, isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -27,6 +28,7 @@ export function LoginPage() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordConfirmation, setPasswordConfirmation] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -38,13 +40,19 @@ export function LoginPage() {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setError(null)
+
+    if (password !== passwordConfirmation) {
+      setError('Passwords do not match')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
-      await login(email, password)
+      await signUp(email, password, passwordConfirmation)
       navigate(from, { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed')
+      setError(err instanceof Error ? err.message : 'Registration failed')
       setIsSubmitting(false)
     }
   }
@@ -58,23 +66,16 @@ export function LoginPage() {
             <Logo size="lg" showText={false} />
           </div>
           <h1 className="text-2xl font-bold text-theme-primary">
-            Sign in to Quantic
+            Create your Quantic account
           </h1>
         </div>
 
-        {/* Login Card */}
+        {/* Sign Up Card */}
         <div className="card">
           {/* Error Alert */}
           {error && (
             <div className="alert alert-danger mb-4">
               {error}
-            </div>
-          )}
-
-          {/* Redirect notice */}
-          {from !== '/' && (
-            <div className="alert alert-info mb-4 text-sm">
-              Please sign in to continue to {from}
             </div>
           )}
 
@@ -90,7 +91,7 @@ export function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoFocus
-                autoComplete="username"
+                autoComplete="email"
                 placeholder="Enter your email address"
                 disabled={isSubmitting}
                 className="input-field"
@@ -107,8 +108,28 @@ export function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                autoComplete="current-password"
-                placeholder="Enter your password"
+                autoComplete="new-password"
+                placeholder="Create a password (min 6 characters)"
+                minLength={6}
+                maxLength={72}
+                disabled={isSubmitting}
+                className="input-field"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="passwordConfirmation" className="block text-sm font-medium text-theme-secondary mb-1">
+                Confirm Password
+              </label>
+              <input
+                id="passwordConfirmation"
+                type="password"
+                value={passwordConfirmation}
+                onChange={(e) => setPasswordConfirmation(e.target.value)}
+                required
+                autoComplete="new-password"
+                placeholder="Confirm your password"
+                minLength={6}
                 maxLength={72}
                 disabled={isSubmitting}
                 className="input-field"
@@ -124,23 +145,14 @@ export function LoginPage() {
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="spinner spinner-sm"></span>
-                    Signing in...
+                    Creating account...
                   </span>
                 ) : (
-                  'Sign in'
+                  'Create account'
                 )}
               </button>
             </div>
           </form>
-
-          <div className="mt-4 text-center">
-            <a
-              href="/passwords/new"
-              className="text-sm text-brand hover:underline"
-            >
-              Forgot password?
-            </a>
-          </div>
 
           {/* Divider */}
           <div className="relative my-6">
@@ -188,9 +200,9 @@ export function LoginPage() {
 
           <div className="mt-6 pt-6 border-t border-theme text-center">
             <p className="text-sm text-theme-secondary">
-              Don't have an account?{' '}
-              <Link to="/signup" className="text-brand hover:underline">
-                Sign up
+              Already have an account?{' '}
+              <Link to="/login" className="text-brand hover:underline">
+                Sign in
               </Link>
             </p>
           </div>
@@ -200,4 +212,4 @@ export function LoginPage() {
   )
 }
 
-export default LoginPage
+export default SignUpPage

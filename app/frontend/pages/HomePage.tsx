@@ -32,7 +32,7 @@ export function HomePage() {
           <Logo size="lg" showText={false} />
         </div>
         <h1 className="text-4xl font-bold text-theme-primary mb-3">
-          Dividend Portfolio
+          Dividend Stocks Radar
         </h1>
         <p className="text-theme-secondary text-lg max-w-2xl mx-auto">
           Track your dividend stocks, set target prices, and build your investment radar.
@@ -72,11 +72,11 @@ export function HomePage() {
         )}
       </section>
 
-      {/* Last Added Stocks Section */}
+      {/* Last Updated Stocks Section */}
       <section className="section">
         <h2 className="text-2xl font-bold text-theme-primary mb-6 flex items-center gap-2">
           <span className="w-1 h-6 bg-brand rounded-full"></span>
-          Last 10 Added Stocks
+          Last 10 Updated Stocks
         </h2>
 
         {lastAddedLoading && (

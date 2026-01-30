@@ -121,7 +121,7 @@ export function Layout() {
               <p className="mt-1">
                 &copy; {new Date().getFullYear()}{' '}
                 <a
-                  href="https://github.com/fleveque"
+                  href="https://leveque.es"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-brand hover:underline"

@@ -5,6 +5,11 @@ Rails.application.routes.draw do
   # Health check for load balancers and uptime monitors
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # OAuth routes
+  # OmniAuth handles /auth/:provider - we just need the callback routes
+  get "/auth/:provider/callback", to: "omniauth_callbacks#google_oauth2", as: :omniauth_callback
+  get "/auth/failure", to: "omniauth_callbacks#failure", as: :omniauth_failure
+
   # React SPA - served at root
   # React Router handles client-side navigation for all non-API routes
   root "react#index"
@@ -31,12 +36,15 @@ Rails.application.routes.draw do
 
       # Session endpoints - for React authentication
       resource :session, only: [ :show, :create, :destroy ]
+
+      # Registration endpoint - for React sign-up
+      resources :users, only: [ :create ], controller: "registrations"
     end
   end
 
   # Catch-all route for React Router (must be last)
   # Excludes API routes and asset paths so they don't get handled by React
   get "*path", to: "react#index", constraints: ->(req) {
-    !req.path.start_with?("/api/", "/assets/", "/up", "/passwords")
+    !req.path.start_with?("/api/", "/assets/", "/up", "/passwords", "/auth/")
   }
 end

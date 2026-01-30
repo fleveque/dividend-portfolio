@@ -45,6 +45,11 @@ gem "simplecov", require: false, group: :test
 gem "yahoo_finance_client", "~> 0.2.1"
 gem "alphavantage"
 
+# OAuth authentication
+gem "omniauth", "~> 2.1"
+gem "omniauth-google-oauth2"
+gem "omniauth-rails_csrf_protection"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

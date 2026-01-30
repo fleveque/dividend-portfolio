@@ -1,5 +1,5 @@
 /**
- * Logo - Reusable logo component for Dividend Portfolio
+ * Logo - Reusable logo component for Quantic
  *
  * Features:
  * - Multiple size variants
@@ -64,7 +64,7 @@ export function Logo({ size = 'md', showText = true, className = '' }: LogoProps
       {/* Logo Text */}
       {showText && (
         <span className={`font-bold text-theme-primary ${textSizeClasses[size]}`}>
-          Dividend Portfolio
+          Quantic
         </span>
       )}
     </div>

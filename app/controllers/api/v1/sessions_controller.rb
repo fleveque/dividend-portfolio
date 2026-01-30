@@ -43,7 +43,9 @@ module Api
       # DELETE /api/v1/session
       # Logout - destroys the current session
       def destroy
-        terminate_session if Current.session
+        # Must call authenticated? to load Current.session since this action
+        # is in allow_unauthenticated_access (resume_session isn't called automatically)
+        terminate_session if authenticated?
         render_success({ logged_out: true })
       end
 
