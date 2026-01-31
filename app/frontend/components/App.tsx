@@ -6,7 +6,8 @@
  * 2. ViewPreferenceProvider - Radar view mode (card/compact)
  * 3. QueryClientProvider - React Query for data fetching/caching
  * 4. AuthProvider - Authentication state
- * 5. BrowserRouter - Client-side routing
+ * 5. BuyPlanProvider - Buy plan mode state
+ * 6. BrowserRouter - Client-side routing
  */
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -14,6 +15,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from '../contexts/ThemeContext'
 import { ViewPreferenceProvider } from '../contexts/ViewPreferenceContext'
 import { AuthProvider } from '../contexts/AuthContext'
+import { BuyPlanProvider } from '../contexts/BuyPlanContext'
 import Layout from './Layout'
 import ProtectedRoute from './ProtectedRoute'
 import HomePage from '../pages/HomePage'
@@ -54,18 +56,20 @@ function App() {
       <ViewPreferenceProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route element={<Layout />}>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/signup" element={<SignUpPage />} />
-                  <Route element={<ProtectedRoute />}>
-                    <Route path="/radar" element={<RadarPage />} />
+            <BuyPlanProvider>
+              <BrowserRouter>
+                <Routes>
+                  <Route element={<Layout />}>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/signup" element={<SignUpPage />} />
+                    <Route element={<ProtectedRoute />}>
+                      <Route path="/radar" element={<RadarPage />} />
+                    </Route>
                   </Route>
-                </Route>
-              </Routes>
-            </BrowserRouter>
+                </Routes>
+              </BrowserRouter>
+            </BuyPlanProvider>
           </AuthProvider>
         </QueryClientProvider>
       </ViewPreferenceProvider>

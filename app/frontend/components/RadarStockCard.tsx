@@ -55,9 +55,11 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
   return (
     <div className={`card p-4 ${getStatusClasses()}`}>
       {/* Stock Header */}
-      <div className="flex items-start gap-3 mb-3">
+      <div className="flex items-start gap-3 mb-3 overflow-hidden">
         {/* Logo */}
-        <StockLogo symbol={stock.symbol} name={stock.name} size="md" />
+        <div className="shrink-0">
+          <StockLogo symbol={stock.symbol} name={stock.name} size="md" />
+        </div>
 
         {/* Stock Info */}
         <div className="flex-1 min-w-0 overflow-hidden">
@@ -76,7 +78,7 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
                 disabled={isRemoving}
                 className="text-red-500 hover:text-red-700 dark:hover:text-red-400 text-xs
                            disabled:text-red-300 dark:disabled:text-red-800 transition-colors
-                           shrink-0 whitespace-nowrap"
+                           shrink-0 whitespace-nowrap cursor-pointer disabled:cursor-not-allowed"
                 title="Remove from radar"
               >
                 {isRemoving ? '...' : 'Remove'}
@@ -116,7 +118,7 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
                 disabled={isSaving}
                 className="p-1.5 bg-emerald-500 text-white rounded-lg text-xs
                            hover:bg-emerald-600 disabled:bg-emerald-300 dark:disabled:bg-emerald-800
-                           transition-colors"
+                           transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
                 {isSaving ? '...' : '✓'}
               </button>
@@ -125,7 +127,7 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
                 disabled={isSaving}
                 className="p-1.5 bg-gray-500 text-white rounded-lg text-xs
                            hover:bg-gray-600 disabled:bg-gray-300 dark:disabled:bg-gray-700
-                           transition-colors"
+                           transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
                 ✕
               </button>

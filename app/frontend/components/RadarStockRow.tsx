@@ -120,9 +120,11 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
   return (
     <div className={`card px-4 py-3 ${getStatusClasses()}`}>
       {/* Desktop Layout */}
-      <div className="hidden md:flex items-center gap-4">
+      <div className="hidden md:flex items-center gap-4 overflow-hidden">
         {/* Logo */}
-        <StockLogo symbol={stock.symbol} name={stock.name} size="sm" />
+        <div className="shrink-0">
+          <StockLogo symbol={stock.symbol} name={stock.name} size="sm" />
+        </div>
 
         {/* Symbol */}
         <span className="font-bold text-theme-primary w-16 shrink-0">
@@ -130,12 +132,14 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
         </span>
 
         {/* Name - truncate on overflow */}
-        <span
-          className="text-sm text-theme-secondary truncate flex-1 min-w-0"
-          title={stock.name}
-        >
-          {stock.name}
-        </span>
+        <div className="w-40 shrink min-w-0 overflow-hidden">
+          <span
+            className="text-sm text-theme-secondary truncate block"
+            title={stock.name}
+          >
+            {stock.name}
+          </span>
+        </div>
 
         {/* Current Price */}
         <span className="font-semibold text-theme-primary w-20 text-right shrink-0">
@@ -164,7 +168,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                 disabled={isSaving}
                 className="p-1 bg-emerald-500 text-white rounded text-xs
                            hover:bg-emerald-600 disabled:bg-emerald-300 dark:disabled:bg-emerald-800
-                           transition-colors"
+                           transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
                 {isSaving ? '...' : '✓'}
               </button>
@@ -173,7 +177,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                 disabled={isSaving}
                 className="p-1 bg-gray-500 text-white rounded text-xs
                            hover:bg-gray-600 disabled:bg-gray-300 dark:disabled:bg-gray-700
-                           transition-colors"
+                           transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
                 ✕
               </button>
@@ -240,19 +244,21 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
       </div>
 
       {/* Mobile Layout */}
-      <div className="md:hidden">
+      <div className="md:hidden overflow-hidden">
         {/* Main row - tappable to expand */}
         <div
-          className="flex items-center gap-3 cursor-pointer"
+          className="flex items-center gap-3 cursor-pointer overflow-hidden w-full"
           onClick={handleMobileRowClick}
         >
           {/* Logo */}
-          <StockLogo symbol={stock.symbol} name={stock.name} size="sm" />
+          <div className="shrink-0">
+            <StockLogo symbol={stock.symbol} name={stock.name} size="sm" />
+          </div>
 
           {/* Symbol & Name */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 overflow-hidden">
             <span className="font-bold text-theme-primary text-sm">{stock.symbol}</span>
-            <p className="text-xs text-theme-muted truncate">{stock.name}</p>
+            <p className="text-xs text-theme-muted truncate" title={stock.name}>{stock.name}</p>
           </div>
 
           {/* Prices */}
@@ -272,7 +278,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
 
           {/* Expand indicator */}
           <svg
-            className={`w-4 h-4 text-theme-muted transition-transform ${isMobileExpanded ? 'rotate-180' : ''}`}
+            className={`w-4 h-4 shrink-0 text-theme-muted transition-transform ${isMobileExpanded ? 'rotate-180' : ''}`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -307,7 +313,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                     disabled={isSaving}
                     className="p-1.5 bg-emerald-500 text-white rounded text-xs
                                hover:bg-emerald-600 disabled:bg-emerald-300 dark:disabled:bg-emerald-800
-                               transition-colors"
+                               transition-colors cursor-pointer disabled:cursor-not-allowed"
                   >
                     {isSaving ? '...' : '✓'}
                   </button>
@@ -316,7 +322,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                     disabled={isSaving}
                     className="p-1.5 bg-gray-500 text-white rounded text-xs
                                hover:bg-gray-600 disabled:bg-gray-300 dark:disabled:bg-gray-700
-                               transition-colors"
+                               transition-colors cursor-pointer disabled:cursor-not-allowed"
                   >
                     ✕
                   </button>
@@ -324,7 +330,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
               ) : (
                 <button
                   onClick={startEdit}
-                  className="text-sm text-brand font-medium"
+                  className="text-sm text-brand font-medium cursor-pointer"
                 >
                   {stock.formattedTargetPrice} (tap to edit)
                 </button>
@@ -393,7 +399,8 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                 className="w-full py-2 text-sm text-red-500 hover:text-red-700
                            dark:hover:text-red-400 disabled:text-red-300
                            dark:disabled:text-red-800 transition-colors
-                           border border-red-200 dark:border-red-800 rounded-lg"
+                           border border-red-200 dark:border-red-800 rounded-lg
+                           cursor-pointer disabled:cursor-not-allowed"
               >
                 {isRemoving ? 'Removing...' : 'Remove from Radar'}
               </button>

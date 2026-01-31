@@ -13,7 +13,7 @@
  * This prevents malicious sites from making requests on behalf of the user.
  */
 
-import type { Stock, RadarStock, User } from '../types'
+import type { Stock, RadarStock, User, BuyPlanResponse } from '../types'
 
 const API_BASE = '/api/v1'
 
@@ -184,5 +184,33 @@ export const sessionApi = {
         password,
         password_confirmation: passwordConfirmation,
       }),
+    }),
+}
+
+// ============================================================================
+// Buy Plan API - Authenticated endpoints (user's buy plan cart)
+// ============================================================================
+
+export const buyPlanApi = {
+  /**
+   * Get the current user's buy plan with all items
+   */
+  get: () => apiFetch<BuyPlanResponse>('/buy_plan'),
+
+  /**
+   * Save cart items (replaces all existing items)
+   */
+  save: (items: { stockId: number; quantity: number }[]) =>
+    apiFetch<BuyPlanResponse>('/buy_plan/save', {
+      method: 'POST',
+      body: JSON.stringify({ items }),
+    }),
+
+  /**
+   * Reset (clear) the buy plan
+   */
+  reset: () =>
+    apiFetch<{ reset: boolean }>('/buy_plan', {
+      method: 'DELETE',
     }),
 }

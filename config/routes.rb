@@ -34,6 +34,11 @@ Rails.application.routes.draw do
         patch "stocks/:stock_id/target_price", action: :update_target_price, as: :update_target_price
       end
 
+      # Buy plan endpoints - authenticated (user's buy plan cart)
+      resource :buy_plan, only: [ :show, :destroy ] do
+        post :save, on: :collection
+      end
+
       # Session endpoints - for React authentication
       resource :session, only: [ :show, :create, :destroy ]
 

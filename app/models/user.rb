@@ -4,6 +4,7 @@ class User < ApplicationRecord
   has_many :transactions
   has_many :dividends
   has_one :radar
+  has_one :buy_plan, dependent: :destroy
   has_many :stocks, through: :transactions
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
