@@ -10,7 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_30_074611) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_31_103414) do
+  create_table "buy_plan_items", force: :cascade do |t|
+    t.integer "buy_plan_id", null: false
+    t.integer "stock_id", null: false
+    t.integer "quantity", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["buy_plan_id", "stock_id"], name: "index_buy_plan_items_on_buy_plan_id_and_stock_id", unique: true
+    t.index ["buy_plan_id"], name: "index_buy_plan_items_on_buy_plan_id"
+    t.index ["stock_id"], name: "index_buy_plan_items_on_stock_id"
+  end
+
+  create_table "buy_plans", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_buy_plans_on_user_id", unique: true
+  end
+
   create_table "dividends", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "stock_id", null: false
@@ -86,6 +104,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_30_074611) do
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
   end
 
+  add_foreign_key "buy_plan_items", "buy_plans"
+  add_foreign_key "buy_plan_items", "stocks"
+  add_foreign_key "buy_plans", "users"
   add_foreign_key "dividends", "stocks"
   add_foreign_key "dividends", "users"
   add_foreign_key "radar_stocks", "radars", on_delete: :cascade

@@ -103,3 +103,29 @@ export interface RadarStockCardProps {
   onUpdateTargetPrice?: (price: number) => void
   isLoading?: boolean
 }
+
+/**
+ * Buy Plan Item
+ * Represents a stock in the buy plan cart with quantity
+ */
+export interface BuyPlanItem {
+  stockId: number
+  symbol: string
+  name: string
+  quantity: number
+  currentPrice: number | null
+  formattedPrice: string
+  subtotal: number | null
+  formattedSubtotal: string
+}
+
+/**
+ * Buy Plan Response from API
+ */
+export interface BuyPlanResponse {
+  id: number | null
+  items: BuyPlanItem[]
+  totalItems: number
+  totalEstimatedCost: number
+  formattedTotal: string
+}

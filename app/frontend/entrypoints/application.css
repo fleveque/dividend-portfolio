@@ -366,3 +366,29 @@ body {
 .border-theme-muted {
   border-color: var(--border-muted);
 }
+
+/* Hover accent background */
+.hover\:bg-theme-accent:hover {
+  background-color: var(--bg-muted);
+}
+
+/* Safe area padding for mobile devices with notches */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Slide-up animation for drawers */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}

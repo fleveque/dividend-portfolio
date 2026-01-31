@@ -5,6 +5,7 @@
  * - React Query for all data operations
  * - Stock search with caching
  * - Theme-aware styling
+ * - Buy plan mode for planning purchases
  */
 
 import { useState, useEffect } from 'react'
@@ -12,9 +13,14 @@ import { RadarStockCard } from '../components/RadarStockCard'
 import { RadarStockRow } from '../components/RadarStockRow'
 import { ViewToggle } from '../components/ViewToggle'
 import StockCard from '../components/StockCard'
+import { BuyPlanModeToggle } from '../components/BuyPlanModeToggle'
+import { AddToCartButton } from '../components/AddToCartButton'
+import { CartSummaryBar } from '../components/CartSummaryBar'
+import { CartDrawer } from '../components/CartDrawer'
 import { useRadar, useAddStock, useRemoveStock } from '../hooks/useRadarQueries'
 import { useStockSearch } from '../hooks/useStockQueries'
 import { useViewPreference } from '../contexts/ViewPreferenceContext'
+import { useBuyPlanContext } from '../contexts/BuyPlanContext'
 import type { Stock } from '../types'
 
 const METRICS_PREFERENCE_KEY = 'radar-show-metrics'
@@ -26,7 +32,9 @@ export function RadarPage() {
     const saved = localStorage.getItem(METRICS_PREFERENCE_KEY)
     return saved === 'true'
   })
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false)
   const { viewMode } = useViewPreference()
+  const { isActive: isBuyPlanMode } = useBuyPlanContext()
 
   useEffect(() => {
     localStorage.setItem(METRICS_PREFERENCE_KEY, String(showMetrics))
@@ -75,12 +83,31 @@ export function RadarPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="section">
-        <h1 className="text-3xl font-bold text-theme-primary mb-6 flex items-center gap-2">
-          <span className="w-1 h-8 bg-brand rounded-full"></span>
-          My Radar
-        </h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-theme-primary flex items-center gap-2">
+            <span className="w-1 h-8 bg-brand rounded-full"></span>
+            My Radar
+          </h1>
+          <BuyPlanModeToggle />
+        </div>
 
-        {/* Search Form */}
+        {/* Buy Plan Mode Banner */}
+        {isBuyPlanMode && (
+          <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+            <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <span className="font-medium">Buy Plan Mode</span>
+            </div>
+            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+              Add stocks to your buy plan cart. Click "View Cart" at the bottom to save.
+            </p>
+          </div>
+        )}
+
+        {/* Search Form - Disabled in buy plan mode */}
         <div className="mb-8">
           <form onSubmit={handleSearch} className="flex gap-3">
             <input
@@ -89,15 +116,19 @@ export function RadarPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search stocks by symbol (e.g., AAPL)..."
               className="input-field flex-1"
+              disabled={isBuyPlanMode}
             />
             <button
               type="submit"
-              disabled={searchLoading}
+              disabled={searchLoading || isBuyPlanMode}
               className="btn-primary"
             >
               {searchLoading ? 'Searching...' : 'Search'}
             </button>
           </form>
+          {isBuyPlanMode && (
+            <p className="text-xs text-theme-muted mt-1">Search is disabled in buy plan mode</p>
+          )}
         </div>
 
         {/* Search Error */}
@@ -161,7 +192,7 @@ export function RadarPage() {
               <button
                 onClick={() => refetchRadar()}
                 disabled={radarLoading}
-                className="text-sm text-brand hover:underline disabled:opacity-50"
+                className="text-sm text-brand hover:underline disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
                 {radarLoading ? 'Refreshing...' : 'Refresh'}
               </button>
@@ -207,21 +238,27 @@ export function RadarPage() {
 
           {/* Stocks Grid/List */}
           {radarStocks.length > 0 && viewMode === 'card' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${isBuyPlanMode ? 'pb-20' : ''}`}>
               {radarStocks.map((stock) => (
-                <RadarStockCard
-                  key={stock.id}
-                  stock={stock}
-                  onRemove={() => handleRemoveStock(stock.id)}
-                  isRemoving={removeStock.isPending}
-                />
+                <div key={stock.id}>
+                  <RadarStockCard
+                    stock={stock}
+                    onRemove={isBuyPlanMode ? undefined : () => handleRemoveStock(stock.id)}
+                    isRemoving={removeStock.isPending}
+                  />
+                  {isBuyPlanMode && (
+                    <div className="mt-2 flex justify-end">
+                      <AddToCartButton stock={stock} />
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           )}
 
           {/* Compact List View */}
           {radarStocks.length > 0 && viewMode === 'compact' && (
-            <div className="flex flex-col gap-2">
+            <div className={`flex flex-col gap-2 ${isBuyPlanMode ? 'pb-20' : ''}`}>
               {/* Controls Row - Hidden on mobile (each row expands individually) */}
               <div className="hidden md:flex justify-end mb-2">
                 <button
@@ -271,24 +308,40 @@ export function RadarPage() {
                     <span className="w-18 text-right shrink-0">MA200</span>
                   </>
                 )}
-                <span className="w-6 shrink-0"></span>
+                {isBuyPlanMode ? (
+                  <span className="w-28 shrink-0 text-right">Add to Cart</span>
+                ) : (
+                  <span className="w-6 shrink-0"></span>
+                )}
               </div>
               {/* Stock Rows */}
               <div>
                 {radarStocks.map((stock) => (
-                  <RadarStockRow
-                    key={stock.id}
-                    stock={stock}
-                    onRemove={() => handleRemoveStock(stock.id)}
-                    isRemoving={removeStock.isPending}
-                    showMetrics={showMetrics}
-                  />
+                  <div key={stock.id} className="flex items-center gap-2 overflow-hidden">
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <RadarStockRow
+                        stock={stock}
+                        onRemove={isBuyPlanMode ? undefined : () => handleRemoveStock(stock.id)}
+                        isRemoving={removeStock.isPending}
+                        showMetrics={showMetrics}
+                      />
+                    </div>
+                    {isBuyPlanMode && (
+                      <div className="hidden md:block shrink-0">
+                        <AddToCartButton stock={stock} />
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Buy Plan Cart Components */}
+      <CartSummaryBar onOpenDrawer={() => setIsCartDrawerOpen(true)} />
+      <CartDrawer isOpen={isCartDrawerOpen} onClose={() => setIsCartDrawerOpen(false)} />
     </div>
   )
 }
