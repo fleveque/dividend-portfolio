@@ -7,6 +7,6 @@ class CreateBuyPlanItems < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :buy_plan_items, [:buy_plan_id, :stock_id], unique: true
+    add_index :buy_plan_items, [ :buy_plan_id, :stock_id ], unique: true
   end
 end
