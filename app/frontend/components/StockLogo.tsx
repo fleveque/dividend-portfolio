@@ -1,14 +1,13 @@
 /**
- * StockLogo - Component to display stock logos from Brandfetch API
+ * StockLogo - Component to display stock logos from the self-hosted logo service
  *
- * Uses Brandfetch Logo API to fetch real company logos based on stock ticker.
+ * Uses our logo-service (logos.quantic.es) to fetch company logos by ticker symbol.
  * Falls back to colored initials when:
- * - VITE_BRANDFETCH_CLIENT_ID is not configured
+ * - VITE_LOGO_SERVICE_URL or VITE_LOGO_SERVICE_API_KEY is not configured
  * - Image fails to load (unknown ticker, network error)
  */
 
 import { useState } from 'react'
-import { useTheme } from '../contexts/ThemeContext'
 
 interface StockLogoProps {
   symbol: string
@@ -23,10 +22,11 @@ const sizeClasses = {
   lg: 'h-12 w-12 text-base',
 }
 
-const imageSizes = {
-  sm: 32,
-  md: 40,
-  lg: 48,
+// Map component sizes to logo-service size params
+const logoServiceSizes: Record<string, string> = {
+  sm: 's',  // 32px
+  md: 'm',  // 64px
+  lg: 'l',  // 128px
 }
 
 /**
@@ -63,19 +63,11 @@ function getInitials(symbol: string): string {
 }
 
 /**
- * Build Brandfetch logo URL for a stock ticker
+ * Build logo-service URL for a stock ticker.
+ * The API key is passed as a query param so it works in <img src> tags.
  */
-function getBrandfetchUrl(symbol: string, clientId: string, theme: 'light' | 'dark', size: number): string {
-  const params = new URLSearchParams({
-    c: clientId,
-    theme: theme,
-    fallback: 'lettermark',
-  })
-  // Request 2x size for retina displays
-  params.set('w', String(size * 2))
-  params.set('h', String(size * 2))
-
-  return `https://cdn.brandfetch.io/ticker/${symbol.toUpperCase()}?${params.toString()}`
+function getLogoServiceUrl(symbol: string, serviceUrl: string, apiKey: string, size: string): string {
+  return `${serviceUrl}/api/v1/logos/${symbol.toUpperCase()}?size=${size}&api_key=${apiKey}`
 }
 
 /**
@@ -102,14 +94,14 @@ function LoadingSkeleton() {
 }
 
 export function StockLogo({ symbol, name, size = 'md', className = '' }: StockLogoProps) {
-  const { resolvedTheme } = useTheme()
   const colorClass = getSymbolColor(symbol)
-  const clientId = import.meta.env.VITE_BRANDFETCH_CLIENT_ID
+  const serviceUrl = import.meta.env.VITE_LOGO_SERVICE_URL
+  const apiKey = import.meta.env.VITE_LOGO_SERVICE_API_KEY
 
   const [imageStatus, setImageStatus] = useState<'loading' | 'loaded' | 'error'>('loading')
 
-  // If no client ID configured, show initials immediately
-  const useFallback = !clientId || clientId === 'your_brandfetch_client_id_here' || clientId === 'your_brandfetch_client_id'
+  // If no service URL or API key configured, show initials immediately
+  const useFallback = !serviceUrl || !apiKey
 
   const handleLoad = () => {
     setImageStatus('loaded')
@@ -131,7 +123,7 @@ export function StockLogo({ symbol, name, size = 'md', className = '' }: StockLo
           {imageStatus === 'loading' && <LoadingSkeleton />}
           {imageStatus === 'error' && <InitialsFallback symbol={symbol} colorClass={colorClass} />}
           <img
-            src={getBrandfetchUrl(symbol, clientId, resolvedTheme, imageSizes[size])}
+            src={getLogoServiceUrl(symbol, serviceUrl, apiKey, logoServiceSizes[size])}
             alt={`${name || symbol} logo`}
             className={`w-full h-full object-contain rounded-lg ${imageStatus === 'loaded' ? '' : 'hidden'}`}
             onLoad={handleLoad}

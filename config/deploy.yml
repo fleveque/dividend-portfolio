@@ -76,4 +76,5 @@ asset_path: /rails/public/assets
 builder:
   arch: arm64
   secrets:
-    - VITE_BRANDFETCH_CLIENT_ID
+    - VITE_LOGO_SERVICE_URL
+    - VITE_LOGO_SERVICE_API_KEY
