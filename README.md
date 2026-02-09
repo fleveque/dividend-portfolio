@@ -23,6 +23,7 @@ Currently, it is in a very early stage, and many things may fail or not work at 
 - **Dividend Tracking**: Add and manage dividends received from your investments.
 - **Statistics**: View statistics about your gains, losses, and total dividends.
 - **Stock Data**: Fetch stock data from reliable internet sources.
+- **Stock Logos**: Company logos served by a self-hosted [logo-service](https://github.com/fleveque/logo-service), with fallback to colored initials for missing tickers.
 - **Portfolio Overview**: View your current portfolio with company logos and percentage allocation.
 - **Radar**: Add stocks to your radar and view basic stock information such as payout, yield, P/E ratio, EPS, and stock price.
 
@@ -66,13 +67,24 @@ The application supports multiple financial data providers. Currently, you can u
     Note: The Yahoo Finance API might be unstable or have limitations. Alpha Vantage is recommended for more reliable data.
 
 
-### 3. Install dependencies:
+### 3. Configure stock logos (optional):
+
+The application uses a self-hosted [logo-service](https://github.com/fleveque/logo-service) to display company logos. Add these to your `.env` file:
+
+```sh
+VITE_LOGO_SERVICE_URL=https://logos.quantic.es
+VITE_LOGO_SERVICE_API_KEY=your_logo_service_api_key
+```
+
+Without these, the app shows colored initials as fallback — no functionality is lost.
+
+### 4. Install dependencies:
 
     ```
     bundle install
     ```
 
-### 4. Set up the database::
+### 5. Set up the database:
 
     ```sh
     rails db:create
@@ -80,13 +92,13 @@ The application supports multiple financial data providers. Currently, you can u
     rails db:seed
     ```
 
-### 5. Start the Rails server:
+### 6. Start the Rails server:
     ```sh
     bin/dev
     ```
 You will need foreman gem if it's not installed.
 
-### 6. Visit the application:
+### 7. Visit the application:
 
 Open your web browser and go to http://localhost:3000.
 
