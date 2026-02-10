@@ -13,7 +13,7 @@
  * This prevents malicious sites from making requests on behalf of the user.
  */
 
-import type { Stock, RadarStock, User, BuyPlanResponse } from '../types'
+import type { Stock, RadarStock, User, BuyPlanResponse, AdminDashboardStats, AdminUser } from '../types'
 
 const API_BASE = '/api/v1'
 
@@ -212,5 +212,25 @@ export const buyPlanApi = {
   reset: () =>
     apiFetch<{ reset: boolean }>('/buy_plan', {
       method: 'DELETE',
+    }),
+}
+
+// ============================================================================
+// Admin API - Admin-only endpoints
+// ============================================================================
+
+export const adminApi = {
+  getDashboard: () => apiFetch<AdminDashboardStats>('/admin/dashboard'),
+
+  getUsers: () => apiFetch<AdminUser[]>('/admin/users'),
+
+  deleteUser: (id: number) =>
+    apiFetch<{ deleted: boolean }>(`/admin/users/${id}`, {
+      method: 'DELETE',
+    }),
+
+  refreshStocks: () =>
+    apiFetch<{ enqueued: boolean }>('/admin/stocks/refresh', {
+      method: 'POST',
     }),
 }

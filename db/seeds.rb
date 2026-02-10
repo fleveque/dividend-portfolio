@@ -13,4 +13,6 @@ default_user = User.find_or_create_by!(email_address: "default@example.com") do 
   user.password_confirmation = "password"
 end
 
-puts "Default user created with email: #{default_user.email_address} and password: password"
+default_user.update!(admin: true) unless default_user.admin?
+
+puts "Default user created with email: #{default_user.email_address} and password: password (admin: #{default_user.admin?})"

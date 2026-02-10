@@ -34,7 +34,8 @@ module Api
         {
           id: user.id,
           emailAddress: user.email_address,
-          name: user.name
+          name: user.name,
+          admin: user.admin?
         }
       end
     end

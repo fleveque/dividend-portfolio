@@ -64,6 +64,7 @@ export interface RadarStock extends Stock {
 export interface User {
   id: number
   emailAddress: string
+  admin?: boolean
 }
 
 /**
@@ -128,4 +129,48 @@ export interface BuyPlanResponse {
   totalItems: number
   totalEstimatedCost: number
   formattedTotal: string
+}
+
+/**
+ * Admin Dashboard Stats
+ * Mirrors: Api::V1::Admin::DashboardController#show response
+ */
+export interface AdminDashboardStats {
+  users: {
+    total: number
+    admins: number
+    recentSignups: number
+  }
+  stocks: {
+    total: number
+    withPrice: number
+    withoutPrice: number
+  }
+  radars: {
+    total: number
+    totalStocksTracked: number
+    avgStocksPerRadar: number
+  }
+  buyPlans: {
+    total: number
+    totalItems: number
+  }
+  transactions: {
+    total: number
+  }
+}
+
+/**
+ * Admin User
+ * Mirrors: Api::V1::Admin::UsersController#serialize_admin_user
+ */
+export interface AdminUser {
+  id: number
+  emailAddress: string
+  name: string | null
+  admin: boolean
+  provider: string | null
+  createdAt: string
+  radarStocksCount: number
+  transactionsCount: number
 }

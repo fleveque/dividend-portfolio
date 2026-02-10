@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_31_103414) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_10_184409) do
   create_table "buy_plan_items", force: :cascade do |t|
     t.integer "buy_plan_id", null: false
     t.integer "stock_id", null: false
@@ -100,6 +100,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_103414) do
     t.string "provider"
     t.string "uid"
     t.string "name"
+    t.boolean "admin", default: false, null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
   end

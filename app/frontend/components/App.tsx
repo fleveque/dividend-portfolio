@@ -18,10 +18,12 @@ import { AuthProvider } from '../contexts/AuthContext'
 import { BuyPlanProvider } from '../contexts/BuyPlanContext'
 import Layout from './Layout'
 import ProtectedRoute from './ProtectedRoute'
+import AdminRoute from './AdminRoute'
 import HomePage from '../pages/HomePage'
 import LoginPage from '../pages/LoginPage'
 import SignUpPage from '../pages/SignUpPage'
 import RadarPage from '../pages/RadarPage'
+import AdminDashboardPage from '../pages/AdminDashboardPage'
 
 /**
  * QueryClient Configuration
@@ -65,6 +67,9 @@ function App() {
                     <Route path="/signup" element={<SignUpPage />} />
                     <Route element={<ProtectedRoute />}>
                       <Route path="/radar" element={<RadarPage />} />
+                    </Route>
+                    <Route element={<AdminRoute />}>
+                      <Route path="/admin" element={<AdminDashboardPage />} />
                     </Route>
                   </Route>
                 </Routes>
