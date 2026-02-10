@@ -54,4 +54,36 @@ RSpec.describe FinancialDataProviders::AlphaVantageProvider, type: :model do
       end
     end
   end
+
+  describe '#refresh_stocks' do
+    before { Rails.cache.clear }
+
+    context 'with rate-limited sequential fetching' do
+      let!(:stock_aapl) { create(:stock, symbol: 'AAPL', price: 100.00) }
+      let!(:stock_msft) { create(:stock, symbol: 'MSFT', price: 200.00) }
+
+      let(:aapl_quote) { double(symbol: 'AAPL', price: 155.00) }
+      let(:msft_quote) { double(symbol: 'MSFT', price: 385.00) }
+
+      before do
+        allow(provider).to receive(:sleep)
+        allow(Alphavantage::TimeSeries).to receive(:new).with(symbol: 'AAPL').and_return(double(quote: aapl_quote))
+        allow(Alphavantage::TimeSeries).to receive(:new).with(symbol: 'MSFT').and_return(double(quote: msft_quote))
+        allow(Alphavantage::Fundamental).to receive(:new).and_return(double(overview: nil))
+      end
+
+      it 'fetches stocks sequentially with rate limiting' do
+        result = provider.refresh_stocks
+        expect(result[:updated]).to eq(2)
+        expect(result[:errors]).to be_empty
+        expect(provider).to have_received(:sleep).with(25).once
+      end
+
+      it 'logs progress' do
+        expect(Rails.logger).to receive(:info).with("Refreshing stock 1/2: AAPL")
+        expect(Rails.logger).to receive(:info).with("Refreshing stock 2/2: MSFT")
+        provider.refresh_stocks
+      end
+    end
+  end
 end

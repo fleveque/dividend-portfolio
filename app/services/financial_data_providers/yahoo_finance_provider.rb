@@ -4,6 +4,21 @@ module FinancialDataProviders
 
     def fetch_and_normalize_stock(symbol)
       data = YahooFinanceClient::Stock.get_quote(symbol)
+      normalize_yahoo_data(data)
+    rescue StandardError => e
+      Rails.logger.error "Yahoo Finance API error: #{e.message}"
+      nil
+    end
+
+    def fetch_and_normalize_stocks(symbols)
+      quotes = YahooFinanceClient::Stock.get_quotes(symbols)
+      quotes.transform_values { |data| normalize_yahoo_data(data) }
+    rescue StandardError => e
+      Rails.logger.error "Yahoo Finance bulk API error: #{e.message}"
+      super
+    end
+
+    def normalize_yahoo_data(data)
       return nil unless data && data[:symbol].present? && data[:price].present?
 
       {
@@ -18,9 +33,6 @@ module FinancialDataProviders
         ma_50: data[:ma50],
         ma_200: data[:ma200]
       }
-    rescue StandardError => e
-      Rails.logger.error "Yahoo Finance API error: #{e.message}"
-      nil
     end
   end
 end

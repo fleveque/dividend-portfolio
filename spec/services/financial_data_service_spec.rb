@@ -46,4 +46,23 @@ RSpec.describe FinancialDataService, type: :service do
       end
     end
   end
+
+  describe '.refresh_stocks' do
+    let(:refresh_result) { { updated: 5, errors: [] } }
+
+    after do
+      described_class.instance_variable_set(:@provider, nil)
+    end
+
+    before do
+      allow(Rails.application.config).to receive(:financial_data_provider).and_return(:yahoo_finance)
+      allow(FinancialDataProviders::YahooFinanceProvider).to receive(:new).
+        and_return(double('YahooFinanceProvider', refresh_stocks: refresh_result))
+    end
+
+    it 'delegates to the provider' do
+      result = described_class.refresh_stocks
+      expect(result).to eq(refresh_result)
+    end
+  end
 end
