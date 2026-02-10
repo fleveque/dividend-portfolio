@@ -25,17 +25,18 @@ module FinancialDataProviders
     #
     # @return [Hash] { updated: Integer, errors: Array<String> }
     def refresh_stocks
-      symbols = Stock.pluck(:symbol)
+      symbols = Stock.pluck(:symbol).map { |s| s.upcase.strip }
       return { updated: 0, errors: [] } if symbols.empty?
 
       results = fetch_and_normalize_stocks(symbols)
       updated = 0
       errors = []
 
-      results.each do |symbol, data|
+      symbols.each do |symbol|
+        data = results[symbol]
         if data && data[:error].nil?
-          store_stock_data(data)
-          Rails.cache.write("stock/#{symbol}", Stock.find_by(symbol: symbol), expires_in: 1.hour)
+          stock = store_stock_data(data)
+          Rails.cache.write("stock/#{symbol}", stock, expires_in: 1.hour)
           updated += 1
         else
           errors << symbol
