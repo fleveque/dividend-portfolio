@@ -93,7 +93,8 @@ export function AdminDashboardPage() {
         setTimeout(() => setRefreshMessage(null), 5000)
       },
       onError: (err) => {
-        setRefreshMessage(`Error: ${err.message}`)
+        const message = err instanceof Error ? err.message : String(err)
+        setRefreshMessage(`Error: ${message}`)
         setTimeout(() => setRefreshMessage(null), 5000)
       },
     })
