@@ -27,6 +27,31 @@ Currently, it is in a very early stage, and many things may fail or not work at 
 - **Portfolio Overview**: View your current portfolio with company logos and percentage allocation.
 - **Radar**: Add stocks to your radar and view basic stock information such as payout, yield, P/E ratio, EPS, and stock price.
 
+- **Admin Dashboard**: Protected admin area with app stats, user management, and manual stock refresh.
+
+## Admin
+
+### Granting Admin Role
+
+**Local development:**
+```sh
+rake admin:grant[user@example.com]
+rake admin:revoke[user@example.com]
+```
+
+The default seed user (`default@example.com`) is automatically granted admin.
+
+**Production (Kamal):**
+```sh
+bin/kamal app exec "bin/rails admin:grant[your@email.com]"
+```
+
+### Admin Features
+
+- **Dashboard stats**: Users, stocks, radars, buy plans, and transactions overview
+- **User management**: View all users with metadata, delete users
+- **Stock refresh**: Manually trigger a stock data refresh job
+
 ## Limitations
 
 - Currently the application doesn't allow multiple currencies.

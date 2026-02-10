@@ -64,6 +64,21 @@ export function Layout() {
                 </NavLink>
               )}
 
+              {isAuthenticated && user?.admin && (
+                <NavLink
+                  to="/admin"
+                  className={({ isActive }) =>
+                    `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-primary-100 dark:bg-primary-900 text-brand'
+                        : 'text-theme-secondary hover:text-brand hover:bg-theme-muted'
+                    }`
+                  }
+                >
+                  Admin
+                </NavLink>
+              )}
+
               {/* Divider */}
               <div className="h-6 w-px bg-theme-muted mx-1 hidden sm:block" />
 

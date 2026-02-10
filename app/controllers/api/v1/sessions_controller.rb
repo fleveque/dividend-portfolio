@@ -58,7 +58,8 @@ module Api
       def serialize_user(user)
         {
           id: user.id,
-          emailAddress: user.email_address
+          emailAddress: user.email_address,
+          admin: user.admin?
         }
       end
     end

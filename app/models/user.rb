@@ -1,9 +1,9 @@
 class User < ApplicationRecord
   has_secure_password validations: false
   has_many :sessions, dependent: :destroy
-  has_many :transactions
-  has_many :dividends
-  has_one :radar
+  has_many :transactions, dependent: :destroy
+  has_many :dividends, dependent: :destroy
+  has_one :radar, dependent: :destroy
   has_one :buy_plan, dependent: :destroy
   has_many :stocks, through: :transactions
 

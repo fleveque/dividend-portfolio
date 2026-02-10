@@ -44,6 +44,13 @@ Rails.application.routes.draw do
 
       # Registration endpoint - for React sign-up
       resources :users, only: [ :create ], controller: "registrations"
+
+      # Admin endpoints - require admin role
+      namespace :admin do
+        resource :dashboard, only: [ :show ], controller: "dashboard"
+        resources :users, only: [ :index, :destroy ]
+        post "stocks/refresh", to: "stocks#refresh"
+      end
     end
   end
 
