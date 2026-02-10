@@ -35,8 +35,8 @@ Currently, it is in a very early stage, and many things may fail or not work at 
 
 **Local development:**
 ```sh
-rake admin:grant[user@example.com]
-rake admin:revoke[user@example.com]
+bin/rails "admin:grant[user@example.com]"
+bin/rails "admin:revoke[user@example.com]"
 ```
 
 The default seed user (`default@example.com`) is automatically granted admin.
