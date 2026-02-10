@@ -8,8 +8,8 @@ class MarketHoursService
 
     return false unless (1..5).cover?(et.wday)
 
-    market_open = et.change(hour: MARKET_OPEN[:hour], min: MARKET_OPEN[:min])
-    market_close = et.change(hour: MARKET_CLOSE[:hour], min: MARKET_CLOSE[:min])
+    market_open = et.change(hour: MARKET_OPEN[:hour], min: MARKET_OPEN[:min], sec: 0, usec: 0)
+    market_close = et.change(hour: MARKET_CLOSE[:hour], min: MARKET_CLOSE[:min], sec: 0, usec: 0)
 
     et >= market_open && et < market_close
   end

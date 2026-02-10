@@ -12,7 +12,7 @@ module FinancialDataProviders
 
     def fetch_and_normalize_stocks(symbols)
       quotes = YahooFinanceClient::Stock.get_quotes(symbols)
-      quotes.transform_values { |data| normalize_yahoo_data(data) }
+      symbols.index_with { |symbol| normalize_yahoo_data(quotes[symbol]) }
     rescue StandardError => e
       Rails.logger.error "Yahoo Finance bulk API error: #{e.message}"
       super
