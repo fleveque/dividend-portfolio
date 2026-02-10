@@ -7,12 +7,15 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
-# Create a default user
-default_user = User.find_or_create_by!(email_address: "default@example.com") do |user|
-  user.password = "password"
-  user.password_confirmation = "password"
+# Create a default admin user for local development only.
+# In production, use `rake admin:grant[user@example.com]` to promote users.
+if Rails.env.development? || Rails.env.test?
+  default_user = User.find_or_create_by!(email_address: "default@example.com") do |user|
+    user.password = "password"
+    user.password_confirmation = "password"
+  end
+
+  default_user.update!(admin: true) unless default_user.admin?
+
+  puts "Default user created with email: #{default_user.email_address} and password: password (admin: #{default_user.admin?})"
 end
-
-default_user.update!(admin: true) unless default_user.admin?
-
-puts "Default user created with email: #{default_user.email_address} and password: password (admin: #{default_user.admin?})"
