@@ -4,6 +4,10 @@ class FinancialDataService
       provider.get_stock(symbol)
     end
 
+    def refresh_stocks
+      provider.refresh_stocks
+    end
+
     private
 
     def provider

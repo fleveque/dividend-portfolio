@@ -48,4 +48,62 @@ RSpec.describe FinancialDataProviders::BaseProvider, type: :model do
       end
     end
   end
+
+  describe '#refresh_stocks' do
+    let(:test_provider) do
+      Class.new(described_class) do
+        def fetch_and_normalize_stock(symbol)
+          { symbol: symbol, price: 150.00 }
+        end
+      end.new
+    end
+
+    before do
+      Rails.cache.clear
+    end
+
+    context 'when there are stocks to refresh' do
+      let!(:stock_aapl) { create(:stock, symbol: 'AAPL', price: 100.00) }
+      let!(:stock_msft) { create(:stock, symbol: 'MSFT', price: 200.00) }
+
+      it 'updates all stocks and returns the count' do
+        result = test_provider.refresh_stocks
+        expect(result[:updated]).to eq(2)
+        expect(result[:errors]).to be_empty
+        expect(stock_aapl.reload.price).to eq(150.00)
+        expect(stock_msft.reload.price).to eq(150.00)
+      end
+
+      it 'warms the Rails cache for each stock' do
+        test_provider.refresh_stocks
+        expect(Rails.cache.read("stock/AAPL")).to be_present
+        expect(Rails.cache.read("stock/MSFT")).to be_present
+      end
+    end
+
+    context 'when there are no stocks' do
+      it 'returns zero updated and no errors' do
+        result = test_provider.refresh_stocks
+        expect(result).to eq({ updated: 0, errors: [] })
+      end
+    end
+
+    context 'when a stock fails to refresh' do
+      let!(:stock) { create(:stock, symbol: 'FAIL', price: 100.00) }
+
+      let(:failing_provider) do
+        Class.new(described_class) do
+          def fetch_and_normalize_stock(symbol)
+            nil
+          end
+        end.new
+      end
+
+      it 'adds the symbol to errors' do
+        result = failing_provider.refresh_stocks
+        expect(result[:updated]).to eq(0)
+        expect(result[:errors]).to eq([ 'FAIL' ])
+      end
+    end
+  end
 end

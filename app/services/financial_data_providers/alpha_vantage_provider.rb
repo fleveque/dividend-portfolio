@@ -1,5 +1,7 @@
 module FinancialDataProviders
   class AlphaVantageProvider < BaseProvider
+    RATE_LIMIT_DELAY = 25
+
     private
 
     def fetch_and_normalize_stock(symbol)
@@ -24,6 +26,15 @@ module FinancialDataProviders
     rescue StandardError => e
       Rails.logger.error "AlphaVantage API error: #{e.message}"
       nil
+    end
+
+    def fetch_and_normalize_stocks(symbols)
+      total = symbols.size
+      symbols.each_with_object({}).with_index do |(symbol, results), index|
+        Rails.logger.info "Refreshing stock #{index + 1}/#{total}: #{symbol}"
+        results[symbol] = fetch_and_normalize_stock(symbol)
+        sleep(RATE_LIMIT_DELAY) if index < total - 1
+      end
     end
 
     def fetch_overview(symbol)
