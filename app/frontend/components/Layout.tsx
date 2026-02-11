@@ -1,17 +1,9 @@
-/**
- * Layout - Shared layout with header, footer, and theme support
- *
- * Features:
- * - Sticky header with logo and navigation
- * - Theme toggle for dark/light modes
- * - Emerald green color scheme
- * - Responsive navigation
- */
-
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Logo } from './Logo'
 import { ThemeToggle } from './ThemeToggle'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 
 export function Layout() {
   const { user, isAuthenticated, isLoading, logout } = useAuth()
@@ -23,26 +15,23 @@ export function Layout() {
   }
 
   return (
-    <div className="min-h-screen bg-theme-surface flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-theme-elevated border-b border-theme shadow-sm">
+      <header className="sticky top-0 z-50 bg-background border-b shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center py-3">
-            {/* Logo */}
-            <Link to="/" className="hover:opacity-80 transition-opacity">
+            <Link to="/" className="flex items-center hover:opacity-80 transition-opacity shrink-0">
               <Logo size="md" showText={true} />
             </Link>
 
-            {/* Navigation */}
-            <nav className="flex items-center gap-2 sm:gap-4">
-              {/* Nav Links */}
+            <nav className="flex items-center gap-1 sm:gap-2 md:gap-4">
               <NavLink
                 to="/"
                 className={({ isActive }) =>
-                  `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  `px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-primary-100 dark:bg-primary-900 text-brand'
-                      : 'text-theme-secondary hover:text-brand hover:bg-theme-muted'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                   }`
                 }
               >
@@ -53,14 +42,14 @@ export function Layout() {
                 <NavLink
                   to="/radar"
                   className={({ isActive }) =>
-                    `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    `px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-primary-100 dark:bg-primary-900 text-brand'
-                        : 'text-theme-secondary hover:text-brand hover:bg-theme-muted'
+                        ? 'bg-accent text-accent-foreground'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                     }`
                   }
                 >
-                  My Radar
+                  Radar
                 </NavLink>
               )}
 
@@ -68,10 +57,10 @@ export function Layout() {
                 <NavLink
                   to="/admin"
                   className={({ isActive }) =>
-                    `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    `px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-primary-100 dark:bg-primary-900 text-brand'
-                        : 'text-theme-secondary hover:text-brand hover:bg-theme-muted'
+                        ? 'bg-accent text-accent-foreground'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                     }`
                   }
                 >
@@ -79,38 +68,26 @@ export function Layout() {
                 </NavLink>
               )}
 
-              {/* Divider */}
-              <div className="h-6 w-px bg-theme-muted mx-1 hidden sm:block" />
+              <Separator orientation="vertical" className="h-6 mx-1 hidden sm:block" />
 
-              {/* Theme Toggle */}
               <ThemeToggle />
 
-              {/* Auth Section */}
               <div className="flex items-center gap-2 ml-1">
                 {isLoading ? (
-                  <span className="text-theme-muted text-sm">Loading...</span>
+                  <span className="text-muted-foreground text-sm">Loading...</span>
                 ) : isAuthenticated && user ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-theme-secondary text-sm hidden md:inline truncate max-w-48">
+                    <span className="text-muted-foreground text-sm hidden md:inline truncate max-w-48">
                       {user.emailAddress}
                     </span>
-                    <button
-                      onClick={handleLogout}
-                      className="px-3 py-1.5 rounded-lg text-sm font-medium
-                                 bg-theme-muted hover:bg-red-100 dark:hover:bg-red-900
-                                 text-theme-secondary hover:text-red-600 dark:hover:text-red-400
-                                 transition-colors cursor-pointer"
-                    >
+                    <Button variant="ghost" size="sm" onClick={handleLogout} className="hover:bg-destructive/10 hover:text-destructive">
                       Logout
-                    </button>
+                    </Button>
                   </div>
                 ) : (
-                  <Link
-                    to="/login"
-                    className="btn-primary text-sm px-4 py-1.5"
-                  >
-                    Sign In
-                  </Link>
+                  <Button asChild size="sm">
+                    <Link to="/login">Sign In</Link>
+                  </Button>
                 )}
               </div>
             </nav>
@@ -118,20 +95,15 @@ export function Layout() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="flex-1">
         <Outlet />
       </main>
 
-      {/* Footer */}
-      <footer className="bg-theme-elevated border-t border-theme py-8">
+      <footer className="bg-background border-t py-6 sm:py-8">
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            {/* Logo in footer */}
             <Logo size="sm" showText={true} />
-
-            {/* Footer text */}
-            <div className="text-theme-muted text-sm text-center">
+            <div className="text-muted-foreground text-xs sm:text-sm text-center">
               <p>Built with Ruby on Rails, React, TypeScript, and Tailwind CSS</p>
               <p className="mt-1">
                 &copy; {new Date().getFullYear()}{' '}
@@ -139,7 +111,7 @@ export function Layout() {
                   href="https://leveque.es"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-brand hover:underline"
+                  className="text-foreground hover:underline"
                 >
                   Francesc Leveque
                 </a>

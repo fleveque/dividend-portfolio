@@ -1,3 +1,4 @@
+import path from "path"
 import { defineConfig, PluginOption } from 'vite'
 import RubyPlugin from 'vite-plugin-ruby'
 
@@ -29,6 +30,9 @@ export default defineConfig({
 
   // Ensure all packages use the same React instance
   resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./app/frontend"),
+    },
     dedupe: ['react', 'react-dom'],
   },
 

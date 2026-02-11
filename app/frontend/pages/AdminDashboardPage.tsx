@@ -1,18 +1,43 @@
 import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import {
   useAdminDashboard,
   useAdminUsers,
   useDeleteUser,
   useRefreshStocks,
 } from '../hooks/useAdminQueries'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import type { AdminUser } from '../types'
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="bg-theme-elevated rounded-lg border border-theme p-4">
-      <p className="text-theme-muted text-sm">{label}</p>
-      <p className="text-2xl font-bold text-theme-primary">{value}</p>
-    </div>
+    <Card>
+      <CardContent className="p-4">
+        <p className="text-muted-foreground text-sm">{label}</p>
+        <p className="text-2xl font-bold text-foreground">{value}</p>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -28,54 +53,59 @@ function UserRow({
   const [showConfirm, setShowConfirm] = useState(false)
 
   return (
-    <tr className="border-b border-theme">
-      <td className="py-3 px-4 text-theme-primary">{user.emailAddress}</td>
-      <td className="py-3 px-4 text-theme-secondary">{user.name || '-'}</td>
-      <td className="py-3 px-4">
-        {user.admin ? (
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary-100 dark:bg-primary-900 text-brand">
-            Admin
-          </span>
-        ) : (
-          <span className="text-xs text-theme-muted">User</span>
-        )}
-      </td>
-      <td className="py-3 px-4 text-theme-secondary">{user.provider || 'email'}</td>
-      <td className="py-3 px-4 text-theme-secondary text-center">{user.radarStocksCount}</td>
-      <td className="py-3 px-4 text-theme-secondary text-center">{user.transactionsCount}</td>
-      <td className="py-3 px-4 text-theme-secondary text-sm">
-        {new Date(user.createdAt).toLocaleDateString()}
-      </td>
-      <td className="py-3 px-4">
-        {showConfirm ? (
-          <div className="flex items-center gap-2">
-            <button
+    <>
+      <TableRow>
+        <TableCell className="text-foreground">{user.emailAddress}</TableCell>
+        <TableCell className="text-muted-foreground">{user.name || '-'}</TableCell>
+        <TableCell>
+          {user.admin ? (
+            <Badge variant="default">Admin</Badge>
+          ) : (
+            <span className="text-xs text-muted-foreground">User</span>
+          )}
+        </TableCell>
+        <TableCell className="text-muted-foreground">{user.provider || 'email'}</TableCell>
+        <TableCell className="text-muted-foreground text-center">{user.radarStocksCount}</TableCell>
+        <TableCell className="text-muted-foreground text-center">{user.transactionsCount}</TableCell>
+        <TableCell className="text-muted-foreground text-sm">
+          {new Date(user.createdAt).toLocaleDateString()}
+        </TableCell>
+        <TableCell>
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => setShowConfirm(true)}
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            Delete
+          </Button>
+        </TableCell>
+      </TableRow>
+
+      <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete user?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {user.emailAddress}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
               onClick={() => {
                 onDelete(user.id)
                 setShowConfirm(false)
               }}
               disabled={isDeleting}
-              className="text-xs px-2 py-1 rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 cursor-pointer"
+              className="bg-destructive text-white hover:bg-destructive/90"
             >
-              Confirm
-            </button>
-            <button
-              onClick={() => setShowConfirm(false)}
-              className="text-xs px-2 py-1 rounded bg-theme-muted text-theme-secondary hover:bg-theme-surface cursor-pointer"
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setShowConfirm(true)}
-            className="text-xs px-2 py-1 rounded text-red-600 hover:bg-red-100 dark:hover:bg-red-900 cursor-pointer"
-          >
-            Delete
-          </button>
-        )}
-      </td>
-    </tr>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
 
@@ -102,17 +132,23 @@ export function AdminDashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-theme-primary mb-8 flex items-center gap-2">
-        <span className="w-1 h-8 bg-brand rounded-full"></span>
+      <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-8 flex items-center gap-2">
+        <span className="w-1 h-8 bg-foreground rounded-full"></span>
         Admin Dashboard
       </h1>
 
       {/* Stats Section */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold text-theme-primary mb-4">Overview</h2>
-        {statsLoading && <p className="text-theme-muted">Loading stats...</p>}
+        <h2 className="text-xl font-semibold text-foreground mb-4">Overview</h2>
+        {statsLoading && (
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" /> Loading stats...
+          </div>
+        )}
         {statsError && (
-          <p className="text-red-500">Failed to load stats: {(statsError as Error).message}</p>
+          <Alert variant="destructive">
+            <AlertDescription>Failed to load stats: {(statsError as Error).message}</AlertDescription>
+          </Alert>
         )}
         {stats && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -132,19 +168,17 @@ export function AdminDashboardPage() {
 
       {/* Stock Refresh Section */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold text-theme-primary mb-4">Stock Data</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-4">Stock Data</h2>
         <div className="flex items-center gap-4">
-          <button
-            onClick={handleRefresh}
-            disabled={refreshStocks.isPending}
-            className="btn-primary px-4 py-2 text-sm disabled:opacity-50 cursor-pointer"
-          >
-            {refreshStocks.isPending ? 'Refreshing...' : 'Refresh All Stocks'}
-          </button>
+          <Button onClick={handleRefresh} disabled={refreshStocks.isPending}>
+            {refreshStocks.isPending ? (
+              <><Loader2 className="size-4 animate-spin" /> Refreshing...</>
+            ) : (
+              'Refresh All Stocks'
+            )}
+          </Button>
           {refreshMessage && (
-            <p
-              className={`text-sm ${refreshMessage.startsWith('Error') ? 'text-red-500' : 'text-green-600 dark:text-green-400'}`}
-            >
+            <p className={`text-sm ${refreshMessage.startsWith('Error') ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400'}`}>
               {refreshMessage}
             </p>
           )}
@@ -153,42 +187,46 @@ export function AdminDashboardPage() {
 
       {/* Users Section */}
       <section>
-        <h2 className="text-xl font-semibold text-theme-primary mb-4">Users</h2>
-        {usersLoading && <p className="text-theme-muted">Loading users...</p>}
+        <h2 className="text-xl font-semibold text-foreground mb-4">Users</h2>
+        {usersLoading && (
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" /> Loading users...
+          </div>
+        )}
         {usersError && (
-          <p className="text-red-500">Failed to load users: {(usersError as Error).message}</p>
+          <Alert variant="destructive">
+            <AlertDescription>Failed to load users: {(usersError as Error).message}</AlertDescription>
+          </Alert>
         )}
         {users && (
-          <div className="overflow-x-auto rounded-lg border border-theme">
-            <table className="w-full text-sm">
-              <thead className="bg-theme-muted">
-                <tr>
-                  <th className="py-3 px-4 text-left text-theme-secondary font-medium">Email</th>
-                  <th className="py-3 px-4 text-left text-theme-secondary font-medium">Name</th>
-                  <th className="py-3 px-4 text-left text-theme-secondary font-medium">Role</th>
-                  <th className="py-3 px-4 text-left text-theme-secondary font-medium">Provider</th>
-                  <th className="py-3 px-4 text-center text-theme-secondary font-medium">
-                    Radar Stocks
-                  </th>
-                  <th className="py-3 px-4 text-center text-theme-secondary font-medium">
-                    Transactions
-                  </th>
-                  <th className="py-3 px-4 text-left text-theme-secondary font-medium">Joined</th>
-                  <th className="py-3 px-4 text-left text-theme-secondary font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <UserRow
-                    key={user.id}
-                    user={user}
-                    onDelete={(id) => deleteUser.mutate(id)}
-                    isDeleting={deleteUser.isPending}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Card>
+            <CardContent className="p-0 overflow-x-auto">
+              <Table className="min-w-[640px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Provider</TableHead>
+                    <TableHead className="text-center">Radar Stocks</TableHead>
+                    <TableHead className="text-center">Transactions</TableHead>
+                    <TableHead>Joined</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((user) => (
+                    <UserRow
+                      key={user.id}
+                      user={user}
+                      onDelete={(id) => deleteUser.mutate(id)}
+                      isDeleting={deleteUser.isPending}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         )}
       </section>
     </div>
