@@ -1,14 +1,5 @@
-/**
- * RadarPage - User's stock radar/watchlist
- *
- * Features:
- * - React Query for all data operations
- * - Stock search with caching
- * - Theme-aware styling
- * - Buy plan mode for planning purchases
- */
-
 import { useState, useEffect } from 'react'
+import { Loader2, ShoppingCart, Minus, Maximize2, Package } from 'lucide-react'
 import { RadarStockCard } from '../components/RadarStockCard'
 import { RadarStockRow } from '../components/RadarStockRow'
 import { ViewToggle } from '../components/ViewToggle'
@@ -21,6 +12,12 @@ import { useRadar, useAddStock, useRemoveStock } from '../hooks/useRadarQueries'
 import { useStockSearch } from '../hooks/useStockQueries'
 import { useViewPreference } from '../contexts/ViewPreferenceContext'
 import { useBuyPlanContext } from '../contexts/BuyPlanContext'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 import type { Stock } from '../types'
 
 const METRICS_PREFERENCE_KEY = 'radar-show-metrics'
@@ -82,262 +79,234 @@ export function RadarPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="section">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-theme-primary flex items-center gap-2">
-            <span className="w-1 h-8 bg-brand rounded-full"></span>
-            My Radar
-          </h1>
-          <BuyPlanModeToggle />
-        </div>
-
-        {/* Buy Plan Mode Banner */}
-        {isBuyPlanMode && (
-          <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg">
-            <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              <span className="font-medium">Buy Plan Mode</span>
-            </div>
-            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-              Add stocks to your buy plan cart. Click "View Cart" at the bottom to save.
-            </p>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2">
+              <span className="w-1 h-8 bg-foreground rounded-full"></span>
+              My Radar
+            </CardTitle>
+            <BuyPlanModeToggle />
           </div>
-        )}
-
-        {/* Search Form - Disabled in buy plan mode */}
-        <div className="mb-8">
-          <form onSubmit={handleSearch} className="flex gap-3">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search stocks by symbol (e.g., AAPL)..."
-              className="input-field flex-1"
-              disabled={isBuyPlanMode}
-            />
-            <button
-              type="submit"
-              disabled={searchLoading || isBuyPlanMode}
-              className="btn-primary"
-            >
-              {searchLoading ? 'Searching...' : 'Search'}
-            </button>
-          </form>
+        </CardHeader>
+        <CardContent>
+          {/* Buy Plan Mode Banner */}
           {isBuyPlanMode && (
-            <p className="text-xs text-theme-muted mt-1">Search is disabled in buy plan mode</p>
+            <Alert variant="warning" className="mb-4">
+              <ShoppingCart className="size-4" />
+              <AlertDescription>
+                <span className="font-medium">Buy Plan Mode</span> — Add stocks to your buy plan cart. Click "View Cart" at the bottom to save.
+              </AlertDescription>
+            </Alert>
           )}
-        </div>
 
-        {/* Search Error */}
-        {searchError && (
-          <div className="alert alert-danger mb-4">
-            {searchError instanceof Error ? searchError.message : 'Search failed'}
-          </div>
-        )}
-
-        {/* Add Stock Error */}
-        {addStock.error && (
-          <div className="alert alert-danger mb-4">
-            {addStock.error instanceof Error ? addStock.error.message : 'Failed to add stock'}
-          </div>
-        )}
-
-        {/* Search Results */}
-        {searchResults && searchResults.length > 0 && (
+          {/* Search Form */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-theme-primary mb-4">Search Results</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {searchResults.map((stock) => (
-                <div key={stock.id} className="relative">
-                  <StockCard stock={stock} />
-                  <div className="mt-3">
-                    {isOnRadar(stock.id) ? (
-                      <span className="badge badge-success">
-                        Already on your radar
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => handleAddStock(stock)}
-                        disabled={addStock.isPending}
-                        className="w-full btn-primary text-sm py-2"
-                      >
-                        {addStock.isPending ? 'Adding...' : 'Add to Radar'}
-                      </button>
-                    )}
+            <form onSubmit={handleSearch} className="flex gap-3">
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search stocks by symbol (e.g., AAPL)..."
+                className="flex-1"
+                disabled={isBuyPlanMode}
+              />
+              <Button type="submit" disabled={searchLoading || isBuyPlanMode}>
+                {searchLoading ? 'Searching...' : 'Search'}
+              </Button>
+            </form>
+            {isBuyPlanMode && (
+              <p className="text-xs text-muted-foreground mt-1">Search is disabled in buy plan mode</p>
+            )}
+          </div>
+
+          {/* Search Error */}
+          {searchError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{searchError instanceof Error ? searchError.message : 'Search failed'}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Add Stock Error */}
+          {addStock.error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{addStock.error instanceof Error ? addStock.error.message : 'Failed to add stock'}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Search Results */}
+          {searchResults && searchResults.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-foreground mb-4">Search Results</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {searchResults.map((stock) => (
+                  <div key={stock.id} className="relative">
+                    <StockCard stock={stock} />
+                    <div className="mt-3">
+                      {isOnRadar(stock.id) ? (
+                        <Badge variant="success">Already on your radar</Badge>
+                      ) : (
+                        <Button
+                          onClick={() => handleAddStock(stock)}
+                          disabled={addStock.isPending}
+                          className="w-full"
+                          size="sm"
+                        >
+                          {addStock.isPending ? 'Adding...' : 'Add to Radar'}
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* No Results Found */}
-        {submittedQuery && !searchLoading && searchResults && searchResults.length === 0 && (
-          <div className="alert alert-warning mb-8">
-            No stocks found for "{submittedQuery.toUpperCase()}". Please check the symbol and try again.
-          </div>
-        )}
-
-        {/* Radar Stocks Section */}
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-theme-primary">
-              Stocks on My Radar ({radarStocks.length})
-            </h2>
-            <div className="flex items-center gap-4">
-              <ViewToggle />
-              <button
-                onClick={() => refetchRadar()}
-                disabled={radarLoading}
-                className="text-sm text-brand hover:underline disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-              >
-                {radarLoading ? 'Refreshing...' : 'Refresh'}
-              </button>
-            </div>
-          </div>
-
-          {/* Radar Error */}
-          {radarError && (
-            <div className="alert alert-danger mb-4">
-              {radarError instanceof Error ? radarError.message : 'Failed to load radar'}
-            </div>
-          )}
-
-          {/* Remove Stock Error */}
-          {removeStock.error && (
-            <div className="alert alert-danger mb-4">
-              {removeStock.error instanceof Error ? removeStock.error.message : 'Failed to remove stock'}
-            </div>
-          )}
-
-          {/* Radar Loading */}
-          {radarLoading && radarStocks.length === 0 && (
-            <div className="text-center py-12">
-              <div className="spinner spinner-lg text-brand mx-auto"></div>
-              <p className="mt-3 text-theme-secondary">Loading your radar...</p>
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!radarLoading && radarStocks.length === 0 && (
-            <div className="text-center py-12 bg-theme-muted rounded-xl">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-theme-elevated flex items-center justify-center">
-                <svg className="w-8 h-8 text-theme-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
+                ))}
               </div>
-              <p className="text-theme-secondary font-medium">Your radar is empty.</p>
-              <p className="text-sm text-theme-muted mt-1">
-                Search for stocks above to add them to your radar.
-              </p>
             </div>
           )}
 
-          {/* Stocks Grid/List */}
-          {radarStocks.length > 0 && viewMode === 'card' && (
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${isBuyPlanMode ? 'pb-20' : ''}`}>
-              {radarStocks.map((stock) => (
-                <div key={stock.id}>
-                  <RadarStockCard
-                    stock={stock}
-                    onRemove={isBuyPlanMode ? undefined : () => handleRemoveStock(stock.id)}
-                    isRemoving={removeStock.isPending}
-                  />
-                  {isBuyPlanMode && (
-                    <div className="mt-2 flex justify-end">
-                      <AddToCartButton stock={stock} />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+          {/* No Results Found */}
+          {submittedQuery && !searchLoading && searchResults && searchResults.length === 0 && (
+            <Alert variant="warning" className="mb-8">
+              <AlertDescription>No stocks found for "{submittedQuery.toUpperCase()}". Please check the symbol and try again.</AlertDescription>
+            </Alert>
           )}
 
-          {/* Compact List View */}
-          {radarStocks.length > 0 && viewMode === 'compact' && (
-            <div className={`flex flex-col gap-2 ${isBuyPlanMode ? 'pb-20' : ''}`}>
-              {/* Controls Row - Hidden on mobile (each row expands individually) */}
-              <div className="hidden md:flex justify-end mb-2">
-                <button
-                  onClick={() => setShowMetrics(!showMetrics)}
-                  className="text-xs px-3 py-1.5 rounded-lg border border-theme
-                             bg-theme-elevated hover:bg-theme-muted
-                             text-theme-secondary hover:text-theme-primary
-                             transition-colors flex items-center gap-1.5"
+          {/* Radar Stocks Section */}
+          <div>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+              <h2 className="text-xl sm:text-2xl font-semibold text-foreground">
+                Stocks on My Radar ({radarStocks.length})
+              </h2>
+              <div className="flex items-center gap-4">
+                <ViewToggle />
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={() => refetchRadar()}
+                  disabled={radarLoading}
+                  className="p-0"
                 >
-                  {showMetrics ? (
-                    <>
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                      </svg>
-                      Collapse
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                      </svg>
-                      Expand
-                    </>
-                  )}
-                </button>
+                  {radarLoading ? 'Refreshing...' : 'Refresh'}
+                </Button>
               </div>
-              {/* Mobile hint */}
-              <p className="md:hidden text-xs text-theme-muted text-center mb-2">
-                Tap a row to expand details
-              </p>
-              {/* Header Row - Hidden on mobile */}
-              <div className="hidden md:flex px-4 py-2 items-center gap-4 text-xs font-medium text-theme-muted uppercase tracking-wide border-b border-theme">
-                <span className="w-8 shrink-0"></span>
-                <span className="w-16 shrink-0">Symbol</span>
-                <span className="flex-1 min-w-0">Name</span>
-                <span className="w-20 text-right shrink-0">Price</span>
-                <span className="w-24 shrink-0">Target</span>
-                <span className="w-16 text-right shrink-0">Status</span>
-                {showMetrics && (
-                  <>
-                    <span className="w-14 text-right shrink-0">PER</span>
-                    <span className="w-16 text-right shrink-0">EPS</span>
-                    <span className="w-14 text-right shrink-0">Div</span>
-                    <span className="w-14 text-right shrink-0">Yield</span>
-                    <span className="w-14 text-right shrink-0">Payout</span>
-                    <span className="w-18 text-right shrink-0">MA50</span>
-                    <span className="w-18 text-right shrink-0">MA200</span>
-                  </>
-                )}
-                {isBuyPlanMode ? (
-                  <span className="w-28 shrink-0 text-right">Add to Cart</span>
-                ) : (
-                  <span className="w-6 shrink-0"></span>
-                )}
+            </div>
+
+            {/* Radar Error */}
+            {radarError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{radarError instanceof Error ? radarError.message : 'Failed to load radar'}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Remove Stock Error */}
+            {removeStock.error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{removeStock.error instanceof Error ? removeStock.error.message : 'Failed to remove stock'}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Radar Loading */}
+            {radarLoading && radarStocks.length === 0 && (
+              <div className="text-center py-12">
+                <Loader2 className="size-8 animate-spin text-muted-foreground mx-auto" />
+                <p className="mt-3 text-muted-foreground">Loading your radar...</p>
               </div>
-              {/* Stock Rows */}
-              <div>
+            )}
+
+            {/* Empty State */}
+            {!radarLoading && radarStocks.length === 0 && (
+              <div className="text-center py-12 bg-muted rounded-xl">
+                <div className="size-16 mx-auto mb-4 rounded-full bg-background flex items-center justify-center">
+                  <Package className="size-8 text-muted-foreground" />
+                </div>
+                <p className="text-foreground font-medium">Your radar is empty.</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Search for stocks above to add them to your radar.
+                </p>
+              </div>
+            )}
+
+            {/* Stocks Grid/List */}
+            {radarStocks.length > 0 && viewMode === 'card' && (
+              <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${isBuyPlanMode ? 'pb-20' : ''}`}>
                 {radarStocks.map((stock) => (
-                  <div key={stock.id} className="flex items-center gap-2 overflow-hidden">
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <RadarStockRow
-                        stock={stock}
-                        onRemove={isBuyPlanMode ? undefined : () => handleRemoveStock(stock.id)}
-                        isRemoving={removeStock.isPending}
-                        showMetrics={showMetrics}
-                      />
-                    </div>
+                  <div key={stock.id}>
+                    <RadarStockCard
+                      stock={stock}
+                      onRemove={isBuyPlanMode ? undefined : () => handleRemoveStock(stock.id)}
+                      isRemoving={removeStock.isPending}
+                    />
                     {isBuyPlanMode && (
-                      <div className="hidden md:block shrink-0">
+                      <div className="mt-2 flex justify-end">
                         <AddToCartButton stock={stock} />
                       </div>
                     )}
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-        </div>
-      </div>
+            )}
+
+            {/* Compact List View */}
+            {radarStocks.length > 0 && viewMode === 'compact' && (
+              <div className={`flex flex-col gap-2 ${isBuyPlanMode ? 'pb-20' : ''}`}>
+                {/* Controls Row */}
+                <div className={cn('hidden justify-end mb-2', showMetrics ? 'xl:flex' : 'md:flex')}>
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    onClick={() => setShowMetrics(!showMetrics)}
+                  >
+                    {showMetrics ? (
+                      <><Minus className="size-3.5" /> Collapse</>
+                    ) : (
+                      <><Maximize2 className="size-3.5" /> Expand</>
+                    )}
+                  </Button>
+                </div>
+                <p className={cn('text-xs text-muted-foreground text-center mb-2', showMetrics ? 'xl:hidden' : 'md:hidden')}>
+                  Tap a row to expand details
+                </p>
+                {/* Header Row */}
+                <div className={cn('hidden px-4 py-2 items-center gap-4 text-xs font-medium text-muted-foreground uppercase tracking-wide border-b overflow-hidden', showMetrics ? 'xl:flex' : 'md:flex')}>
+                  <span className="w-8 shrink-0"></span>
+                  <span className="w-16 shrink-0">Symbol</span>
+                  <span className="w-40 shrink min-w-0">Name</span>
+                  <span className="w-20 text-right shrink-0">Price</span>
+                  <span className="w-24 shrink-0">Target</span>
+                  <span className="w-16 text-right shrink-0">Status</span>
+                  {showMetrics && (
+                    <>
+                      <span className="w-14 text-right shrink-0">PER</span>
+                      <span className="w-16 text-right shrink-0">EPS</span>
+                      <span className="w-14 text-right shrink-0">Div</span>
+                      <span className="w-14 text-right shrink-0">Yield</span>
+                      <span className="w-14 text-right shrink-0">Payout</span>
+                      <span className="w-18 text-right shrink-0">MA50</span>
+                      <span className="w-18 text-right shrink-0">MA200</span>
+                    </>
+                  )}
+                  {isBuyPlanMode ? (
+                    <span className="w-28 shrink-0 text-right">Add to Cart</span>
+                  ) : (
+                    <span className="w-6 shrink-0"></span>
+                  )}
+                </div>
+                {/* Stock Rows */}
+                <div>
+                  {radarStocks.map((stock) => (
+                    <RadarStockRow
+                      key={stock.id}
+                      stock={stock}
+                      onRemove={isBuyPlanMode ? undefined : () => handleRemoveStock(stock.id)}
+                      isRemoving={removeStock.isPending}
+                      showMetrics={showMetrics}
+                      actionSlot={isBuyPlanMode ? <AddToCartButton stock={stock} /> : undefined}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Buy Plan Cart Components */}
       <CartSummaryBar onOpenDrawer={() => setIsCartDrawerOpen(true)} />

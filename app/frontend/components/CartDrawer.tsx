@@ -1,16 +1,28 @@
-/**
- * CartDrawer - Full cart view with Save/Reset/Done buttons
- *
- * Features:
- * - Slide-up drawer on mobile
- * - Full cart item list with quantity controls
- * - Save Cart / Reset Cart buttons
- * - Done Planning button to exit mode
- * - Unsaved changes indicator
- */
-
+import { useState } from 'react'
+import { ShoppingCart, Minus, Plus, Trash2, Loader2 } from 'lucide-react'
 import { useBuyPlanContext } from '../contexts/BuyPlanContext'
 import { StockLogo } from './StockLogo'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+  SheetDescription,
+} from '@/components/ui/sheet'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 
 interface CartDrawerProps {
   isOpen: boolean
@@ -31,34 +43,38 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     exitBuyPlanMode,
   } = useBuyPlanContext()
 
+  const [showResetDialog, setShowResetDialog] = useState(false)
+  const [showDoneDialog, setShowDoneDialog] = useState(false)
+
   const handleSave = async () => {
     await saveCart()
   }
 
   const handleReset = async () => {
-    const confirmed = window.confirm(
-      'This will clear your entire buy plan. Are you sure?'
-    )
-    if (confirmed) {
-      await resetCart()
-    }
+    await resetCart()
+    setShowResetDialog(false)
   }
 
   const handleDone = () => {
     if (isDirty) {
-      const confirmed = window.confirm(
-        'You have unsaved changes. Save before exiting?'
-      )
-      if (confirmed) {
-        saveCart().then(() => {
-          exitBuyPlanMode()
-          onClose()
-        })
-        return
-      }
+      setShowDoneDialog(true)
+    } else {
+      exitBuyPlanMode()
+      onClose()
     }
+  }
+
+  const handleDoneSave = async () => {
+    await saveCart()
     exitBuyPlanMode()
     onClose()
+    setShowDoneDialog(false)
+  }
+
+  const handleDoneDiscard = () => {
+    exitBuyPlanMode()
+    onClose()
+    setShowDoneDialog(false)
   }
 
   const handleIncrement = (stockId: number, currentQty: number) => {
@@ -71,176 +87,143 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     }
   }
 
-  if (!isOpen) return null
-
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-50 bg-black/50 transition-opacity"
-        onClick={onClose}
-      />
+      <Sheet open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
+        <SheetContent side="bottom" className="max-h-[85vh] flex flex-col rounded-t-2xl safe-area-bottom" showCloseButton={true}>
+          <SheetHeader>
+            <SheetTitle>Your Buy Plan</SheetTitle>
+            <SheetDescription className="sr-only">Manage your stock buy plan cart</SheetDescription>
+          </SheetHeader>
 
-      {/* Drawer */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-theme-base rounded-t-2xl
-                   shadow-2xl max-h-[85vh] flex flex-col animate-slide-up
-                   safe-area-bottom"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-theme">
-          <h2 className="text-lg font-bold text-theme-primary">Your Buy Plan</h2>
-          <button
-            onClick={onClose}
-            className="p-2 text-theme-muted hover:text-theme-primary transition-colors cursor-pointer"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {items.length === 0 ? (
-            <div className="text-center py-8 text-theme-muted">
-              <svg
-                className="w-12 h-12 mx-auto mb-3 text-theme-muted"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-              <p>Your cart is empty</p>
-              <p className="text-sm mt-1">Add stocks from your radar to plan purchases</p>
-            </div>
-          ) : (
-            items.map((item) => (
-              <div
-                key={item.stockId}
-                className="card p-3 overflow-hidden"
-              >
-                <div className="flex items-center gap-3 overflow-hidden">
-                  {/* Logo */}
-                  <div className="shrink-0">
-                    <StockLogo symbol={item.symbol} name={item.name} size="sm" />
-                  </div>
-
-                  {/* Stock info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-theme-primary text-sm">{item.symbol}</p>
-                    <p className="text-xs text-theme-muted truncate" title={item.name}>{item.name}</p>
-                    <p className="text-xs text-theme-secondary mt-1">
-                      {item.formattedPrice} × {item.quantity} = {item.formattedSubtotal}
-                    </p>
-                  </div>
-
-                  {/* Quantity controls */}
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      onClick={() => handleDecrement(item.stockId, item.quantity)}
-                      disabled={item.quantity <= 1}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg
-                                 border border-theme text-theme-primary
-                                 hover:bg-theme-accent disabled:text-theme-muted
-                                 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                      </svg>
-                    </button>
-                    <span className="w-8 text-center text-sm font-medium text-theme-primary">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() => handleIncrement(item.stockId, item.quantity)}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg
-                                 border border-theme text-theme-primary
-                                 hover:bg-theme-accent transition-colors cursor-pointer"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => removeFromCart(item.stockId)}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg
-                                 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30
-                                 transition-colors ml-1 cursor-pointer"
-                      title="Remove"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
+          {/* Cart Items */}
+          <div className="flex-1 overflow-y-auto px-4 space-y-3">
+            {items.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <ShoppingCart className="size-12 mx-auto mb-3" />
+                <p>Your cart is empty</p>
+                <p className="text-sm mt-1">Add stocks from your radar to plan purchases</p>
               </div>
-            ))
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-theme space-y-3">
-          {/* Totals */}
-          {items.length > 0 && (
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-theme-muted">
-                Total: {totalItems} share{totalItems !== 1 ? 's' : ''}
-              </span>
-              <span className="font-bold text-theme-primary text-lg">
-                {formattedTotal}
-              </span>
-            </div>
-          )}
-
-          {/* Action buttons */}
-          <div className="flex gap-2">
-            <button
-              onClick={handleSave}
-              disabled={!isDirty || isSaving}
-              className="flex-1 py-2.5 px-4 text-sm font-medium rounded-lg
-                         bg-emerald-500 text-white
-                         hover:bg-emerald-600 dark:hover:bg-emerald-400
-                         disabled:bg-gray-300 dark:disabled:bg-gray-700
-                         disabled:text-gray-500 dark:disabled:text-gray-400
-                         disabled:cursor-not-allowed transition-colors cursor-pointer"
-            >
-              {isSaving ? 'Saving...' : isDirty ? 'Save Cart' : 'Saved'}
-            </button>
-            <button
-              onClick={handleReset}
-              disabled={items.length === 0 || isSaving}
-              className="py-2.5 px-4 text-sm font-medium rounded-lg
-                         border border-red-300 dark:border-red-700
-                         text-red-600 dark:text-red-400
-                         hover:bg-red-50 dark:hover:bg-red-900/30
-                         disabled:border-gray-200 dark:disabled:border-gray-700
-                         disabled:text-gray-400 dark:disabled:text-gray-500
-                         disabled:cursor-not-allowed transition-colors cursor-pointer"
-            >
-              Reset
-            </button>
+            ) : (
+              items.map((item) => (
+                <Card key={item.stockId}>
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="shrink-0">
+                        <StockLogo symbol={item.symbol} name={item.name} size="sm" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-foreground text-sm">{item.symbol}</p>
+                        <p className="text-xs text-muted-foreground truncate" title={item.name}>{item.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {item.formattedPrice} × {item.quantity} = {item.formattedSubtotal}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button
+                          variant="outline"
+                          size="icon-xs"
+                          onClick={() => handleDecrement(item.stockId, item.quantity)}
+                          disabled={item.quantity <= 1}
+                        >
+                          <Minus className="size-3" />
+                        </Button>
+                        <span className="w-8 text-center text-sm font-medium text-foreground">
+                          {item.quantity}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="icon-xs"
+                          onClick={() => handleIncrement(item.stockId, item.quantity)}
+                        >
+                          <Plus className="size-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => removeFromCart(item.stockId)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-1"
+                          title="Remove"
+                        >
+                          <Trash2 className="size-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
 
-          {/* Done button */}
-          <button
-            onClick={handleDone}
-            className="w-full py-2.5 px-4 text-sm font-medium rounded-lg
-                       border border-theme text-theme-primary
-                       hover:bg-theme-accent transition-colors cursor-pointer"
-          >
-            Done Planning
-          </button>
-        </div>
-      </div>
+          <SheetFooter className="flex-col gap-3">
+            {items.length > 0 && (
+              <>
+                <Separator />
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    Total: {totalItems} share{totalItems !== 1 ? 's' : ''}
+                  </span>
+                  <span className="font-bold text-foreground text-lg">{formattedTotal}</span>
+                </div>
+              </>
+            )}
+
+            <div className="flex gap-2">
+              <Button onClick={handleSave} disabled={!isDirty || isSaving} className="flex-1">
+                {isSaving ? (
+                  <><Loader2 className="size-4 animate-spin" /> Saving...</>
+                ) : isDirty ? 'Save Cart' : 'Saved'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowResetDialog(true)}
+                disabled={items.length === 0 || isSaving}
+                className="text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/10"
+              >
+                Reset
+              </Button>
+            </div>
+
+            <Button variant="outline" onClick={handleDone} className="w-full">
+              Done Planning
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
+      {/* Reset Confirmation Dialog */}
+      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset buy plan?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will clear your entire buy plan. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleReset} className="bg-destructive text-white hover:bg-destructive/90">
+              Reset
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Done with unsaved changes Dialog */}
+      <AlertDialog open={showDoneDialog} onOpenChange={setShowDoneDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes. Would you like to save before exiting?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDoneDiscard}>Discard</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDoneSave}>Save & Exit</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

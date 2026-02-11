@@ -1,394 +1,134 @@
-/**
- * Tailwind CSS v4 Entry Point
- *
- * Theme: Emerald green with dark/light mode support
- */
-
 @import "tailwindcss";
+@import "tw-animate-css";
 
-/**
- * Source paths for class detection
- */
 @source "../../components/**/*.tsx";
+@source "../../components/ui/**/*.tsx";
 @source "../../contexts/**/*.tsx";
 @source "../../pages/**/*.tsx";
 @source "../../../views/**/*.html.erb";
 
-/**
- * Tailwind v4 Theme Customization
- * Emerald green color scheme with semantic colors
- */
-@theme {
-  /* Primary: Emerald Green (growth/money theme) */
-  --color-primary-50: #ecfdf5;
-  --color-primary-100: #d1fae5;
-  --color-primary-200: #a7f3d0;
-  --color-primary-300: #6ee7b7;
-  --color-primary-400: #34d399;
-  --color-primary-500: #10b981;
-  --color-primary-600: #059669;
-  --color-primary-700: #047857;
-  --color-primary-800: #065f46;
-  --color-primary-900: #064e3b;
-  --color-primary-950: #022c22;
-}
+@custom-variant dark (&:is(.dark *));
 
-/**
- * CSS Custom Properties for Theme Switching
- * Light theme (default)
- */
 :root {
-  /* Background colors */
-  --bg-base: #ffffff;
-  --bg-surface: #f8fafc;
-  --bg-muted: #f1f5f9;
-  --bg-elevated: #ffffff;
-
-  /* Text colors */
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
-  --text-inverted: #ffffff;
-
-  /* Border colors */
-  --border-default: #e2e8f0;
-  --border-muted: #f1f5f9;
-
-  /* Primary brand colors */
-  --brand-primary: #059669;
-  --brand-primary-hover: #047857;
-  --brand-primary-light: #d1fae5;
-  --brand-primary-text: #065f46;
-
-  /* Semantic colors */
-  --color-success: #10b981;
-  --color-success-light: #d1fae5;
-  --color-warning: #f59e0b;
-  --color-warning-light: #fef3c7;
-  --color-danger: #ef4444;
-  --color-danger-light: #fee2e2;
-  --color-info: #3b82f6;
-  --color-info-light: #dbeafe;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.714);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar-background: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
-/**
- * Dark theme
- */
 .dark {
-  /* Background colors */
-  --bg-base: #0f172a;
-  --bg-surface: #1e293b;
-  --bg-muted: #334155;
-  --bg-elevated: #1e293b;
-
-  /* Text colors */
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --text-inverted: #0f172a;
-
-  /* Border colors */
-  --border-default: #334155;
-  --border-muted: #1e293b;
-
-  /* Primary brand colors (adjusted for dark) */
-  --brand-primary: #10b981;
-  --brand-primary-hover: #34d399;
-  --brand-primary-light: #065f46;
-  --brand-primary-text: #6ee7b7;
-
-  /* Semantic colors (adjusted for dark) */
-  --color-success: #34d399;
-  --color-success-light: #065f46;
-  --color-warning: #fbbf24;
-  --color-warning-light: #78350f;
-  --color-danger: #f87171;
-  --color-danger-light: #7f1d1d;
-  --color-info: #60a5fa;
-  --color-info-light: #1e3a5f;
+  --background: oklch(0.178 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.215 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.215 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar-background: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
 }
 
-/**
- * Base Styles
- */
-html {
-  background-color: var(--bg-base);
-  color: var(--text-primary);
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar-background: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-body {
-  background-color: var(--bg-base);
-  color: var(--text-primary);
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-/**
- * Component Classes
- */
-
-/* Primary Button - Emerald themed */
-.btn-primary {
-  @apply px-6 py-2.5 font-medium rounded-xl
-         shadow-sm hover:shadow-md
-         focus:outline-none focus:ring-2 focus:ring-offset-2
-         cursor-pointer disabled:cursor-not-allowed
-         transition-all duration-200;
-  background-color: var(--brand-primary);
-  color: var(--text-inverted);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--brand-primary-hover);
-}
-
-.btn-primary:focus {
-  --tw-ring-color: var(--brand-primary);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-}
-
-/* Secondary Button */
-.btn-secondary {
-  @apply px-6 py-2.5 font-medium rounded-xl
-         shadow-sm hover:shadow-md
-         focus:outline-none focus:ring-2 focus:ring-offset-2
-         cursor-pointer disabled:cursor-not-allowed
-         transition-all duration-200;
-  background-color: var(--bg-muted);
-  color: var(--text-primary);
-  border: 1px solid var(--border-default);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: var(--border-default);
-}
-
-.btn-secondary:focus {
-  --tw-ring-color: var(--border-default);
-}
-
-.btn-secondary:disabled {
-  opacity: 0.5;
-}
-
-/* Danger Button */
-.btn-danger {
-  @apply px-6 py-2.5 font-medium rounded-xl
-         shadow-sm hover:shadow-md
-         focus:outline-none focus:ring-2 focus:ring-offset-2
-         cursor-pointer disabled:cursor-not-allowed
-         transition-all duration-200;
-  background-color: var(--color-danger);
-  color: var(--text-inverted);
-}
-
-.btn-danger:hover:not(:disabled) {
-  filter: brightness(1.1);
-}
-
-.btn-danger:focus {
-  --tw-ring-color: var(--color-danger);
-}
-
-.btn-danger:disabled {
-  opacity: 0.5;
-}
-
-/* Form Input */
-.input-field {
-  @apply w-full px-4 py-2.5 rounded-xl
-         focus:outline-none focus:ring-2
-         disabled:cursor-not-allowed
-         transition-all duration-200;
-  background-color: var(--bg-base);
-  color: var(--text-primary);
-  border: 1px solid var(--border-default);
-}
-
-.input-field:focus {
-  --tw-ring-color: var(--brand-primary);
-  border-color: var(--brand-primary);
-}
-
-.input-field:disabled {
-  background-color: var(--bg-muted);
-  opacity: 0.7;
-}
-
-.input-field::placeholder {
-  color: var(--text-muted);
-}
-
-/* Card Container */
-.card {
-  @apply rounded-xl shadow-md p-6 transition-all duration-200;
-  background-color: var(--bg-elevated);
-  border: 1px solid var(--border-muted);
-}
-
-/* Card with Hover Effect */
-.card-hover {
-  @apply rounded-xl shadow-md p-6 cursor-pointer
-         transition-all duration-200;
-  background-color: var(--bg-elevated);
-  border: 1px solid var(--border-muted);
-}
-
-.card-hover:hover {
-  @apply shadow-lg;
-  transform: translateY(-2px);
-  border-color: var(--brand-primary);
-}
-
-/* Page Section */
-.section {
-  @apply rounded-xl shadow-lg p-6;
-  background-color: var(--bg-elevated);
-  border: 1px solid var(--border-muted);
-}
-
-/**
- * Utility Classes
- */
-
-/* Badge Styles */
-.badge {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-}
-
-.badge-success {
-  background-color: var(--color-success-light);
-  color: var(--color-success);
-}
-
-.badge-warning {
-  background-color: var(--color-warning-light);
-  color: var(--color-warning);
-}
-
-.badge-danger {
-  background-color: var(--color-danger-light);
-  color: var(--color-danger);
-}
-
-.badge-info {
-  background-color: var(--color-info-light);
-  color: var(--color-info);
-}
-
-/* Spinner */
-.spinner {
-  @apply animate-spin rounded-full border-2 border-current border-t-transparent;
-}
-
-.spinner-sm {
-  @apply w-4 h-4;
-}
-
-.spinner-md {
-  @apply w-6 h-6;
-}
-
-.spinner-lg {
-  @apply w-8 h-8;
-}
-
-/* Alert Styles */
-.alert {
-  @apply px-4 py-3 rounded-xl border;
-}
-
-.alert-success {
-  background-color: var(--color-success-light);
-  border-color: var(--color-success);
-  color: var(--color-success);
-}
-
-.alert-warning {
-  background-color: var(--color-warning-light);
-  border-color: var(--color-warning);
-  color: var(--color-warning);
-}
-
-.alert-danger {
-  background-color: var(--color-danger-light);
-  border-color: var(--color-danger);
-  color: var(--color-danger);
-}
-
-.alert-info {
-  background-color: var(--color-info-light);
-  border-color: var(--color-info);
-  color: var(--color-info);
-}
-
-/* Text color utilities using CSS vars */
-.text-theme-primary {
-  color: var(--text-primary);
-}
-
-.text-theme-secondary {
-  color: var(--text-secondary);
-}
-
-.text-theme-muted {
-  color: var(--text-muted);
-}
-
-.text-brand {
-  color: var(--brand-primary);
-}
-
-/* Background utilities using CSS vars */
-.bg-theme-base {
-  background-color: var(--bg-base);
-}
-
-.bg-theme-surface {
-  background-color: var(--bg-surface);
-}
-
-.bg-theme-muted {
-  background-color: var(--bg-muted);
-}
-
-.bg-theme-elevated {
-  background-color: var(--bg-elevated);
-}
-
-/* Border utilities */
-.border-theme {
-  border-color: var(--border-default);
-}
-
-.border-theme-muted {
-  border-color: var(--border-muted);
-}
-
-/* Hover accent background */
-.hover\:bg-theme-accent:hover {
-  background-color: var(--bg-muted);
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 /* Safe area padding for mobile devices with notches */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-/* Slide-up animation for drawers */
-@keyframes slide-up {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out;
 }

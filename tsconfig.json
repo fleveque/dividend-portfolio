@@ -1,5 +1,11 @@
 {
   "compilerOptions": {
+    // Path aliases
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./app/frontend/*"]
+    },
+
     // Target modern JavaScript (ES2020 features like optional chaining, nullish coalescing)
     "target": "ES2020",
 

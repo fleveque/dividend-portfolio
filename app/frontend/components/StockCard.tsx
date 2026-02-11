@@ -1,38 +1,29 @@
-/**
- * StockCard - Displays a single stock's information in a card format
- *
- * Features:
- * - Company logo with fallback
- * - Theme-aware styling
- * - Hover effects
- */
-
 import { StockCardProps } from '../types'
 import { StockLogo } from './StockLogo'
+import { Card, CardContent } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 
 function StockCard({ stock }: StockCardProps) {
   return (
-    <div className="card-hover p-4">
-      <div className="flex items-start gap-3">
-        {/* Stock Logo */}
-        <StockLogo symbol={stock.symbol} name={stock.name} size="md" />
-
-        {/* Stock Info */}
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-bold text-theme-primary">{stock.symbol}</h3>
-          <p className="text-sm text-theme-secondary truncate" title={stock.name}>
-            {stock.name}
-          </p>
+    <Card className="hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer">
+      <CardContent className="p-4">
+        <div className="flex items-start gap-3">
+          <StockLogo symbol={stock.symbol} name={stock.name} size="md" />
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-bold text-foreground">{stock.symbol}</h3>
+            <p className="text-sm text-muted-foreground truncate" title={stock.name}>
+              {stock.name}
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* Price */}
-      <div className="mt-3 pt-3 border-t border-theme">
-        <p className="text-xl font-semibold text-brand">
+        <Separator className="my-3" />
+
+        <p className="text-xl font-semibold text-foreground">
           {stock.formattedPrice}
         </p>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
 
