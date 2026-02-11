@@ -56,9 +56,11 @@ Decorators in `app/decorators/` use `SimpleDelegator` (not a gem). `StockDecorat
 
 ### Frontend
 
-- Rails 8 with Hotwire (Turbo + Stimulus)
-- Tailwind CSS for styling
-- Importmap for JavaScript (no Node.js build step)
+- React + TypeScript SPA served by Rails, bundled with Vite (`vite.config.ts`)
+- Tailwind CSS v4 for styling with CSS variables for theming (light/dark mode)
+- **shadcn/ui** component library (`app/frontend/components/ui/`) — config in `components.json`, uses `cn()` helper from `app/frontend/lib/utils.ts` for class merging
+- React Query v5 for data fetching (hooks in `app/frontend/hooks/`)
+- Path aliases: `@/` maps to `app/frontend/` (configured in `tsconfig.json` and `vite.config.ts`)
 
 ## Configuration
 
