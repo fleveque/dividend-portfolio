@@ -1,6 +1,6 @@
 class StockDecorator < ApplicationDecorator
-  MONTH_INTERVALS = {
-    "monthly" => 1, "quarterly" => 3, "semi_annual" => 6, "annual" => 12
+  PAYMENTS_PER_YEAR = {
+    "monthly" => 12, "quarterly" => 4, "semi_annual" => 2, "annual" => 1
   }.freeze
 
   def initialize(stock, target_price: nil)
@@ -118,25 +118,26 @@ class StockDecorator < ApplicationDecorator
   end
 
   def payment_months
-    return [] unless dividend_schedule_available?
+    stored = object.payment_months
+    return stored if stored.is_a?(Array) && stored.any?
 
-    interval = MONTH_INTERVALS[payment_frequency]
-    start_month = ex_dividend_date.month
-    months = []
-    month = start_month
-    12.times do
-      months << month if (month - start_month) % interval == 0
-      month = month % 12 + 1
-    end
-    months.sort
+    []
+  end
+
+  def shifted_payment_months
+    stored = object.shifted_payment_months
+    return stored if stored.is_a?(Array) && stored.any?
+
+    []
   end
 
   def dividend_per_payment
     return nil unless dividend_schedule_available? && dividend.present?
 
-    interval = MONTH_INTERVALS[payment_frequency]
-    payments_per_year = 12 / interval
-    (dividend.to_f / payments_per_year).round(4)
+    per_year = PAYMENTS_PER_YEAR[payment_frequency] || payment_months.size
+    return nil unless per_year&.positive?
+
+    (dividend.to_f / per_year).round(4)
   end
 
   def formatted_dividend_per_payment
@@ -159,7 +160,7 @@ class StockDecorator < ApplicationDecorator
   end
 
   def dividend_schedule_available?
-    ex_dividend_date.present? && payment_frequency.present?
+    payment_months.any? && payment_frequency.present?
   end
 
   private

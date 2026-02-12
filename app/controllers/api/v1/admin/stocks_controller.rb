@@ -4,7 +4,7 @@ module Api
       class StocksController < BaseController
         # POST /api/v1/admin/stocks/refresh
         def refresh
-          RefreshStocksJob.perform_later
+          RefreshStocksJob.perform_later(force: true)
           render_success({ enqueued: true })
         end
       end

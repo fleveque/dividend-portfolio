@@ -42,6 +42,7 @@ export interface Stock {
   exDividendDate: string | null
   paymentFrequency: string | null
   paymentMonths: number[]
+  shiftedPaymentMonths: number[]
   dividendPerPayment: number | null
   formattedDividendPerPayment: string
   formattedPaymentFrequency: string

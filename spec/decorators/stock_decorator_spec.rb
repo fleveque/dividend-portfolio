@@ -186,39 +186,39 @@ RSpec.describe StockDecorator do
   end
 
   describe '#payment_months' do
-    context 'when quarterly from March' do
-      let(:stock) { Stock.new(symbol: 'AAPL', price: 150.00, ex_dividend_date: Date.new(2024, 3, 15), payment_frequency: 'quarterly', dividend: 4.00) }
+    context 'when stored months are present' do
+      let(:stock) { Stock.new(symbol: 'AAPL', price: 150.00, payment_frequency: 'quarterly', payment_months: [ 2, 5, 8, 11 ]) }
 
-      it 'returns [3, 6, 9, 12]' do
-        expect(decorated_stock.payment_months).to eq([ 3, 6, 9, 12 ])
+      it 'returns stored months directly' do
+        expect(decorated_stock.payment_months).to eq([ 2, 5, 8, 11 ])
       end
     end
 
-    context 'when monthly' do
-      let(:stock) { Stock.new(symbol: 'O', price: 60.00, ex_dividend_date: Date.new(2024, 1, 10), payment_frequency: 'monthly', dividend: 3.00) }
+    context 'when monthly stock' do
+      let(:stock) { Stock.new(symbol: 'O', price: 60.00, payment_frequency: 'monthly', payment_months: (1..12).to_a) }
 
       it 'returns all 12 months' do
         expect(decorated_stock.payment_months).to eq((1..12).to_a)
       end
     end
 
-    context 'when semi_annual from June' do
-      let(:stock) { Stock.new(symbol: 'TEST', price: 100.00, ex_dividend_date: Date.new(2024, 6, 1), payment_frequency: 'semi_annual', dividend: 2.00) }
+    context 'when semi_annual' do
+      let(:stock) { Stock.new(symbol: 'TEST', price: 100.00, payment_frequency: 'semi_annual', payment_months: [ 6, 12 ]) }
 
       it 'returns [6, 12]' do
         expect(decorated_stock.payment_months).to eq([ 6, 12 ])
       end
     end
 
-    context 'when annual from September' do
-      let(:stock) { Stock.new(symbol: 'TEST', price: 100.00, ex_dividend_date: Date.new(2024, 9, 1), payment_frequency: 'annual', dividend: 5.00) }
-
-      it 'returns [9]' do
-        expect(decorated_stock.payment_months).to eq([ 9 ])
+    context 'when payment_months is nil' do
+      it 'returns empty array' do
+        expect(decorated_stock.payment_months).to eq([])
       end
     end
 
-    context 'when schedule data is missing' do
+    context 'when payment_months is empty array' do
+      let(:stock) { Stock.new(symbol: 'TEST', price: 100.00, payment_months: []) }
+
       it 'returns empty array' do
         expect(decorated_stock.payment_months).to eq([])
       end
@@ -227,7 +227,7 @@ RSpec.describe StockDecorator do
 
   describe '#dividend_per_payment' do
     context 'when $4.00 annual dividend paid quarterly' do
-      let(:stock) { Stock.new(symbol: 'AAPL', price: 150.00, ex_dividend_date: Date.new(2024, 3, 15), payment_frequency: 'quarterly', dividend: 4.00) }
+      let(:stock) { Stock.new(symbol: 'AAPL', price: 150.00, payment_frequency: 'quarterly', dividend: 4.00, payment_months: [ 2, 5, 8, 11 ]) }
 
       it 'returns $1.00 per payment' do
         expect(decorated_stock.dividend_per_payment).to eq(1.0)
@@ -243,7 +243,7 @@ RSpec.describe StockDecorator do
 
   describe '#formatted_dividend_per_payment' do
     context 'with schedule data' do
-      let(:stock) { Stock.new(symbol: 'AAPL', price: 150.00, ex_dividend_date: Date.new(2024, 3, 15), payment_frequency: 'quarterly', dividend: 4.00) }
+      let(:stock) { Stock.new(symbol: 'AAPL', price: 150.00, payment_frequency: 'quarterly', dividend: 4.00, payment_months: [ 2, 5, 8, 11 ]) }
 
       it 'returns formatted string' do
         expect(decorated_stock.formatted_dividend_per_payment).to eq('$1.00')
@@ -280,19 +280,25 @@ RSpec.describe StockDecorator do
   end
 
   describe '#dividend_schedule_available?' do
-    it 'returns true when both fields are present' do
-      stock.ex_dividend_date = Date.new(2024, 3, 15)
+    it 'returns true when payment_months and frequency are present' do
+      stock.payment_months = [ 3, 6, 9, 12 ]
       stock.payment_frequency = 'quarterly'
       expect(decorated_stock.dividend_schedule_available?).to be true
     end
 
-    it 'returns false when ex_dividend_date is nil' do
+    it 'returns false when payment_months is empty' do
       stock.payment_frequency = 'quarterly'
+      stock.payment_months = []
       expect(decorated_stock.dividend_schedule_available?).to be false
     end
 
     it 'returns false when payment_frequency is nil' do
-      stock.ex_dividend_date = Date.new(2024, 3, 15)
+      stock.payment_months = [ 3, 6, 9, 12 ]
+      expect(decorated_stock.dividend_schedule_available?).to be false
+    end
+
+    it 'returns false when payment_months is nil' do
+      stock.payment_frequency = 'quarterly'
       expect(decorated_stock.dividend_schedule_available?).to be false
     end
   end

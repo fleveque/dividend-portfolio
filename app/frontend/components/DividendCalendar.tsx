@@ -26,11 +26,12 @@ export function DividendCalendar({ stocks }: DividendCalendarProps) {
     )
   }
 
-  // Calculate monthly totals
+  // Calculate monthly totals (only primary months, not shifted)
   const monthlyTotals = Array.from({ length: 12 }, (_, i) => {
     const month = i + 1
     return scheduledStocks.reduce((total, stock) => {
-      if (stock.paymentMonths.includes(month) && stock.dividendPerPayment) {
+      const isPrimary = stock.paymentMonths.includes(month) && !stock.shiftedPaymentMonths.includes(month)
+      if (isPrimary && stock.dividendPerPayment) {
         return total + stock.dividendPerPayment
       }
       return total
@@ -57,21 +58,25 @@ export function DividendCalendar({ stocks }: DividendCalendarProps) {
                 </TableCell>
                 {Array.from({ length: 12 }, (_, i) => {
                   const month = i + 1
-                  const isPayment = stock.paymentMonths.includes(month)
+                  const isShifted = stock.shiftedPaymentMonths.includes(month)
+                  const isPrimary = stock.paymentMonths.includes(month) && !isShifted
                   return (
                     <TableCell key={month} className="text-center px-1">
-                      {isPayment ? (
+                      {(isPrimary || isShifted) ? (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span className={cn(
                               'inline-block rounded px-1.5 py-0.5 text-xs font-medium',
-                              'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400'
+                              isPrimary && 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
+                              isShifted && 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400'
                             )}>
-                              ${stock.dividendPerPayment?.toFixed(2)}
+                              {isShifted ? '~' : ''}${stock.dividendPerPayment?.toFixed(2)}
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            {stock.symbol} · {stock.formattedPaymentFrequency} · Ex-div: {stock.formattedExDividendDate}
+                            {stock.symbol} · {stock.formattedPaymentFrequency}
+                            {isShifted && ' · Payment sometimes shifts to this month'}
+                            {!isShifted && ` · Ex-div: ${stock.formattedExDividendDate}`}
                           </TooltipContent>
                         </Tooltip>
                       ) : (

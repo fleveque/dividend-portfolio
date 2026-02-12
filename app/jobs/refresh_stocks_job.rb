@@ -1,8 +1,8 @@
 class RefreshStocksJob < ApplicationJob
   queue_as :default
 
-  def perform
-    unless MarketHoursService.market_open?
+  def perform(force: false)
+    unless force || MarketHoursService.market_open?
       Rails.logger.info "RefreshStocksJob: Market is closed, skipping refresh"
       return
     end

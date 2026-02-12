@@ -9,6 +9,8 @@ FactoryBot.define do
       dividend_yield { 2.50 }
       ex_dividend_date { Date.new(2024, 3, 15) }
       payment_frequency { "quarterly" }
+      payment_months { [ 3, 6, 9, 12 ] }
+      shifted_payment_months { [] }
     end
   end
 end

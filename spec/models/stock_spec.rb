@@ -21,6 +21,15 @@ RSpec.describe Stock, type: :model do
       it { should_not allow_value('weekly').for(:payment_frequency) }
       it { should_not allow_value('bimonthly').for(:payment_frequency) }
     end
+
+    describe 'payment_months' do
+      it { should allow_value(nil).for(:payment_months) }
+      it { should allow_value([]).for(:payment_months) }
+      it { should allow_value([ 1, 6, 12 ]).for(:payment_months) }
+      it { should_not allow_value([ 0 ]).for(:payment_months) }
+      it { should_not allow_value([ 13 ]).for(:payment_months) }
+      it { should_not allow_value([ "march" ]).for(:payment_months) }
+    end
   end
 
   describe ".last_added" do
