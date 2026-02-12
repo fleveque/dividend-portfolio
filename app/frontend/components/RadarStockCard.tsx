@@ -2,6 +2,7 @@ import { Check, X } from 'lucide-react'
 import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateTargetPrice } from '../hooks/useRadarQueries'
 import { StockLogo } from './StockLogo'
+import { DividendMonthGrid } from './DividendMonthGrid'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -147,16 +148,27 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
             <span className="text-muted-foreground">MA50:</span>
             <span className="text-foreground font-medium">{stock.formattedMa50}</span>
           </div>
-          <div className="col-span-2 flex justify-between">
+          <div className="flex justify-between">
             <span className="text-muted-foreground">MA200:</span>
             <span className="text-foreground font-medium">{stock.formattedMa200}</span>
           </div>
         </div>
 
-        {/* Status Indicator */}
-        {stock.percentageDifference && (
+        {/* Dividend Schedule */}
+        {stock.dividendScheduleAvailable && (
           <>
             <Separator className="my-3" />
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">Dividends</span>
+              <DividendMonthGrid paymentMonths={stock.paymentMonths} size="md" />
+            </div>
+          </>
+        )}
+
+        {/* Status Indicator */}
+        <Separator className="my-3" />
+        {stock.percentageDifference ? (
+          <>
             {stock.belowTarget && (
               <Badge variant="success">
                 ↓ {stock.percentageDifference} below target
@@ -173,6 +185,8 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
               </Badge>
             )}
           </>
+        ) : (
+          <Badge variant="outline">No target set</Badge>
         )}
       </CardContent>
     </Card>

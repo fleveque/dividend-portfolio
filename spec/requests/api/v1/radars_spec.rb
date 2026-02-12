@@ -47,6 +47,26 @@ RSpec.describe "Api::V1::Radars", type: :request do
           expect(stock_data["aboveTarget"]).to be true
         end
       end
+
+      context "when stock has dividend schedule data" do
+        let(:dividend_stock) { create(:stock, :with_dividend_schedule, symbol: "JNJ", name: "Johnson & Johnson") }
+        let!(:radar) { create(:radar, user: user) }
+        let!(:radar_stock) { RadarStock.create!(radar: radar, stock: dividend_stock) }
+
+        it "returns dividend schedule fields" do
+          get "/api/v1/radar"
+
+          stock_data = JSON.parse(response.body)["data"]["stocks"].first
+          expect(stock_data["exDividendDate"]).to eq("2024-03-15")
+          expect(stock_data["paymentFrequency"]).to eq("quarterly")
+          expect(stock_data["paymentMonths"]).to eq([ 3, 6, 9, 12 ])
+          expect(stock_data["dividendPerPayment"]).to eq(0.25)
+          expect(stock_data["formattedDividendPerPayment"]).to eq("$0.25")
+          expect(stock_data["formattedPaymentFrequency"]).to eq("Quarterly")
+          expect(stock_data["formattedExDividendDate"]).to eq("Mar 15, 2024")
+          expect(stock_data["dividendScheduleAvailable"]).to be true
+        end
+      end
     end
   end
 

@@ -11,6 +11,16 @@ RSpec.describe Stock, type: :model do
   describe 'validations' do
     it { should validate_presence_of(:symbol) }
     it { should validate_uniqueness_of(:symbol) }
+
+    describe 'payment_frequency' do
+      it { should allow_value(nil).for(:payment_frequency) }
+      it { should allow_value('monthly').for(:payment_frequency) }
+      it { should allow_value('quarterly').for(:payment_frequency) }
+      it { should allow_value('semi_annual').for(:payment_frequency) }
+      it { should allow_value('annual').for(:payment_frequency) }
+      it { should_not allow_value('weekly').for(:payment_frequency) }
+      it { should_not allow_value('bimonthly').for(:payment_frequency) }
+    end
   end
 
   describe ".last_added" do

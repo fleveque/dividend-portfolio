@@ -3,6 +3,7 @@ import { Check, X, ChevronDown, ArrowDown, ArrowUp, Minus as MinusIcon } from 'l
 import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateTargetPrice } from '../hooks/useRadarQueries'
 import { StockLogo } from './StockLogo'
+import { DividendMonthGrid } from './DividendMonthGrid'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -132,6 +133,9 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
               <span className="text-xs text-foreground w-14 text-right shrink-0">{stock.formattedPayoutRatio}</span>
               <span className="text-xs text-foreground w-18 text-right shrink-0">{stock.formattedMa50}</span>
               <span className="text-xs text-foreground w-18 text-right shrink-0">{stock.formattedMa200}</span>
+              <div className="w-28 shrink-0 flex justify-end">
+                <DividendMonthGrid paymentMonths={stock.paymentMonths} size="sm" />
+              </div>
             </>
           )}
 
@@ -241,9 +245,13 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                   <span className="text-muted-foreground">MA50:</span>
                   <span className="text-foreground font-medium">{stock.formattedMa50}</span>
                 </div>
-                <div className="col-span-2 flex justify-between">
+                <div className="flex justify-between">
                   <span className="text-muted-foreground">MA200:</span>
                   <span className="text-foreground font-medium">{stock.formattedMa200}</span>
+                </div>
+                <div className="col-span-2 flex items-center justify-between">
+                  <span className="text-muted-foreground">Dividends:</span>
+                  <DividendMonthGrid paymentMonths={stock.paymentMonths} size="md" />
                 </div>
               </div>
 

@@ -31,7 +31,9 @@ module FinancialDataProviders
         dividend_yield: data[:dividend_yield],
         payout_ratio: data[:payout_ratio],
         ma_50: data[:ma50],
-        ma_200: data[:ma200]
+        ma_200: data[:ma200],
+        ex_dividend_date: data[:ex_dividend_date] || data[:dividend_date],
+        payment_frequency: data[:dividend].present? ? "quarterly" : nil
       }
     end
   end
