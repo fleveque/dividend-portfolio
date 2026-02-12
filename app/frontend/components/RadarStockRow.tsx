@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
+import { ScoreBadge } from './ScoreBadge'
 import type { RadarStock } from '../types'
 
 interface RadarStockRowProps {
@@ -87,6 +88,9 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
           <div className="w-40 shrink min-w-0 overflow-hidden">
             <span className="text-sm text-muted-foreground truncate block" title={stock.name}>{stock.name}</span>
           </div>
+          <div className="w-16 shrink-0">
+            <ScoreBadge score={stock.dividendScore} label={stock.dividendScoreLabel} />
+          </div>
           <span className="font-semibold text-foreground w-20 text-right shrink-0">{stock.formattedPrice}</span>
 
           {/* Target Price - Inline Editable */}
@@ -162,7 +166,10 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
               <StockLogo symbol={stock.symbol} name={stock.name} size="sm" />
             </div>
             <div className="flex-1 min-w-0 overflow-hidden">
-              <span className="font-bold text-foreground text-sm">{stock.symbol}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-foreground text-sm">{stock.symbol}</span>
+                <ScoreBadge score={stock.dividendScore} label={stock.dividendScoreLabel} />
+              </div>
               <p className="text-xs text-muted-foreground truncate" title={stock.name}>{stock.name}</p>
             </div>
             <div className="text-right shrink-0">

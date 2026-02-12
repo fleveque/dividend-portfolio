@@ -68,6 +68,28 @@ RSpec.describe "Api::V1::Radars", type: :request do
           expect(stock_data["dividendScheduleAvailable"]).to be true
         end
       end
+
+      context "when stock has financial metrics" do
+        let(:scored_stock) do
+          create(:stock,
+            symbol: "KO", name: "Coca-Cola", price: 55.00,
+            dividend_yield: 3.2, payout_ratio: 70.0, pe_ratio: 22.0,
+            ma_200: 58.00, dividend: 1.76,
+            payment_frequency: "quarterly", payment_months: [ 4, 7, 10, 12 ])
+        end
+        let!(:radar) { create(:radar, user: user) }
+        let!(:radar_stock) { RadarStock.create!(radar: radar, stock: scored_stock) }
+
+        it "returns dividendScore and dividendScoreLabel" do
+          get "/api/v1/radar"
+
+          stock_data = JSON.parse(response.body)["data"]["stocks"].first
+          expect(stock_data).to have_key("dividendScore")
+          expect(stock_data).to have_key("dividendScoreLabel")
+          expect(stock_data["dividendScore"]).to be_a(Integer)
+          expect(stock_data["dividendScoreLabel"]).to be_a(String)
+        end
+      end
     end
   end
 

@@ -127,7 +127,9 @@ module Api
           formattedDividendPerPayment: decorated.formatted_dividend_per_payment,
           formattedPaymentFrequency: decorated.formatted_payment_frequency,
           formattedExDividendDate: decorated.formatted_ex_dividend_date,
-          dividendScheduleAvailable: decorated.dividend_schedule_available?
+          dividendScheduleAvailable: decorated.dividend_schedule_available?,
+          dividendScore: decorated.dividend_score,
+          dividendScoreLabel: decorated.dividend_score_label
         }
       end
     end

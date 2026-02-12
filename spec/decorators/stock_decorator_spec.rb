@@ -303,6 +303,110 @@ RSpec.describe StockDecorator do
     end
   end
 
+  describe '#dividend_score' do
+    context 'with all excellent metrics' do
+      let(:stock) do
+        Stock.new(
+          symbol: 'GREAT', name: 'Great Co', price: 90.00,
+          dividend_yield: 4.0, payout_ratio: 50.0, pe_ratio: 12.0,
+          ma_200: 100.00, dividend: 3.60,
+          payment_frequency: 'quarterly', payment_months: [ 3, 6, 9, 12 ]
+        )
+      end
+
+      it 'returns 10' do
+        expect(decorated_stock.dividend_score).to eq(10)
+      end
+
+      it 'labels as Strong' do
+        expect(decorated_stock.dividend_score_label).to eq('Strong')
+      end
+    end
+
+    context 'with mixed metrics' do
+      let(:stock) do
+        Stock.new(
+          symbol: 'MIX', name: 'Mix Co', price: 110.00,
+          dividend_yield: 2.0, payout_ratio: 70.0, pe_ratio: 20.0,
+          ma_200: 100.00, dividend: 2.20,
+          payment_frequency: 'quarterly', payment_months: [ 3, 6, 9, 12 ]
+        )
+      end
+
+      it 'returns a score in 5-7' do
+        # yield=1, payout=1, pe=1, ma200=1 (110<=100*1.1), schedule=2 → 6
+        expect(decorated_stock.dividend_score).to eq(6)
+      end
+
+      it 'labels as Fair' do
+        expect(decorated_stock.dividend_score_label).to eq('Fair')
+      end
+    end
+
+    context 'with poor metrics' do
+      let(:stock) do
+        Stock.new(
+          symbol: 'POOR', name: 'Poor Co', price: 200.00,
+          dividend_yield: 0.5, payout_ratio: 90.0, pe_ratio: 30.0,
+          ma_200: 100.00, dividend: 1.00,
+          payment_frequency: 'annual', payment_months: [ 6 ]
+        )
+      end
+
+      it 'returns a score in 1-4' do
+        # yield=0, payout=0, pe=0, ma200=0, schedule=1 → 1
+        expect(decorated_stock.dividend_score).to eq(1)
+      end
+
+      it 'labels as Weak' do
+        expect(decorated_stock.dividend_score_label).to eq('Weak')
+      end
+    end
+
+    context 'with no data (all nil)' do
+      let(:stock) { Stock.new(symbol: 'EMPTY', name: 'Empty Co', price: nil) }
+
+      it 'returns score 0' do
+        expect(decorated_stock.dividend_score).to eq(0)
+      end
+
+      it 'returns nil label (badge hidden)' do
+        expect(decorated_stock.dividend_score_label).to be_nil
+      end
+    end
+
+    context 'with partial data (only yield + payout)' do
+      let(:stock) do
+        Stock.new(
+          symbol: 'PART', name: 'Partial Co', price: nil,
+          dividend_yield: 3.5, payout_ratio: 55.0
+        )
+      end
+
+      it 'still computes a score' do
+        # yield=2, payout=2, rest=0 → 4
+        expect(decorated_stock.dividend_score).to eq(4)
+      end
+
+      it 'returns a label since 2 dimensions have data' do
+        expect(decorated_stock.dividend_score_label).to eq('Weak')
+      end
+    end
+
+    context 'with only one dimension having data' do
+      let(:stock) do
+        Stock.new(
+          symbol: 'ONE', name: 'One Co', price: nil,
+          dividend_yield: 5.0
+        )
+      end
+
+      it 'returns nil label (insufficient data)' do
+        expect(decorated_stock.dividend_score_label).to be_nil
+      end
+    end
+  end
+
   describe '#target_status_text' do
     it 'returns appropriate text for below target' do
       stock.price = 140.00

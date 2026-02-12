@@ -163,7 +163,86 @@ class StockDecorator < ApplicationDecorator
     payment_months.any? && payment_frequency.present?
   end
 
+  def dividend_score
+    yield_score + payout_score + pe_score + ma200_score + schedule_score
+  end
+
+  def dividend_score_label
+    return nil unless has_sufficient_data_for_score?
+
+    case dividend_score
+    when 8..10 then "Strong"
+    when 5..7  then "Fair"
+    else "Weak"
+    end
+  end
+
   private
+
+  def yield_score
+    return 0 unless dividend_yield
+
+    if dividend_yield >= 3
+      2
+    elsif dividend_yield >= 1
+      1
+    else
+      0
+    end
+  end
+
+  def payout_score
+    return 0 unless payout_ratio
+
+    if payout_ratio <= 60
+      2
+    elsif payout_ratio <= 80
+      1
+    else
+      0
+    end
+  end
+
+  def pe_score
+    return 0 unless pe_ratio
+
+    if pe_ratio <= 15
+      2
+    elsif pe_ratio <= 25
+      1
+    else
+      0
+    end
+  end
+
+  def ma200_score
+    return 0 unless price && ma_200
+
+    if price <= ma_200
+      2
+    elsif price <= ma_200 * 1.1
+      1
+    else
+      0
+    end
+  end
+
+  def schedule_score
+    return 0 unless dividend_schedule_available?
+
+    quarterly_or_more = %w[monthly quarterly].include?(payment_frequency)
+    quarterly_or_more ? 2 : 1
+  end
+
+  def has_sufficient_data_for_score?
+    count = 0
+    count += 1 if dividend_yield
+    count += 1 if payout_ratio
+    count += 1 if pe_ratio
+    count += 1 if price && ma_200
+    count += 1 if dividend_schedule_available?
+    count >= 2
+  end
 
   def prices_available?
     target_price.present? && current_price.present?
