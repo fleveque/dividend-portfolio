@@ -55,7 +55,9 @@ RSpec.describe FinancialDataProviders::BaseProvider, type: :model do
             {
               symbol: symbol, price: 150.00,
               ex_dividend_date: Date.new(2024, 3, 14),
-              payment_frequency: "quarterly"
+              payment_frequency: "quarterly",
+              payment_months: [ 3, 6, 9, 12 ],
+              shifted_payment_months: []
             }
           end
         end.new
@@ -67,14 +69,147 @@ RSpec.describe FinancialDataProviders::BaseProvider, type: :model do
         Rails.cache.clear
       end
 
-      it 'includes ex_dividend_date and payment_frequency in normalized data' do
+      it 'includes dividend schedule fields in normalized data' do
         provider_with_schedule.get_stock(symbol)
         expect(stock).to have_received(:update!).with(
           hash_including(
             ex_dividend_date: Date.new(2024, 3, 14),
-            payment_frequency: "quarterly"
+            payment_frequency: "quarterly",
+            payment_months: [ 3, 6, 9, 12 ],
+            shifted_payment_months: []
           )
         )
+      end
+    end
+  end
+
+  describe '#infer_dividend_schedule' do
+    let(:provider) { described_class.new }
+
+    context 'with quarterly history (4 dividends/year)' do
+      let(:history) do
+        [
+          { date: Date.new(2024, 2, 9), amount: 0.24 },
+          { date: Date.new(2024, 5, 10), amount: 0.25 },
+          { date: Date.new(2024, 8, 9), amount: 0.25 },
+          { date: Date.new(2024, 11, 8), amount: 0.25 },
+          { date: Date.new(2025, 2, 7), amount: 0.25 },
+          { date: Date.new(2025, 5, 9), amount: 0.25 },
+          { date: Date.new(2025, 8, 8), amount: 0.25 },
+          { date: Date.new(2025, 11, 7), amount: 0.25 }
+        ]
+      end
+
+      it 'infers quarterly frequency' do
+        result = provider.send(:infer_dividend_schedule, history)
+        expect(result[:payment_frequency]).to eq("quarterly")
+      end
+
+      it 'extracts actual payment months' do
+        result = provider.send(:infer_dividend_schedule, history)
+        expect(result[:payment_months]).to eq([ 2, 5, 8, 11 ])
+      end
+
+      it 'has no shifted months for consistent history' do
+        result = provider.send(:infer_dividend_schedule, history)
+        expect(result[:shifted_payment_months]).to eq([])
+      end
+    end
+
+    context 'with monthly history (12 dividends/year)' do
+      let(:history) do
+        (1..24).map do |i|
+          { date: Date.new(2024, 1, 15) + (i - 1).months, amount: 0.25 }
+        end
+      end
+
+      it 'infers monthly frequency' do
+        result = provider.send(:infer_dividend_schedule, history)
+        expect(result[:payment_frequency]).to eq("monthly")
+      end
+
+      it 'returns all 12 months' do
+        result = provider.send(:infer_dividend_schedule, history)
+        expect(result[:payment_months]).to eq((1..12).to_a)
+      end
+    end
+
+    context 'with semi-annual history (2 dividends/year)' do
+      let(:history) do
+        [
+          { date: Date.new(2024, 6, 1), amount: 1.0 },
+          { date: Date.new(2024, 12, 1), amount: 1.0 },
+          { date: Date.new(2025, 6, 1), amount: 1.0 },
+          { date: Date.new(2025, 12, 1), amount: 1.0 }
+        ]
+      end
+
+      it 'infers semi_annual frequency' do
+        result = provider.send(:infer_dividend_schedule, history)
+        expect(result[:payment_frequency]).to eq("semi_annual")
+      end
+
+      it 'extracts payment months' do
+        result = provider.send(:infer_dividend_schedule, history)
+        expect(result[:payment_months]).to eq([ 6, 12 ])
+      end
+    end
+
+    context 'with annual history (1 dividend/year)' do
+      let(:history) do
+        [
+          { date: Date.new(2024, 9, 1), amount: 5.0 },
+          { date: Date.new(2025, 9, 1), amount: 5.0 }
+        ]
+      end
+
+      it 'infers annual frequency' do
+        result = provider.send(:infer_dividend_schedule, history)
+        expect(result[:payment_frequency]).to eq("annual")
+      end
+    end
+
+    context 'with empty history' do
+      it 'returns empty hash' do
+        result = provider.send(:infer_dividend_schedule, [])
+        expect(result).to eq({})
+      end
+    end
+
+    context 'with nil history' do
+      it 'returns empty hash' do
+        result = provider.send(:infer_dividend_schedule, nil)
+        expect(result).to eq({})
+      end
+    end
+
+    context 'with month-shifting dividends (e.g. KO)' do
+      let(:history) do
+        [
+          { date: Date.new(2024, 3, 14), amount: 0.485 },
+          { date: Date.new(2024, 6, 13), amount: 0.485 },
+          { date: Date.new(2024, 9, 12), amount: 0.485 },
+          { date: Date.new(2024, 11, 29), amount: 0.485 },
+          { date: Date.new(2025, 3, 13), amount: 0.51 },
+          { date: Date.new(2025, 6, 12), amount: 0.51 },
+          { date: Date.new(2025, 9, 11), amount: 0.51 },
+          { date: Date.new(2025, 12, 12), amount: 0.51 }
+        ]
+      end
+
+      it 'infers quarterly frequency' do
+        result = provider.send(:infer_dividend_schedule, history)
+        expect(result[:payment_frequency]).to eq("quarterly")
+      end
+
+      it 'includes all historical months' do
+        result = provider.send(:infer_dividend_schedule, history)
+        expect(result[:payment_months]).to eq([ 3, 6, 9, 11, 12 ])
+      end
+
+      it 'marks months appearing only once as shifted' do
+        result = provider.send(:infer_dividend_schedule, history)
+        expect(result[:shifted_payment_months]).to eq([ 11, 12 ])
       end
     end
   end

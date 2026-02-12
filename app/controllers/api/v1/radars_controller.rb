@@ -122,6 +122,7 @@ module Api
           exDividendDate: stock.ex_dividend_date&.iso8601,
           paymentFrequency: stock.payment_frequency,
           paymentMonths: decorated.payment_months,
+          shiftedPaymentMonths: decorated.shifted_payment_months,
           dividendPerPayment: decorated.dividend_per_payment,
           formattedDividendPerPayment: decorated.formatted_dividend_per_payment,
           formattedPaymentFrequency: decorated.formatted_payment_frequency,

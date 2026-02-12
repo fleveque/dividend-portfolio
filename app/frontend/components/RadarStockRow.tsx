@@ -134,7 +134,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
               <span className="text-xs text-foreground w-18 text-right shrink-0">{stock.formattedMa50}</span>
               <span className="text-xs text-foreground w-18 text-right shrink-0">{stock.formattedMa200}</span>
               <div className="w-28 shrink-0 flex justify-end">
-                <DividendMonthGrid paymentMonths={stock.paymentMonths} size="sm" />
+                <DividendMonthGrid paymentMonths={stock.paymentMonths} shiftedPaymentMonths={stock.shiftedPaymentMonths} size="sm" />
               </div>
             </>
           )}
@@ -251,7 +251,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                 </div>
                 <div className="col-span-2 flex items-center justify-between">
                   <span className="text-muted-foreground">Dividends:</span>
-                  <DividendMonthGrid paymentMonths={stock.paymentMonths} size="md" />
+                  <DividendMonthGrid paymentMonths={stock.paymentMonths} shiftedPaymentMonths={stock.shiftedPaymentMonths} size="md" />
                 </div>
               </div>
 

@@ -60,6 +60,7 @@ RSpec.describe "Api::V1::Radars", type: :request do
           expect(stock_data["exDividendDate"]).to eq("2024-03-15")
           expect(stock_data["paymentFrequency"]).to eq("quarterly")
           expect(stock_data["paymentMonths"]).to eq([ 3, 6, 9, 12 ])
+          expect(stock_data["shiftedPaymentMonths"]).to eq([])
           expect(stock_data["dividendPerPayment"]).to eq(0.25)
           expect(stock_data["formattedDividendPerPayment"]).to eq("$0.25")
           expect(stock_data["formattedPaymentFrequency"]).to eq("Quarterly")

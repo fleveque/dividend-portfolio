@@ -3,7 +3,8 @@ module FinancialDataProviders
     REQUIRED_FIELDS = [ :symbol, :price ].freeze
     OPTIONAL_FIELDS = [
       :name, :eps, :pe_ratio, :dividend, :dividend_yield,
-      :payout_ratio, :ma_50, :ma_200, :ex_dividend_date, :payment_frequency
+      :payout_ratio, :ma_50, :ma_200, :ex_dividend_date, :payment_frequency,
+      :payment_months, :shifted_payment_months
     ].freeze
 
     # Fetches stock data from the provider's API, stores it in the database and caches the result.
@@ -67,6 +68,65 @@ module FinancialDataProviders
       end
     end
 
+    # Infers payment_frequency and payment_months from a dividend history array.
+    # Each entry should be { date: Date, amount: Float }.
+    # Returns { payment_frequency:, payment_months: } or empty hash if insufficient data.
+    def infer_dividend_schedule(history)
+      return {} if history.blank?
+
+      annual_count = estimate_annual_count(history)
+      frequency = frequency_from_count(annual_count)
+      month_counts = history.map { |d| d[:date].month }.tally
+      primary, shifted = classify_months(month_counts)
+
+      # Monthly payers hit all 12 months — boundary timing doesn't mean a shift
+      if frequency == "monthly"
+        primary += shifted
+        shifted = []
+      end
+
+      {
+        payment_frequency: frequency,
+        payment_months: (primary + shifted).uniq.sort,
+        shifted_payment_months: shifted.sort
+      }
+    end
+
+    # Months appearing only once in multi-year data are "shifted" — the payment
+    # occasionally lands there instead of the adjacent primary month.
+    # With only 1 year of data (max count = 1), we can't detect shifts.
+    def classify_months(month_counts)
+      max_count = month_counts.values.max || 0
+      threshold = max_count > 1 ? 2 : 1
+
+      primary = []
+      shifted = []
+      month_counts.each do |month, count|
+        (count >= threshold ? primary : shifted) << month
+      end
+      [ primary, shifted ]
+    end
+
+    def estimate_annual_count(history)
+      return history.size.to_f if history.size <= 1
+
+      dates = history.map { |d| d[:date] }
+      span_days = (dates.last - dates.first).to_f
+      return history.size.to_f if span_days < 90
+
+      avg_interval = span_days / (history.size - 1)
+      (365.25 / avg_interval).round(1)
+    end
+
+    def frequency_from_count(annual_count)
+      case annual_count
+      when 10..Float::INFINITY then "monthly"
+      when 3..9 then "quarterly"
+      when 1.5..2.9 then "semi_annual"
+      else "annual"
+      end
+    end
+
     def normalize_stock_data(data)
       normalized = REQUIRED_FIELDS.each_with_object({}) do |field, hash|
         value = data[field] || data.try(field)
@@ -77,7 +137,7 @@ module FinancialDataProviders
 
       OPTIONAL_FIELDS.each_with_object(normalized) do |field, hash|
         value = data[field] || data.try(field)
-        hash[field] = value if value.present?
+        hash[field] = value if !value.nil? && (value.is_a?(Array) || value.present?)
       end
     end
 

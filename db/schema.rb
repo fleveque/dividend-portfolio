@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_12_065614) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_12_140517) do
   create_table "buy_plan_items", force: :cascade do |t|
     t.integer "buy_plan_id", null: false
     t.integer "stock_id", null: false
@@ -79,6 +79,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_12_065614) do
     t.decimal "ma_200", precision: 10, scale: 2
     t.date "ex_dividend_date"
     t.string "payment_frequency"
+    t.json "payment_months"
+    t.json "shifted_payment_months"
     t.index ["symbol"], name: "index_stocks_on_symbol", unique: true
   end
 

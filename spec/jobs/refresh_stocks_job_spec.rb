@@ -48,5 +48,19 @@ RSpec.describe RefreshStocksJob, type: :job do
         expect(logger).to have_received(:info).with(/Market is closed, skipping refresh/)
       end
     end
+
+    context 'when force is true and market is closed' do
+      before do
+        allow(MarketHoursService).to receive(:market_open?).and_return(false)
+      end
+
+      it 'refreshes stocks regardless of market hours' do
+        allow(FinancialDataService).to receive(:refresh_stocks).and_return({ updated: 5, errors: [] })
+
+        described_class.perform_now(force: true)
+
+        expect(FinancialDataService).to have_received(:refresh_stocks)
+      end
+    end
   end
 end

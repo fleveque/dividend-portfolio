@@ -19,6 +19,7 @@ RSpec.describe FinancialDataProviders::AlphaVantageProvider, type: :model do
       allow(stock).to receive(:update!).and_return(true)
       allow(stock).to receive(:to_json).and_return(stock.attributes.to_json)
       allow(stock).to receive(:assign_attributes).and_return(true)
+      allow(HTTParty).to receive(:get).and_return(double(body: ""))
 
       Rails.cache.clear
     end
@@ -69,17 +70,30 @@ RSpec.describe FinancialDataProviders::AlphaVantageProvider, type: :model do
         }
       end
 
+      let(:dividend_csv) do
+        <<~CSV
+          ex_dividend_date,declaration_date,record_date,payment_date,amount
+          2024-02-09,2024-01-25,2024-02-12,2024-02-16,0.24
+          2024-05-10,2024-04-25,2024-05-13,2024-05-16,0.25
+          2024-08-09,2024-07-25,2024-08-12,2024-08-15,0.25
+          2024-11-08,2024-10-24,2024-11-11,2024-11-14,0.25
+        CSV
+      end
+
       before do
         allow(Alphavantage::Fundamental).to receive(:new).with(symbol: symbol)
           .and_return(double(overview: overview_data))
+        allow(HTTParty).to receive(:get).and_return(double(body: dividend_csv))
       end
 
-      it 'stores ex_dividend_date and payment_frequency' do
+      it 'stores ex_dividend_date and inferred schedule from history' do
         provider.get_stock(symbol)
         expect(stock).to have_received(:update!).with(
           hash_including(
             ex_dividend_date: Date.new(2024, 3, 14),
-            payment_frequency: "quarterly"
+            payment_frequency: "quarterly",
+            payment_months: [ 2, 5, 8, 11 ],
+            shifted_payment_months: []
           )
         )
       end
@@ -97,13 +111,14 @@ RSpec.describe FinancialDataProviders::AlphaVantageProvider, type: :model do
       before do
         allow(Alphavantage::Fundamental).to receive(:new).with(symbol: symbol)
           .and_return(double(overview: overview_data))
+        allow(HTTParty).to receive(:get).and_return(double(body: ""))
       end
 
       it 'does not include dividend schedule fields' do
         provider.get_stock(symbol)
         expect(stock).to have_received(:update!) do |args|
-          expect(args).not_to have_key(:ex_dividend_date)
           expect(args).not_to have_key(:payment_frequency)
+          expect(args).not_to have_key(:payment_months)
         end
       end
     end
@@ -124,6 +139,7 @@ RSpec.describe FinancialDataProviders::AlphaVantageProvider, type: :model do
         allow(Alphavantage::TimeSeries).to receive(:new).with(symbol: 'AAPL').and_return(double(quote: aapl_quote))
         allow(Alphavantage::TimeSeries).to receive(:new).with(symbol: 'MSFT').and_return(double(quote: msft_quote))
         allow(Alphavantage::Fundamental).to receive(:new).and_return(double(overview: nil))
+        allow(HTTParty).to receive(:get).and_return(double(body: ""))
       end
 
       it 'fetches stocks sequentially with rate limiting' do

@@ -160,7 +160,7 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
             <Separator className="my-3" />
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground uppercase tracking-wide">Dividends</span>
-              <DividendMonthGrid paymentMonths={stock.paymentMonths} size="md" />
+              <DividendMonthGrid paymentMonths={stock.paymentMonths} shiftedPaymentMonths={stock.shiftedPaymentMonths} size="md" />
             </div>
           </>
         )}
