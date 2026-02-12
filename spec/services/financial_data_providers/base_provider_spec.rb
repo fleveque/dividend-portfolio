@@ -47,6 +47,36 @@ RSpec.describe FinancialDataProviders::BaseProvider, type: :model do
         )
       end
     end
+
+    context 'with dividend schedule fields' do
+      let(:provider_with_schedule) do
+        Class.new(described_class) do
+          def fetch_and_normalize_stock(symbol)
+            {
+              symbol: symbol, price: 150.00,
+              ex_dividend_date: Date.new(2024, 3, 14),
+              payment_frequency: "quarterly"
+            }
+          end
+        end.new
+      end
+
+      before do
+        allow(Stock).to receive(:find_or_initialize_by).and_return(stock)
+        allow(stock).to receive(:update!).and_return(true)
+        Rails.cache.clear
+      end
+
+      it 'includes ex_dividend_date and payment_frequency in normalized data' do
+        provider_with_schedule.get_stock(symbol)
+        expect(stock).to have_received(:update!).with(
+          hash_including(
+            ex_dividend_date: Date.new(2024, 3, 14),
+            payment_frequency: "quarterly"
+          )
+        )
+      end
+    end
   end
 
   describe '#refresh_stocks' do

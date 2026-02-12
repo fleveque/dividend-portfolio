@@ -38,6 +38,15 @@ export interface Stock {
   formattedPayoutRatio: string
   formattedMa50: string
   formattedMa200: string
+  // Dividend schedule
+  exDividendDate: string | null
+  paymentFrequency: string | null
+  paymentMonths: number[]
+  dividendPerPayment: number | null
+  formattedDividendPerPayment: string
+  formattedPaymentFrequency: string
+  formattedExDividendDate: string
+  dividendScheduleAvailable: boolean
 }
 
 /**

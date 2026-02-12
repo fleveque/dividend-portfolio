@@ -1,4 +1,8 @@
 class StockDecorator < ApplicationDecorator
+  MONTH_INTERVALS = {
+    "monthly" => 1, "quarterly" => 3, "semi_annual" => 6, "annual" => 12
+  }.freeze
+
   def initialize(stock, target_price: nil)
     super(stock)
     @explicit_target_price = target_price
@@ -111,6 +115,51 @@ class StockDecorator < ApplicationDecorator
   def formatted_ma_200
     return "N/A" unless ma_200
     "$#{sprintf('%.2f', ma_200)}"
+  end
+
+  def payment_months
+    return [] unless dividend_schedule_available?
+
+    interval = MONTH_INTERVALS[payment_frequency]
+    start_month = ex_dividend_date.month
+    months = []
+    month = start_month
+    12.times do
+      months << month if (month - start_month) % interval == 0
+      month = month % 12 + 1
+    end
+    months.sort
+  end
+
+  def dividend_per_payment
+    return nil unless dividend_schedule_available? && dividend.present?
+
+    interval = MONTH_INTERVALS[payment_frequency]
+    payments_per_year = 12 / interval
+    (dividend.to_f / payments_per_year).round(4)
+  end
+
+  def formatted_dividend_per_payment
+    value = dividend_per_payment
+    return "N/A" unless value
+
+    "$#{sprintf('%.2f', value)}"
+  end
+
+  def formatted_payment_frequency
+    return "N/A" unless payment_frequency
+
+    payment_frequency.titleize
+  end
+
+  def formatted_ex_dividend_date
+    return "N/A" unless ex_dividend_date
+
+    ex_dividend_date.strftime("%b %d, %Y")
+  end
+
+  def dividend_schedule_available?
+    ex_dividend_date.present? && payment_frequency.present?
   end
 
   private

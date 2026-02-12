@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Loader2, ShoppingCart, Minus, Maximize2, Package } from 'lucide-react'
+import { Loader2, ShoppingCart, Minus, Maximize2, Package, Calendar } from 'lucide-react'
 import { RadarStockCard } from '../components/RadarStockCard'
 import { RadarStockRow } from '../components/RadarStockRow'
 import { ViewToggle } from '../components/ViewToggle'
@@ -8,6 +8,7 @@ import { BuyPlanModeToggle } from '../components/BuyPlanModeToggle'
 import { AddToCartButton } from '../components/AddToCartButton'
 import { CartSummaryBar } from '../components/CartSummaryBar'
 import { CartDrawer } from '../components/CartDrawer'
+import { DividendCalendar } from '../components/DividendCalendar'
 import { useRadar, useAddStock, useRemoveStock } from '../hooks/useRadarQueries'
 import { useStockSearch } from '../hooks/useStockQueries'
 import { useViewPreference } from '../contexts/ViewPreferenceContext'
@@ -281,6 +282,7 @@ export function RadarPage() {
                       <span className="w-14 text-right shrink-0">Payout</span>
                       <span className="w-18 text-right shrink-0">MA50</span>
                       <span className="w-18 text-right shrink-0">MA200</span>
+                      <span className="w-28 text-right shrink-0">Schedule</span>
                     </>
                   )}
                   {isBuyPlanMode ? (
@@ -307,6 +309,21 @@ export function RadarPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Dividend Calendar */}
+      {radarStocks.length > 0 && !isBuyPlanMode && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <Calendar className="size-5" />
+              Dividend Calendar
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DividendCalendar stocks={radarStocks} />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Buy Plan Cart Components */}
       <CartSummaryBar onOpenDrawer={() => setIsCartDrawerOpen(true)} />

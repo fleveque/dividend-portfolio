@@ -185,6 +185,118 @@ RSpec.describe StockDecorator do
     end
   end
 
+  describe '#payment_months' do
+    context 'when quarterly from March' do
+      let(:stock) { Stock.new(symbol: 'AAPL', price: 150.00, ex_dividend_date: Date.new(2024, 3, 15), payment_frequency: 'quarterly', dividend: 4.00) }
+
+      it 'returns [3, 6, 9, 12]' do
+        expect(decorated_stock.payment_months).to eq([ 3, 6, 9, 12 ])
+      end
+    end
+
+    context 'when monthly' do
+      let(:stock) { Stock.new(symbol: 'O', price: 60.00, ex_dividend_date: Date.new(2024, 1, 10), payment_frequency: 'monthly', dividend: 3.00) }
+
+      it 'returns all 12 months' do
+        expect(decorated_stock.payment_months).to eq((1..12).to_a)
+      end
+    end
+
+    context 'when semi_annual from June' do
+      let(:stock) { Stock.new(symbol: 'TEST', price: 100.00, ex_dividend_date: Date.new(2024, 6, 1), payment_frequency: 'semi_annual', dividend: 2.00) }
+
+      it 'returns [6, 12]' do
+        expect(decorated_stock.payment_months).to eq([ 6, 12 ])
+      end
+    end
+
+    context 'when annual from September' do
+      let(:stock) { Stock.new(symbol: 'TEST', price: 100.00, ex_dividend_date: Date.new(2024, 9, 1), payment_frequency: 'annual', dividend: 5.00) }
+
+      it 'returns [9]' do
+        expect(decorated_stock.payment_months).to eq([ 9 ])
+      end
+    end
+
+    context 'when schedule data is missing' do
+      it 'returns empty array' do
+        expect(decorated_stock.payment_months).to eq([])
+      end
+    end
+  end
+
+  describe '#dividend_per_payment' do
+    context 'when $4.00 annual dividend paid quarterly' do
+      let(:stock) { Stock.new(symbol: 'AAPL', price: 150.00, ex_dividend_date: Date.new(2024, 3, 15), payment_frequency: 'quarterly', dividend: 4.00) }
+
+      it 'returns $1.00 per payment' do
+        expect(decorated_stock.dividend_per_payment).to eq(1.0)
+      end
+    end
+
+    context 'when schedule data is missing' do
+      it 'returns nil' do
+        expect(decorated_stock.dividend_per_payment).to be_nil
+      end
+    end
+  end
+
+  describe '#formatted_dividend_per_payment' do
+    context 'with schedule data' do
+      let(:stock) { Stock.new(symbol: 'AAPL', price: 150.00, ex_dividend_date: Date.new(2024, 3, 15), payment_frequency: 'quarterly', dividend: 4.00) }
+
+      it 'returns formatted string' do
+        expect(decorated_stock.formatted_dividend_per_payment).to eq('$1.00')
+      end
+    end
+
+    context 'without schedule data' do
+      it 'returns N/A' do
+        expect(decorated_stock.formatted_dividend_per_payment).to eq('N/A')
+      end
+    end
+  end
+
+  describe '#formatted_payment_frequency' do
+    it 'returns titleized frequency' do
+      stock.payment_frequency = 'semi_annual'
+      expect(decorated_stock.formatted_payment_frequency).to eq('Semi Annual')
+    end
+
+    it 'returns N/A when nil' do
+      expect(decorated_stock.formatted_payment_frequency).to eq('N/A')
+    end
+  end
+
+  describe '#formatted_ex_dividend_date' do
+    it 'returns formatted date' do
+      stock.ex_dividend_date = Date.new(2024, 3, 15)
+      expect(decorated_stock.formatted_ex_dividend_date).to eq('Mar 15, 2024')
+    end
+
+    it 'returns N/A when nil' do
+      expect(decorated_stock.formatted_ex_dividend_date).to eq('N/A')
+    end
+  end
+
+  describe '#dividend_schedule_available?' do
+    it 'returns true when both fields are present' do
+      stock.ex_dividend_date = Date.new(2024, 3, 15)
+      stock.payment_frequency = 'quarterly'
+      expect(decorated_stock.dividend_schedule_available?).to be true
+    end
+
+    it 'returns false when ex_dividend_date is nil' do
+      stock.payment_frequency = 'quarterly'
+      expect(decorated_stock.dividend_schedule_available?).to be false
+    end
+
+    it 'returns false when payment_frequency is nil' do
+      stock.ex_dividend_date = Date.new(2024, 3, 15)
+      expect(decorated_stock.dividend_schedule_available?).to be false
+    end
+  end
+
   describe '#target_status_text' do
     it 'returns appropriate text for below target' do
       stock.price = 140.00

@@ -118,7 +118,15 @@ module Api
           formattedDividendYield: decorated.formatted_dividend_yield,
           formattedPayoutRatio: decorated.formatted_payout_ratio,
           formattedMa50: decorated.formatted_ma_50,
-          formattedMa200: decorated.formatted_ma_200
+          formattedMa200: decorated.formatted_ma_200,
+          exDividendDate: stock.ex_dividend_date&.iso8601,
+          paymentFrequency: stock.payment_frequency,
+          paymentMonths: decorated.payment_months,
+          dividendPerPayment: decorated.dividend_per_payment,
+          formattedDividendPerPayment: decorated.formatted_dividend_per_payment,
+          formattedPaymentFrequency: decorated.formatted_payment_frequency,
+          formattedExDividendDate: decorated.formatted_ex_dividend_date,
+          dividendScheduleAvailable: decorated.dividend_schedule_available?
         }
       end
     end

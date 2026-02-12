@@ -21,7 +21,9 @@ module FinancialDataProviders
         dividend_yield: parse_decimal(overview&.dig("DividendYield")),
         payout_ratio: parse_decimal(overview&.dig("PayoutRatio")),
         ma_50: parse_decimal(overview&.dig("50DayMovingAverage")),
-        ma_200: parse_decimal(overview&.dig("200DayMovingAverage"))
+        ma_200: parse_decimal(overview&.dig("200DayMovingAverage")),
+        ex_dividend_date: parse_date(overview&.dig("ExDividendDate")),
+        payment_frequency: parse_decimal(overview&.dig("DividendPerShare"))&.positive? ? "quarterly" : nil
       }
     rescue StandardError => e
       Rails.logger.error "AlphaVantage API error: #{e.message}"
@@ -48,6 +50,13 @@ module FinancialDataProviders
       return nil if value.blank? || value == "None" || value == "-"
       BigDecimal(value.to_s)
     rescue ArgumentError
+      nil
+    end
+
+    def parse_date(value)
+      return nil if value.blank? || value == "None" || value == "-"
+      Date.parse(value)
+    rescue Date::Error
       nil
     end
   end

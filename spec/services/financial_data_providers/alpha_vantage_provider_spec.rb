@@ -53,6 +53,60 @@ RSpec.describe FinancialDataProviders::AlphaVantageProvider, type: :model do
         expect(result).to be_nil
       end
     end
+
+    context 'when overview includes dividend schedule data' do
+      let(:overview_data) do
+        {
+          "Name" => "Apple Inc.",
+          "EPS" => "6.57",
+          "PERatio" => "28.5",
+          "DividendPerShare" => "0.96",
+          "DividendYield" => "0.0055",
+          "PayoutRatio" => "0.1537",
+          "50DayMovingAverage" => "148.50",
+          "200DayMovingAverage" => "145.00",
+          "ExDividendDate" => "2024-03-14"
+        }
+      end
+
+      before do
+        allow(Alphavantage::Fundamental).to receive(:new).with(symbol: symbol)
+          .and_return(double(overview: overview_data))
+      end
+
+      it 'stores ex_dividend_date and payment_frequency' do
+        provider.get_stock(symbol)
+        expect(stock).to have_received(:update!).with(
+          hash_including(
+            ex_dividend_date: Date.new(2024, 3, 14),
+            payment_frequency: "quarterly"
+          )
+        )
+      end
+    end
+
+    context 'when overview has no dividend data' do
+      let(:overview_data) do
+        {
+          "Name" => "Alphabet Inc.",
+          "DividendPerShare" => "0",
+          "ExDividendDate" => "None"
+        }
+      end
+
+      before do
+        allow(Alphavantage::Fundamental).to receive(:new).with(symbol: symbol)
+          .and_return(double(overview: overview_data))
+      end
+
+      it 'does not include dividend schedule fields' do
+        provider.get_stock(symbol)
+        expect(stock).to have_received(:update!) do |args|
+          expect(args).not_to have_key(:ex_dividend_date)
+          expect(args).not_to have_key(:payment_frequency)
+        end
+      end
+    end
   end
 
   describe '#refresh_stocks' do

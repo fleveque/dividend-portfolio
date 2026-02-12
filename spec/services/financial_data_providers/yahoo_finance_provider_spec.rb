@@ -28,6 +28,29 @@ RSpec.describe FinancialDataProviders::YahooFinanceProvider, type: :model do
     end
   end
 
+  describe 'normalize_yahoo_data' do
+    it 'passes through ex_dividend_date from the gem' do
+      data = {
+        symbol: 'AAPL', price: 150.00, dividend: 0.96,
+        ex_dividend_date: Date.new(2024, 3, 14)
+      }
+      result = provider.send(:normalize_yahoo_data, data)
+      expect(result[:ex_dividend_date]).to eq(Date.new(2024, 3, 14))
+    end
+
+    it 'infers quarterly frequency for dividend-paying stocks' do
+      data = { symbol: 'AAPL', price: 150.00, dividend: 0.96 }
+      result = provider.send(:normalize_yahoo_data, data)
+      expect(result[:payment_frequency]).to eq("quarterly")
+    end
+
+    it 'returns nil frequency for non-dividend stocks' do
+      data = { symbol: 'GOOG', price: 140.00, dividend: nil }
+      result = provider.send(:normalize_yahoo_data, data)
+      expect(result[:payment_frequency]).to be_nil
+    end
+  end
+
   describe '#refresh_stocks' do
     before { Rails.cache.clear }
 
