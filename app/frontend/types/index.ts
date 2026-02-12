@@ -48,6 +48,9 @@ export interface Stock {
   formattedPaymentFrequency: string
   formattedExDividendDate: string
   dividendScheduleAvailable: boolean
+  // Dividend score
+  dividendScore: number
+  dividendScoreLabel: string | null
 }
 
 /**

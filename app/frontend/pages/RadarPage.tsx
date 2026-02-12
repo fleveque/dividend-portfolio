@@ -270,6 +270,7 @@ export function RadarPage() {
                   <span className="w-8 shrink-0"></span>
                   <span className="w-16 shrink-0">Symbol</span>
                   <span className="w-40 shrink min-w-0">Name</span>
+                  <span className="w-16 shrink-0">Score</span>
                   <span className="w-20 text-right shrink-0">Price</span>
                   <span className="w-24 shrink-0">Target</span>
                   <span className="w-16 text-right shrink-0">Status</span>

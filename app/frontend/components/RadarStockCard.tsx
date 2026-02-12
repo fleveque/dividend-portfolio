@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
+import { ScoreBadge } from './ScoreBadge'
 import type { RadarStock } from '../types'
 
 interface RadarStockCardProps {
@@ -56,7 +57,10 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
           <div className="flex-1 min-w-0 overflow-hidden">
             <div className="flex justify-between items-start gap-2">
               <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-bold text-foreground">{stock.symbol}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-foreground">{stock.symbol}</h3>
+                  <ScoreBadge score={stock.dividendScore} label={stock.dividendScoreLabel} />
+                </div>
                 <p className="text-sm text-muted-foreground truncate" title={stock.name}>
                   {stock.name}
                 </p>
