@@ -16,7 +16,14 @@ RSpec.describe "Api::V1::Stocks", type: :request do
 
       json = JSON.parse(response.body)
       stock_data = json["data"].first
-      expect(stock_data).to include("id", "symbol", "name", "price", "formattedPrice")
+      expect(stock_data).to include(
+        "id", "symbol", "name", "price", "formattedPrice",
+        "formattedPeRatio", "formattedEps", "formattedDividend",
+        "formattedDividendYield", "formattedPayoutRatio",
+        "formattedMa50", "formattedMa200",
+        "dividendScore", "dividendScoreLabel",
+        "paymentMonths", "dividendScheduleAvailable"
+      )
     end
   end
 
@@ -90,6 +97,18 @@ RSpec.describe "Api::V1::Stocks", type: :request do
       json = JSON.parse(response.body)
       expect(json["data"].length).to eq(1)
       expect(json["data"].first["symbol"]).to eq("AAPL")
+    end
+
+    it "returns stock metrics in search results" do
+      get "/api/v1/stocks/search", params: { query: "AAPL" }
+
+      json = JSON.parse(response.body)
+      stock_data = json["data"].first
+      expect(stock_data).to include(
+        "formattedPeRatio", "formattedEps", "formattedDividend",
+        "dividendScore", "dividendScoreLabel",
+        "paymentMonths", "dividendScheduleAvailable"
+      )
     end
 
     it "returns empty array for no results" do
