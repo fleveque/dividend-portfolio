@@ -23,6 +23,7 @@ Rails.application.routes.draw do
         collection do
           get :last_added   # GET /api/v1/stocks/last_added
           get :most_added   # GET /api/v1/stocks/most_added
+          get :top_scored   # GET /api/v1/stocks/top_scored
           get :search       # GET /api/v1/stocks/search?query=AAPL
         end
       end

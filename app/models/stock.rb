@@ -14,6 +14,17 @@ class Stock < ApplicationRecord
     order(created_at: :desc).limit(limit)
   end
 
+  def self.top_scored(limit = 10)
+    where.not(price: nil).filter_map do |stock|
+      decorated = StockDecorator.new(stock)
+      [ stock, decorated.dividend_score ] if decorated.dividend_score >= 5 && decorated.dividend_score_label.present?
+    end.group_by { |_, score| score }
+      .sort_by { |score, _| -score }
+      .flat_map { |_, group| group.shuffle }
+      .first(limit)
+      .map(&:first)
+  end
+
   private
 
   def payment_months_format

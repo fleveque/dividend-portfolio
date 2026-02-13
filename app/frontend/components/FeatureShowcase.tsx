@@ -4,8 +4,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
   type CarouselApi,
 } from '@/components/ui/carousel'
 import { cn } from '@/lib/utils'
@@ -92,9 +90,9 @@ export function FeatureShowcase() {
         <CarouselContent>
           {slides.map((slide) => (
             <CarouselItem key={slide.title}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center p-2">
+              <div className="flex flex-col gap-4 p-2">
                 {/* Text */}
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2 text-foreground">
                     <slide.icon className="size-5" />
                     <h3 className="text-lg font-semibold">{slide.title}</h3>
@@ -105,12 +103,7 @@ export function FeatureShowcase() {
                 </div>
 
                 {/* Screenshot */}
-                <div
-                  className={cn(
-                    'flex justify-center',
-                    slide.mobile && 'md:justify-center',
-                  )}
-                >
+                <div className="flex justify-center flex-1 min-h-0">
                   <img
                     src={slide.image}
                     alt={slide.title}
@@ -118,8 +111,8 @@ export function FeatureShowcase() {
                     className={cn(
                       'rounded-lg border shadow-sm',
                       slide.mobile
-                        ? 'max-h-72 w-auto object-contain'
-                        : 'w-full max-h-80 object-cover object-top',
+                        ? 'max-h-96 w-auto object-contain'
+                        : 'w-full max-h-96 object-cover object-top',
                     )}
                   />
                 </div>
@@ -128,8 +121,6 @@ export function FeatureShowcase() {
           ))}
         </CarouselContent>
 
-        <CarouselPrevious className="hidden md:inline-flex" />
-        <CarouselNext className="hidden md:inline-flex" />
       </Carousel>
 
       {/* Dot navigation */}
@@ -140,7 +131,7 @@ export function FeatureShowcase() {
             aria-label={`Go to slide ${i + 1}`}
             onClick={() => scrollTo(i)}
             className={cn(
-              'h-2 rounded-full transition-all duration-300',
+              'h-2 rounded-full transition-all duration-300 cursor-pointer',
               i === current
                 ? 'w-6 bg-foreground'
                 : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50',

@@ -1,6 +1,7 @@
 import { Loader2 } from 'lucide-react'
 import { Logo } from '../components/Logo'
 import { FeatureShowcase } from '../components/FeatureShowcase'
+import { TopScoredShowcase } from '../components/TopScoredShowcase'
 import { CompactStockRow } from '../components/CompactStockRow'
 import { useLastAddedStocks, useMostAddedStocks } from '../hooks/useStockQueries'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -37,12 +38,19 @@ export function HomePage() {
         </p>
       </div>
 
-      {/* Feature Showcase */}
-      <Card className="mb-8">
-        <CardContent className="px-8 md:px-14 py-6">
-          <FeatureShowcase />
-        </CardContent>
-      </Card>
+      {/* Feature Showcase + Top Scored Stocks */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-8">
+        <Card className="lg:col-span-3">
+          <CardContent className="px-6 pt-4 pb-5">
+            <FeatureShowcase />
+          </CardContent>
+        </Card>
+        <Card className="lg:col-span-2">
+          <CardContent className="px-6 pt-4 pb-5">
+            <TopScoredShowcase />
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Stock Lists — side by side on large screens */}
       <div className="grid lg:grid-cols-2 gap-4">

@@ -72,7 +72,7 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
                   size="xs"
                   onClick={onRemove}
                   disabled={isRemoving}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0 cursor-pointer"
                 >
                   {isRemoving ? '...' : 'Remove'}
                 </Button>
