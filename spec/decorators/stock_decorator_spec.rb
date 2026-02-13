@@ -407,6 +407,143 @@ RSpec.describe StockDecorator do
     end
   end
 
+  describe '#formatted_fifty_two_week_high' do
+    it 'formats with dollar sign' do
+      stock.fifty_two_week_high = 200.00
+      expect(decorated_stock.formatted_fifty_two_week_high).to eq('$200.00')
+    end
+
+    it 'returns N/A when nil' do
+      expect(decorated_stock.formatted_fifty_two_week_high).to eq('N/A')
+    end
+  end
+
+  describe '#formatted_fifty_two_week_low' do
+    it 'formats with dollar sign' do
+      stock.fifty_two_week_low = 80.00
+      expect(decorated_stock.formatted_fifty_two_week_low).to eq('$80.00')
+    end
+
+    it 'returns N/A when nil' do
+      expect(decorated_stock.formatted_fifty_two_week_low).to eq('N/A')
+    end
+  end
+
+  describe '#fifty_two_week_range_position' do
+    context 'when price is at midpoint' do
+      before do
+        stock.price = 140.00
+        stock.fifty_two_week_high = 200.00
+        stock.fifty_two_week_low = 80.00
+      end
+
+      it 'returns 50.0' do
+        expect(decorated_stock.fifty_two_week_range_position).to eq(50.0)
+      end
+    end
+
+    context 'when price is at the low' do
+      before do
+        stock.price = 80.00
+        stock.fifty_two_week_high = 200.00
+        stock.fifty_two_week_low = 80.00
+      end
+
+      it 'returns 0.0' do
+        expect(decorated_stock.fifty_two_week_range_position).to eq(0.0)
+      end
+    end
+
+    context 'when price is at the high' do
+      before do
+        stock.price = 200.00
+        stock.fifty_two_week_high = 200.00
+        stock.fifty_two_week_low = 80.00
+      end
+
+      it 'returns 100.0' do
+        expect(decorated_stock.fifty_two_week_range_position).to eq(100.0)
+      end
+    end
+
+    context 'when high equals low (zero range)' do
+      before do
+        stock.price = 100.00
+        stock.fifty_two_week_high = 100.00
+        stock.fifty_two_week_low = 100.00
+      end
+
+      it 'returns 50.0' do
+        expect(decorated_stock.fifty_two_week_range_position).to eq(50.0)
+      end
+    end
+
+    context 'when price exceeds high (stale data)' do
+      before do
+        stock.price = 220.00
+        stock.fifty_two_week_high = 200.00
+        stock.fifty_two_week_low = 80.00
+      end
+
+      it 'clamps to 100.0' do
+        expect(decorated_stock.fifty_two_week_range_position).to eq(100.0)
+      end
+    end
+
+    context 'when price is below low (stale data)' do
+      before do
+        stock.price = 60.00
+        stock.fifty_two_week_high = 200.00
+        stock.fifty_two_week_low = 80.00
+      end
+
+      it 'clamps to 0.0' do
+        expect(decorated_stock.fifty_two_week_range_position).to eq(0.0)
+      end
+    end
+
+    context 'when data is missing' do
+      it 'returns nil when high is nil' do
+        stock.fifty_two_week_low = 80.00
+        expect(decorated_stock.fifty_two_week_range_position).to be_nil
+      end
+
+      it 'returns nil when low is nil' do
+        stock.fifty_two_week_high = 200.00
+        expect(decorated_stock.fifty_two_week_range_position).to be_nil
+      end
+
+      it 'returns nil when price is nil' do
+        stock.price = nil
+        stock.fifty_two_week_high = 200.00
+        stock.fifty_two_week_low = 80.00
+        expect(decorated_stock.fifty_two_week_range_position).to be_nil
+      end
+    end
+  end
+
+  describe '#fifty_two_week_data_available?' do
+    it 'returns true when both high and low are present' do
+      stock.fifty_two_week_high = 200.00
+      stock.fifty_two_week_low = 80.00
+      expect(decorated_stock.fifty_two_week_data_available?).to be true
+    end
+
+    it 'returns false when high is nil' do
+      stock.fifty_two_week_low = 80.00
+      expect(decorated_stock.fifty_two_week_data_available?).to be false
+    end
+
+    it 'returns false when low is nil' do
+      stock.fifty_two_week_high = 200.00
+      expect(decorated_stock.fifty_two_week_data_available?).to be false
+    end
+
+    it 'returns false when both are nil' do
+      expect(decorated_stock.fifty_two_week_data_available?).to be false
+    end
+  end
+
   describe '#target_status_text' do
     it 'returns appropriate text for below target' do
       stock.price = 140.00

@@ -22,7 +22,8 @@ RSpec.describe "Api::V1::Stocks", type: :request do
         "formattedDividendYield", "formattedPayoutRatio",
         "formattedMa50", "formattedMa200",
         "dividendScore", "dividendScoreLabel",
-        "paymentMonths", "dividendScheduleAvailable"
+        "paymentMonths", "dividendScheduleAvailable",
+        "fiftyTwoWeekDataAvailable"
       )
     end
   end
@@ -107,7 +108,8 @@ RSpec.describe "Api::V1::Stocks", type: :request do
       expect(stock_data).to include(
         "formattedPeRatio", "formattedEps", "formattedDividend",
         "dividendScore", "dividendScoreLabel",
-        "paymentMonths", "dividendScheduleAvailable"
+        "paymentMonths", "dividendScheduleAvailable",
+        "fiftyTwoWeekDataAvailable"
       )
     end
 

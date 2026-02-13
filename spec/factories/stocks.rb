@@ -12,5 +12,10 @@ FactoryBot.define do
       payment_months { [ 3, 6, 9, 12 ] }
       shifted_payment_months { [] }
     end
+
+    trait :with_52_week_range do
+      fifty_two_week_high { 200.00 }
+      fifty_two_week_low { 80.00 }
+    end
   end
 end

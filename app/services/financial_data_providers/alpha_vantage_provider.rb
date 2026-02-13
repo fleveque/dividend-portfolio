@@ -39,6 +39,8 @@ module FinancialDataProviders
         payout_ratio: parse_decimal(overview&.dig("PayoutRatio")),
         ma_50: parse_decimal(overview&.dig("50DayMovingAverage")),
         ma_200: parse_decimal(overview&.dig("200DayMovingAverage")),
+        fifty_two_week_high: parse_decimal(overview&.dig("52WeekHigh")),
+        fifty_two_week_low: parse_decimal(overview&.dig("52WeekLow")),
         ex_dividend_date: parse_date(overview&.dig("ExDividendDate"))
       }
     end

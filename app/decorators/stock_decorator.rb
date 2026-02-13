@@ -117,6 +117,29 @@ class StockDecorator < ApplicationDecorator
     "$#{sprintf('%.2f', ma_200)}"
   end
 
+  def formatted_fifty_two_week_high
+    return "N/A" unless fifty_two_week_high
+    format_currency(fifty_two_week_high)
+  end
+
+  def formatted_fifty_two_week_low
+    return "N/A" unless fifty_two_week_low
+    format_currency(fifty_two_week_low)
+  end
+
+  def fifty_two_week_range_position
+    return nil unless fifty_two_week_data_available? && price
+
+    range = fifty_two_week_high - fifty_two_week_low
+    return 50.0 if range.zero?
+
+    ((price - fifty_two_week_low).to_f / range.to_f * 100).clamp(0.0, 100.0).round(1)
+  end
+
+  def fifty_two_week_data_available?
+    fifty_two_week_high.present? && fifty_two_week_low.present?
+  end
+
   def payment_months
     stored = object.payment_months
     return stored if stored.is_a?(Array) && stored.any?

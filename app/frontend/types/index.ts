@@ -51,6 +51,13 @@ export interface Stock {
   // Dividend score
   dividendScore: number
   dividendScoreLabel: string | null
+  // 52-week range
+  fiftyTwoWeekHigh: number | null
+  fiftyTwoWeekLow: number | null
+  formattedFiftyTwoWeekHigh: string
+  formattedFiftyTwoWeekLow: string
+  fiftyTwoWeekRangePosition: number | null
+  fiftyTwoWeekDataAvailable: boolean
 }
 
 /**
