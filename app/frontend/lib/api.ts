@@ -97,6 +97,11 @@ export const stocksApi = {
   getMostAdded: () => apiFetch<Stock[]>('/stocks/most_added'),
 
   /**
+   * Get stocks with the highest dividend scores
+   */
+  getTopScored: () => apiFetch<Stock[]>('/stocks/top_scored'),
+
+  /**
    * Search for a stock by symbol
    */
   search: (query: string) =>

@@ -83,6 +83,35 @@ RSpec.describe "Api::V1::Stocks", type: :request do
     end
   end
 
+  describe "GET /api/v1/stocks/top_scored" do
+    it "returns stocks with dividend score >= 5" do
+      # Stock with high score: yield >= 3 (2pts), payout <= 60 (2pts), pe <= 15 (2pts) = 6
+      create(:stock, symbol: "HIGH",
+        price: 100.00, dividend_yield: 4.0, payout_ratio: 50.0, pe_ratio: 12.0)
+      # Stock with low score: no metrics = 0
+      create(:stock, symbol: "LOW", price: 50.00)
+
+      get "/api/v1/stocks/top_scored"
+
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body)
+      expect(json["success"]).to be true
+      symbols = json["data"].map { |s| s["symbol"] }
+      expect(symbols).to include("HIGH")
+      expect(symbols).not_to include("LOW")
+    end
+
+    it "returns empty array when no stocks qualify" do
+      create(:stock, symbol: "LOW", price: 50.00)
+
+      get "/api/v1/stocks/top_scored"
+
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body)
+      expect(json["data"]).to eq([])
+    end
+  end
+
   describe "GET /api/v1/stocks/search" do
     let!(:stock) { create(:stock, symbol: "AAPL", name: "Apple Inc.") }
 

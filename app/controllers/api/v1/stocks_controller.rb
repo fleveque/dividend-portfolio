@@ -38,6 +38,15 @@ module Api
         render_success(stocks.map { |s| serialize_stock(s) })
       end
 
+      # GET /api/v1/stocks/top_scored
+      # Returns stocks with the highest dividend scores
+      def top_scored
+        stocks = Rails.cache.fetch("top_scored_stocks", expires_in: 1.hour) do
+          Stock.top_scored(10)
+        end
+        render_success(stocks.map { |s| serialize_stock(s) })
+      end
+
       # GET /api/v1/stocks/search?query=AAPL
       # Searches for a stock by symbol using the financial data provider
       def search

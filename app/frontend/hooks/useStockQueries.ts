@@ -51,6 +51,20 @@ export function useMostAddedStocks() {
 }
 
 /**
+ * Fetch the top-scored dividend stocks
+ *
+ * Usage:
+ *   const { data, isLoading, error } = useTopScoredStocks()
+ */
+export function useTopScoredStocks() {
+  return useQuery({
+    queryKey: ['stocks', 'topScored'],
+    queryFn: stocksApi.getTopScored,
+    staleTime: 1000 * 60 * 5, // Consider fresh for 5 minutes
+  })
+}
+
+/**
  * Search for stocks by symbol
  *
  * The `enabled` option prevents the query from running when query is empty.
