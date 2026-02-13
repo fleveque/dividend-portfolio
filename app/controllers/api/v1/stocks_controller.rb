@@ -91,7 +91,13 @@ module Api
           formattedExDividendDate: decorated.formatted_ex_dividend_date,
           dividendScheduleAvailable: decorated.dividend_schedule_available?,
           dividendScore: decorated.dividend_score,
-          dividendScoreLabel: decorated.dividend_score_label
+          dividendScoreLabel: decorated.dividend_score_label,
+          fiftyTwoWeekHigh: stock.fifty_two_week_high,
+          fiftyTwoWeekLow: stock.fifty_two_week_low,
+          formattedFiftyTwoWeekHigh: decorated.formatted_fifty_two_week_high,
+          formattedFiftyTwoWeekLow: decorated.formatted_fifty_two_week_low,
+          fiftyTwoWeekRangePosition: decorated.fifty_two_week_range_position,
+          fiftyTwoWeekDataAvailable: decorated.fifty_two_week_data_available?
         }
       end
     end

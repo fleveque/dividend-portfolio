@@ -40,6 +40,8 @@ module FinancialDataProviders
         payout_ratio: data[:payout_ratio],
         ma_50: data[:ma50],
         ma_200: data[:ma200],
+        fifty_two_week_high: data[:fifty_two_week_high],
+        fifty_two_week_low: data[:fifty_two_week_low],
         ex_dividend_date: data[:ex_dividend_date] || data[:dividend_date]
       }
     end

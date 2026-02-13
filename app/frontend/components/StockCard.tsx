@@ -1,6 +1,7 @@
 import { StockCardProps } from '../types'
 import { StockLogo } from './StockLogo'
 import { DividendMonthGrid } from './DividendMonthGrid'
+import { FiftyTwoWeekRange } from './FiftyTwoWeekRange'
 import { ScoreBadge } from './ScoreBadge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -69,6 +70,21 @@ function StockCard({ stock }: StockCardProps) {
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground uppercase tracking-wide">Dividends</span>
               <DividendMonthGrid paymentMonths={stock.paymentMonths} shiftedPaymentMonths={stock.shiftedPaymentMonths} size="md" />
+            </div>
+          </>
+        )}
+
+        {/* 52-Week Range */}
+        {stock.fiftyTwoWeekDataAvailable && (
+          <>
+            <Separator className="my-3" />
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground uppercase tracking-wide shrink-0">52W</span>
+              <FiftyTwoWeekRange
+                low={stock.formattedFiftyTwoWeekLow}
+                high={stock.formattedFiftyTwoWeekHigh}
+                position={stock.fiftyTwoWeekRangePosition}
+              />
             </div>
           </>
         )}
