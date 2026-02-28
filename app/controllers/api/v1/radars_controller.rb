@@ -37,6 +37,18 @@ module Api
         render_success({ removed: true })
       end
 
+      # GET /api/v1/radar/insights
+      # Returns AI-generated insights for the user's radar portfolio
+      def insights
+        stocks = @radar.sorted_stocks || []
+        stocks_data = stocks.map { |s| serialize_stock_for_ai(s) }
+        result = AiInsightsService.radar_insights(stocks_data)
+        render_success(result)
+      rescue AiProviders::BaseProvider::AiError => e
+        Rails.logger.error "AI insights error: #{e.message}"
+        render_error("AI insights temporarily unavailable", status: :service_unavailable)
+      end
+
       # PATCH /api/v1/radar/stocks/:stock_id/target_price
       # Updates the target price for a stock on the radar
       def update_target_price
@@ -99,6 +111,24 @@ module Api
           belowTarget: decorated.below_target?,
           atTarget: decorated.at_target?,
           **serialize_stock_metrics(stock, decorated)
+        }
+      end
+
+      # Serialize stock data for AI analysis (compact, numeric-only)
+      def serialize_stock_for_ai(stock)
+        decorated = StockDecorator.new(stock, target_price: stock.target_price)
+        {
+          symbol: stock.symbol,
+          name: stock.name,
+          price: stock.price&.to_f,
+          targetPrice: stock.target_price&.to_f,
+          dividendYield: stock.dividend_yield&.to_f,
+          payoutRatio: stock.payout_ratio&.to_f,
+          peRatio: stock.pe_ratio&.to_f,
+          ma200: stock.ma_200&.to_f,
+          dividendScore: decorated.dividend_score,
+          paymentMonths: decorated.payment_months,
+          fiftyTwoWeekRangePosition: decorated.fifty_two_week_range_position
         }
       end
 

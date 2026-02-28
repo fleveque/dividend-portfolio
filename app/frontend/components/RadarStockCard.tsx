@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { ScoreBadge } from './ScoreBadge'
+import { StockAiSummary } from './StockAiSummary'
 import type { RadarStock } from '../types'
 
 interface RadarStockCardProps {
@@ -184,6 +185,9 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
             </div>
           </>
         )}
+
+        {/* AI Summary */}
+        <StockAiSummary stockId={stock.id} />
 
         {/* Status Indicator */}
         <Separator className="my-3" />

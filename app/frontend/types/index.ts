@@ -152,6 +152,28 @@ export interface BuyPlanResponse {
 }
 
 /**
+ * AI Radar Insights
+ * Mirrors: AiInsightsService.radar_insights response
+ */
+export interface RadarInsights {
+  summary: string
+  buyingOpportunities: { symbol: string; reason: string }[]
+  coverageGaps: string
+  riskFlags: { symbol: string; flag: string }[]
+  strengths: string[]
+}
+
+/**
+ * AI Stock Summary
+ * Mirrors: AiInsightsService.stock_summary response
+ */
+export interface StockAiSummary {
+  summary: string
+  verdict: 'strong_buy' | 'buy' | 'hold' | 'caution' | 'avoid'
+  keyPoints: string[]
+}
+
+/**
  * Admin Dashboard Stats
  * Mirrors: Api::V1::Admin::DashboardController#show response
  */

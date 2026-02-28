@@ -9,6 +9,7 @@ import { AddToCartButton } from '../components/AddToCartButton'
 import { CartSummaryBar } from '../components/CartSummaryBar'
 import { CartDrawer } from '../components/CartDrawer'
 import { DividendCalendar } from '../components/DividendCalendar'
+import { RadarInsights } from '../components/RadarInsights'
 import { useRadar, useAddStock, useRemoveStock } from '../hooks/useRadarQueries'
 import { useStockSearch } from '../hooks/useStockQueries'
 import { useViewPreference } from '../contexts/ViewPreferenceContext'
@@ -310,6 +311,11 @@ export function RadarPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* AI Portfolio Insights */}
+      {radarStocks.length > 0 && !isBuyPlanMode && (
+        <RadarInsights hasStocks={radarStocks.length > 0} />
+      )}
 
       {/* Dividend Calendar */}
       {radarStocks.length > 0 && !isBuyPlanMode && (

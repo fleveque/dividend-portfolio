@@ -5,6 +5,7 @@ module Api
     class StocksController < BaseController
       # Public endpoints don't require login
       allow_unauthenticated_access
+      before_action :require_authentication, only: [ :ai_summary ]
 
       # GET /api/v1/stocks
       # Returns all stocks (paginated in a real app)
@@ -45,6 +46,39 @@ module Api
           Stock.top_scored(10)
         end
         render_success(stocks.map { |s| serialize_stock(s) })
+      end
+
+      # GET /api/v1/stocks/:id/ai_summary
+      # Returns an AI-generated summary for a single stock (authenticated)
+      def ai_summary
+        stock = Stock.find(params[:id])
+        decorated = StockDecorator.new(stock)
+
+        # Include target price if user has this stock on their radar
+        radar_stock = Current.user.radar&.radar_stocks&.find_by(stock_id: stock.id)
+        target_price = radar_stock&.target_price&.to_f
+
+        stock_data = {
+          id: stock.id,
+          symbol: stock.symbol,
+          name: stock.name,
+          price: stock.price&.to_f,
+          targetPrice: target_price,
+          dividendYield: stock.dividend_yield&.to_f,
+          payoutRatio: stock.payout_ratio&.to_f,
+          peRatio: stock.pe_ratio&.to_f,
+          ma200: stock.ma_200&.to_f,
+          dividendScore: decorated.dividend_score,
+          paymentMonths: decorated.payment_months,
+          fiftyTwoWeekRangePosition: decorated.fifty_two_week_range_position,
+          updated_at: stock.updated_at.to_i
+        }
+
+        result = AiInsightsService.stock_summary(stock_data)
+        render_success(result)
+      rescue AiProviders::BaseProvider::AiError => e
+        Rails.logger.error "AI summary error for stock #{params[:id]}: #{e.message}"
+        render_error("AI summary temporarily unavailable", status: :service_unavailable)
       end
 
       # GET /api/v1/stocks/search?query=AAPL

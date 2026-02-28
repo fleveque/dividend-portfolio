@@ -13,7 +13,7 @@
  * This prevents malicious sites from making requests on behalf of the user.
  */
 
-import type { Stock, RadarStock, User, BuyPlanResponse, AdminDashboardStats, AdminUser } from '../types'
+import type { Stock, RadarStock, User, BuyPlanResponse, AdminDashboardStats, AdminUser, RadarInsights, StockAiSummary } from '../types'
 
 const API_BASE = '/api/v1'
 
@@ -106,6 +106,11 @@ export const stocksApi = {
    */
   search: (query: string) =>
     apiFetch<Stock[]>(`/stocks/search?query=${encodeURIComponent(query)}`),
+
+  /**
+   * Get AI-generated summary for a stock (authenticated)
+   */
+  getAiSummary: (id: number) => apiFetch<StockAiSummary>(`/stocks/${id}/ai_summary`),
 }
 
 // ============================================================================
@@ -148,6 +153,11 @@ export const radarApi = {
       method: 'PATCH',
       body: JSON.stringify({ target_price: targetPrice }),
     }),
+
+  /**
+   * Get AI-generated insights for the radar portfolio (authenticated)
+   */
+  getInsights: () => apiFetch<RadarInsights>('/radar/insights'),
 }
 
 // ============================================================================
