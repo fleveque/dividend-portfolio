@@ -26,6 +26,7 @@ Currently, it is in a very early stage, and many things may fail or not work at 
 - **Stock Logos**: Company logos served by a self-hosted [logo-service](https://github.com/fleveque/logo-service), with fallback to colored initials for missing tickers.
 - **Portfolio Overview**: View your current portfolio with company logos and percentage allocation.
 - **Radar**: Add stocks to your radar and view basic stock information such as payout, yield, P/E ratio, EPS, and stock price.
+- **AI Portfolio Insights**: AI-powered analysis of your radar portfolio using Google Gemini — highlights buying opportunities, dividend coverage gaps, risk flags, and per-stock summaries.
 
 - **Admin Dashboard**: Protected admin area with app stats, user management, and manual stock refresh.
 
@@ -103,13 +104,23 @@ VITE_LOGO_SERVICE_API_KEY=your_logo_service_api_key
 
 Without these, the app shows colored initials as fallback — no functionality is lost.
 
-### 4. Install dependencies:
+### 4. Configure AI insights (optional):
+
+Get a free API key from [Google AI Studio](https://aistudio.google.com/apikey) and add it to your `.env`:
+
+```sh
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+Without this key, the app works normally but AI insight features will be unavailable.
+
+### 5. Install dependencies:
 
     ```
     bundle install
     ```
 
-### 5. Set up the database:
+### 6. Set up the database:
 
     ```sh
     rails db:create
@@ -117,13 +128,13 @@ Without these, the app shows colored initials as fallback — no functionality i
     rails db:seed
     ```
 
-### 6. Start the Rails server:
+### 7. Start the Rails server:
     ```sh
     bin/dev
     ```
 You will need foreman gem if it's not installed.
 
-### 7. Visit the application:
+### 8. Visit the application:
 
 Open your web browser and go to http://localhost:3000.
 
@@ -145,6 +156,7 @@ For local development and testing, create a `.env.test` file:
 
 ```sh
 ALPHAVANTAGE_API_KEY=dummy_key_for_tests
+GEMINI_API_KEY=dummy_key_for_tests
 ```
 
 For GitHub Actions, add the following to your repository secrets:

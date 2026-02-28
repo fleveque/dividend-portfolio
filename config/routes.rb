@@ -20,6 +20,9 @@ Rails.application.routes.draw do
     namespace :v1 do
       # Stock endpoints - public (no auth required for browsing)
       resources :stocks, only: [ :index, :show ] do
+        member do
+          get :ai_summary   # GET /api/v1/stocks/:id/ai_summary
+        end
         collection do
           get :last_added   # GET /api/v1/stocks/last_added
           get :most_added   # GET /api/v1/stocks/most_added
@@ -33,6 +36,7 @@ Rails.application.routes.draw do
         post "stocks/:stock_id", action: :add_stock, as: :add_stock
         delete "stocks/:stock_id", action: :remove_stock, as: :remove_stock
         patch "stocks/:stock_id/target_price", action: :update_target_price, as: :update_target_price
+        get :insights  # GET /api/v1/radar/insights
       end
 
       # Buy plan endpoints - authenticated (user's buy plan cart)

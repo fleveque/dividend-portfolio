@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Radar, CalendarDays, ShoppingCart, Smartphone } from 'lucide-react'
+import { Radar, CalendarDays, ShoppingCart, Sparkles, Smartphone } from 'lucide-react'
 import {
   Carousel,
   CarouselContent,
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import radarCardsImg from '@/assets/screenshots/radar-cards.png'
 import dividendCalendarImg from '@/assets/screenshots/dividend-calendar.png'
 import buyPlanModeImg from '@/assets/screenshots/buy-plan-mode.png'
+import aiInsightsImg from '@/assets/screenshots/ai-insights.png'
 import mobileRadarImg from '@/assets/screenshots/mobile-radar.png'
 
 const slides = [
@@ -36,6 +37,14 @@ const slides = [
     description:
       'Plan purchases with a shopping cart — set quantities and see estimated costs.',
     image: buyPlanModeImg,
+    mobile: false,
+  },
+  {
+    icon: Sparkles,
+    title: 'AI Portfolio Insights',
+    description:
+      'Get AI-powered analysis with buying opportunities, risk flags, and per-stock summaries.',
+    image: aiInsightsImg,
     mobile: false,
   },
   {
