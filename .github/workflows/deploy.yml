@@ -46,6 +46,11 @@ jobs:
         run: |
           ssh-keyscan 46.224.239.228 >> ~/.ssh/known_hosts 2>/dev/null
 
+      - name: Debug secrets
+        run: |
+          echo "RAILS_MASTER_KEY length: ${#RAILS_MASTER_KEY}"
+          echo "KAMAL_REGISTRY_PASSWORD length: ${#KAMAL_REGISTRY_PASSWORD}"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
