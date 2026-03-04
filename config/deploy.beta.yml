@@ -1,0 +1,10 @@
+# Beta environment overrides (merged with deploy.yml)
+# Deploy with: kamal deploy -d beta
+
+proxy:
+  ssl: true
+  hosts:
+    - beta.quantic.es
+
+volumes:
+  - "dividend_portfolio_beta_storage:/rails/storage"
