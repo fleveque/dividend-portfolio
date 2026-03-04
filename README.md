@@ -168,3 +168,41 @@ For GitHub Actions, add the following to your repository secrets:
    - Value: Your Alpha Vantage API key or a dummy key for tests
 
 Note: Tests are configured to mock API calls, so you don't need a real API key for running tests.
+
+## Deployment
+
+The application is deployed with [Kamal](https://kamal-deploy.org/) to a single server running Docker.
+
+### Environments
+
+| Environment | Branch | Domain | Auto-deploy |
+|---|---|---|---|
+| Production | `main` | `quantic.es`, `quantic.cat` | Yes, after CI passes |
+| Beta | `beta` | `beta.quantic.es` | Yes, after CI passes |
+
+### How it works
+
+1. A PR is merged to `main` or `beta`
+2. CI runs (tests, linting, security scans)
+3. If CI passes, the deploy workflow builds a Docker image, pushes it to GHCR, and deploys via Kamal
+
+### Forking this repo
+
+If you fork this project, update these files with your own server, domains, and registry:
+
+- `config/deploy.yml` — production server IP, domains, and container registry
+- `config/deploy.beta.yml` — beta domain
+- `.kamal/secrets` and `.kamal/secrets.beta` — secret references (no raw values)
+
+Then add these GitHub Actions secrets to your repository:
+
+| Secret | Description |
+|---|---|
+| `SSH_PRIVATE_KEY` | SSH key authorized on your server |
+| `KAMAL_REGISTRY_PASSWORD` | Container registry token (e.g. GHCR PAT with `packages:write`) |
+| `RAILS_MASTER_KEY` | Contents of `config/master.key` |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `GEMINI_API_KEY` | Google Gemini API key (optional) |
+| `VITE_LOGO_SERVICE_URL` | Logo service URL (optional) |
+| `VITE_LOGO_SERVICE_API_KEY` | Logo service API key (optional) |
