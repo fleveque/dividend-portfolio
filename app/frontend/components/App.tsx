@@ -24,6 +24,8 @@ import LoginPage from '../pages/LoginPage'
 import SignUpPage from '../pages/SignUpPage'
 import RadarPage from '../pages/RadarPage'
 import AdminDashboardPage from '../pages/AdminDashboardPage'
+import PortfolioPage from '../pages/PortfolioPage'
+import SettingsPage from '../pages/SettingsPage'
 
 /**
  * QueryClient Configuration
@@ -67,6 +69,8 @@ function App() {
                     <Route path="/signup" element={<SignUpPage />} />
                     <Route element={<ProtectedRoute />}>
                       <Route path="/radar" element={<RadarPage />} />
+                      <Route path="/portfolio" element={<PortfolioPage />} />
+                      <Route path="/settings" element={<SettingsPage />} />
                     </Route>
                     <Route element={<AdminRoute />}>
                       <Route path="/admin" element={<AdminDashboardPage />} />

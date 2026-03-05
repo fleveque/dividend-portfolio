@@ -4,6 +4,10 @@ module Api
       class DashboardController < BaseController
         # GET /api/v1/admin/dashboard
         def show
+          users_with_holdings = User.joins(:holdings).distinct.count
+          users_with_slug = User.where.not(portfolio_slug: [ nil, "" ]).count
+          total_holdings = Holding.count
+
           render_success({
             users: {
               total: User.count,
@@ -26,6 +30,15 @@ module Api
             },
             transactions: {
               total: Transaction.count
+            },
+            holdings: {
+              totalHoldings: total_holdings,
+              usersWithHoldings: users_with_holdings,
+              avgHoldingsPerUser: users_with_holdings.positive? ? (total_holdings.to_f / users_with_holdings).round(1) : 0
+            },
+            pulse: {
+              usersWithSlug: users_with_slug,
+              adoptionRate: User.count.positive? ? (users_with_slug.to_f / User.count * 100).round(1) : 0
             }
           })
         end

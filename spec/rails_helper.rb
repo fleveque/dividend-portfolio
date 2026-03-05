@@ -55,6 +55,11 @@ RSpec.configure do |config|
     Rails.cache.clear
   end
 
+  # Stub NatsPublisher globally to prevent real NATS connections in tests
+  config.before(:each) do
+    allow(NatsPublisher).to receive(:publish)
+  end
+
   # You can uncomment this line to turn off ActiveRecord support entirely.
   # config.use_active_record = false
 

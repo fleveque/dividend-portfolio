@@ -13,7 +13,7 @@
  * This prevents malicious sites from making requests on behalf of the user.
  */
 
-import type { Stock, RadarStock, User, BuyPlanResponse, AdminDashboardStats, AdminUser, RadarInsights, StockAiSummary } from '../types'
+import type { Stock, RadarStock, User, BuyPlanResponse, AdminDashboardStats, AdminUser, RadarInsights, StockAiSummary, HoldingsResponse, Holding, UserProfile } from '../types'
 
 const API_BASE = '/api/v1'
 
@@ -100,6 +100,11 @@ export const stocksApi = {
    * Get stocks with the highest dividend scores
    */
   getTopScored: () => apiFetch<Stock[]>('/stocks/top_scored'),
+
+  /**
+   * Get stocks most frequently held in portfolios
+   */
+  getMostHeld: () => apiFetch<Stock[]>('/stocks/most_held'),
 
   /**
    * Search for a stock by symbol
@@ -227,6 +232,53 @@ export const buyPlanApi = {
   reset: () =>
     apiFetch<{ reset: boolean }>('/buy_plan', {
       method: 'DELETE',
+    }),
+}
+
+// ============================================================================
+// Holdings API - Authenticated endpoints (user's portfolio)
+// ============================================================================
+
+export const holdingsApi = {
+  getAll: () => apiFetch<HoldingsResponse>('/holdings'),
+
+  create: (stockId: number, quantity: number, averagePrice: number) =>
+    apiFetch<Holding>('/holdings', {
+      method: 'POST',
+      body: JSON.stringify({ stock_id: stockId, quantity, average_price: averagePrice }),
+    }),
+
+  update: (id: number, quantity: number, averagePrice: number) =>
+    apiFetch<Holding>(`/holdings/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ quantity, average_price: averagePrice }),
+    }),
+
+  delete: (id: number) =>
+    apiFetch<{ deleted: boolean }>(`/holdings/${id}`, {
+      method: 'DELETE',
+    }),
+
+  getInsights: () => apiFetch<RadarInsights>('/holdings/insights'),
+
+  importFromCart: (items: { stock_id: number; quantity: number }[]) =>
+    apiFetch<{ imported: number }>('/holdings/import_from_cart', {
+      method: 'POST',
+      body: JSON.stringify({ items }),
+    }),
+}
+
+// ============================================================================
+// Profile API - Authenticated endpoints (user settings)
+// ============================================================================
+
+export const profileApi = {
+  get: () => apiFetch<UserProfile>('/profile'),
+
+  update: (portfolioSlug: string | null) =>
+    apiFetch<UserProfile>('/profile', {
+      method: 'PATCH',
+      body: JSON.stringify({ portfolio_slug: portfolioSlug }),
     }),
 }
 

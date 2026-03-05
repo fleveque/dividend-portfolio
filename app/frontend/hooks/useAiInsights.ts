@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { radarApi, stocksApi } from '../lib/api'
+import { radarApi, stocksApi, holdingsApi } from '../lib/api'
 
 /**
  * Fetch AI-generated insights for the user's radar portfolio.
@@ -12,6 +12,21 @@ export function useRadarInsights(enabled: boolean) {
     enabled,
     staleTime: 1000 * 60 * 10, // 10 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes
+    retry: 1,
+  })
+}
+
+/**
+ * Fetch AI-generated insights for the user's portfolio.
+ * Only fetches when explicitly enabled (e.g., when the section is expanded).
+ */
+export function usePortfolioInsights(enabled: boolean) {
+  return useQuery({
+    queryKey: ['portfolio', 'insights'],
+    queryFn: holdingsApi.getInsights,
+    enabled,
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
     retry: 1,
   })
 }

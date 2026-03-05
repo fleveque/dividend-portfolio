@@ -4,6 +4,10 @@ class AiInsightsService
       provider.radar_insights(stocks_data)
     end
 
+    def portfolio_insights(stocks_data)
+      provider.portfolio_insights(stocks_data)
+    end
+
     def stock_summary(stock_data)
       provider.stock_summary(stock_data)
     end

@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { ShoppingCart, Minus, Plus, Trash2, Loader2 } from 'lucide-react'
+import { ShoppingCart, Minus, Plus, Trash2, Loader2, Briefcase } from 'lucide-react'
 import { useBuyPlanContext } from '../contexts/BuyPlanContext'
+import { useImportFromCart } from '../hooks/useHoldingsQueries'
 import { StockLogo } from './StockLogo'
 import {
   Sheet,
@@ -43,8 +44,11 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     exitBuyPlanMode,
   } = useBuyPlanContext()
 
+  const importFromCart = useImportFromCart()
+
   const [showResetDialog, setShowResetDialog] = useState(false)
   const [showDoneDialog, setShowDoneDialog] = useState(false)
+  const [showMoveDialog, setShowMoveDialog] = useState(false)
 
   const handleSave = async () => {
     await saveCart()
@@ -85,6 +89,18 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     if (currentQty > 1) {
       updateQuantity(stockId, currentQty - 1)
     }
+  }
+
+  const handleMoveToPortfolio = async () => {
+    const cartItems = items.map((item) => ({
+      stock_id: item.stockId,
+      quantity: item.quantity,
+    }))
+    await importFromCart.mutateAsync(cartItems)
+    await resetCart()
+    exitBuyPlanMode()
+    onClose()
+    setShowMoveDialog(false)
   }
 
   return (
@@ -184,6 +200,19 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               </Button>
             </div>
 
+            <Button
+              variant="outline"
+              onClick={() => setShowMoveDialog(true)}
+              disabled={items.length === 0 || isSaving || importFromCart.isPending}
+              className="w-full"
+            >
+              {importFromCart.isPending ? (
+                <><Loader2 className="size-4 animate-spin" /> Moving...</>
+              ) : (
+                <><Briefcase className="size-4" /> Move to Portfolio</>
+              )}
+            </Button>
+
             <Button variant="outline" onClick={handleDone} className="w-full">
               Done Planning
             </Button>
@@ -221,6 +250,24 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           <AlertDialogFooter>
             <AlertDialogCancel onClick={handleDoneDiscard}>Discard</AlertDialogCancel>
             <AlertDialogAction onClick={handleDoneSave}>Save & Exit</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Move to Portfolio Confirmation Dialog */}
+      <AlertDialog open={showMoveDialog} onOpenChange={setShowMoveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Move to Portfolio?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will add {totalItems} share{totalItems !== 1 ? 's' : ''} to your portfolio using current market prices as the average price. Your buy plan cart will be cleared.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleMoveToPortfolio}>
+              Move to Portfolio
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

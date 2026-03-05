@@ -27,6 +27,7 @@ Rails.application.routes.draw do
           get :last_added   # GET /api/v1/stocks/last_added
           get :most_added   # GET /api/v1/stocks/most_added
           get :top_scored   # GET /api/v1/stocks/top_scored
+          get :most_held    # GET /api/v1/stocks/most_held
           get :search       # GET /api/v1/stocks/search?query=AAPL
         end
       end
@@ -43,6 +44,17 @@ Rails.application.routes.draw do
       resource :buy_plan, only: [ :show, :destroy ] do
         post :save, on: :collection
       end
+
+      # Holdings endpoints - authenticated (user's portfolio)
+      resources :holdings, only: [ :index, :create, :update, :destroy ] do
+        collection do
+          get :insights
+          post :import_from_cart
+        end
+      end
+
+      # Profile endpoint - authenticated (user settings)
+      resource :profile, only: [ :show, :update ]
 
       # Session endpoints - for React authentication
       resource :session, only: [ :show, :create, :destroy ]
