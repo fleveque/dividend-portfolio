@@ -3,7 +3,7 @@ import { Logo } from '../components/Logo'
 import { FeatureShowcase } from '../components/FeatureShowcase'
 import { TopScoredShowcase } from '../components/TopScoredShowcase'
 import { CompactStockRow } from '../components/CompactStockRow'
-import { useLastAddedStocks, useMostAddedStocks } from '../hooks/useStockQueries'
+import { useLastAddedStocks, useMostAddedStocks, useMostHeldStocks } from '../hooks/useStockQueries'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
@@ -20,8 +20,15 @@ export function HomePage() {
     error: mostAddedError,
   } = useMostAddedStocks()
 
+  const {
+    data: mostHeld,
+    isLoading: mostHeldLoading,
+    error: mostHeldError,
+  } = useMostHeldStocks()
+
   const topMostAdded = mostAdded?.slice(0, 5)
   const topLastAdded = lastAdded?.slice(0, 5)
+  const topMostHeld = mostHeld?.slice(0, 5)
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -31,10 +38,10 @@ export function HomePage() {
           <Logo size="lg" showText={false} />
         </div>
         <h1 className="text-2xl sm:text-4xl font-bold text-foreground mb-2">
-          Dividend Stocks Radar
+          Dividend Stocks Portfolio & Radar
         </h1>
         <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
-          Track your dividend stocks, set target prices, and build your investment radar.
+          AI-enhanced dividend investing. Track your portfolio, set target prices on your radar, plan purchases, and get intelligent insights — all in one place.
         </p>
       </div>
 
@@ -52,9 +59,9 @@ export function HomePage() {
         </Card>
       </div>
 
-      {/* Stock Lists — side by side on large screens */}
-      <div className="grid lg:grid-cols-2 gap-4">
-        {/* Most Added Stocks */}
+      {/* Stock Lists — three columns on large screens */}
+      <div className="grid lg:grid-cols-3 gap-4">
+        {/* Most Added to Radar */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -92,7 +99,45 @@ export function HomePage() {
           </CardContent>
         </Card>
 
-        {/* Last Updated Stocks */}
+        {/* Most Held in Portfolios */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <span className="w-1 h-5 bg-foreground rounded-full"></span>
+              Most Held in Portfolios
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {mostHeldLoading && (
+              <div className="flex items-center justify-center p-6">
+                <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                <span className="ml-3 text-muted-foreground text-sm">Loading...</span>
+              </div>
+            )}
+
+            {mostHeldError && (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  {mostHeldError instanceof Error ? mostHeldError.message : 'Failed to load'}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {!mostHeldLoading && !mostHeldError && (!topMostHeld || topMostHeld.length === 0) && (
+              <p className="text-muted-foreground text-center py-6 text-sm">No stocks found.</p>
+            )}
+
+            {!mostHeldLoading && !mostHeldError && topMostHeld && topMostHeld.length > 0 && (
+              <div className="divide-y">
+                {topMostHeld.map((stock) => (
+                  <CompactStockRow key={stock.id} stock={stock} />
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Recently Updated */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">

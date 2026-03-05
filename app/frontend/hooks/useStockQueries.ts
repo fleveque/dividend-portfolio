@@ -65,6 +65,17 @@ export function useTopScoredStocks() {
 }
 
 /**
+ * Fetch the most held stocks in portfolios
+ */
+export function useMostHeldStocks() {
+  return useQuery({
+    queryKey: ['stocks', 'mostHeld'],
+    queryFn: stocksApi.getMostHeld,
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+/**
  * Search for stocks by symbol
  *
  * The `enabled` option prevents the query from running when query is empty.

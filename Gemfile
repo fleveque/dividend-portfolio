@@ -45,6 +45,9 @@ gem "simplecov", require: false, group: :test
 gem "yahoo_finance_client", "~> 0.4.1"
 gem "alphavantage"
 
+# NATS messaging
+gem "nats-pure", "~> 2.4"
+
 # OAuth authentication
 gem "omniauth", "~> 2.1"
 gem "omniauth-google-oauth2"

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Radar, CalendarDays, ShoppingCart, Sparkles, Smartphone } from 'lucide-react'
+import { Radar, CalendarDays, ShoppingCart, Sparkles, Smartphone, Briefcase } from 'lucide-react'
 import {
   Carousel,
   CarouselContent,
@@ -13,6 +13,7 @@ import dividendCalendarImg from '@/assets/screenshots/dividend-calendar.png'
 import buyPlanModeImg from '@/assets/screenshots/buy-plan-mode.png'
 import aiInsightsImg from '@/assets/screenshots/ai-insights.png'
 import mobileRadarImg from '@/assets/screenshots/mobile-radar.png'
+import portfolioImg from '@/assets/screenshots/portfolio.png'
 
 const slides = [
   {
@@ -40,10 +41,18 @@ const slides = [
     mobile: false,
   },
   {
-    icon: Sparkles,
-    title: 'AI Portfolio Insights',
+    icon: Briefcase,
+    title: 'Portfolio Tracker',
     description:
-      'Get AI-powered analysis with buying opportunities, risk flags, and per-stock summaries.',
+      'Manage your holdings with real-time gain/loss tracking, weighted average prices, and market value calculations.',
+    image: portfolioImg,
+    mobile: false,
+  },
+  {
+    icon: Sparkles,
+    title: 'AI-Powered Insights',
+    description:
+      'Get AI-driven analysis with buying opportunities, risk flags, and per-stock summaries for both your radar and portfolio.',
     image: aiInsightsImg,
     mobile: false,
   },

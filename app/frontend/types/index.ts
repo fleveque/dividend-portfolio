@@ -85,6 +85,36 @@ export interface User {
   id: number
   emailAddress: string
   admin?: boolean
+  portfolioSlug?: string | null
+}
+
+/**
+ * Holding interface
+ * Mirrors: Holding model + computed fields from HoldingsController
+ * Includes full decorated Stock data for dividend calendar and metrics
+ */
+export interface Holding {
+  id: number
+  quantity: number
+  averagePrice: number
+  marketValue: number
+  gainLoss: number
+  gainLossPercent: number
+  stock: Stock
+}
+
+export interface HoldingsResponse {
+  holdings: Holding[]
+  totalValue: number
+  totalCost: number
+  totalGainLoss: number
+  totalGainLossPercent: number
+}
+
+export interface UserProfile {
+  id: number
+  emailAddress: string
+  portfolioSlug: string | null
 }
 
 /**
@@ -200,6 +230,15 @@ export interface AdminDashboardStats {
   transactions: {
     total: number
   }
+  holdings: {
+    totalHoldings: number
+    usersWithHoldings: number
+    avgHoldingsPerUser: number
+  }
+  pulse: {
+    usersWithSlug: number
+    adoptionRate: number
+  }
 }
 
 /**
@@ -215,4 +254,6 @@ export interface AdminUser {
   createdAt: string
   radarStocksCount: number
   transactionsCount: number
+  holdingsCount: number
+  portfolioSlug: string | null
 }

@@ -32,9 +32,11 @@ RSpec.describe "Api::V1::Admin::Dashboard", type: :request do
 
       it "returns dashboard stats" do
         # Create some data for stats
-        create_list(:user, 2)
-        create(:stock, symbol: "AAPL", price: 150.00)
+        users = create_list(:user, 2)
+        stock = create(:stock, symbol: "AAPL", price: 150.00)
         create(:stock, symbol: "GOOGL", price: nil)
+        create(:holding, user: users.first, stock: stock, quantity: 10, average_price: 100.00)
+        users.first.update!(portfolio_slug: "test-slug")
 
         get "/api/v1/admin/dashboard"
 
@@ -51,6 +53,15 @@ RSpec.describe "Api::V1::Admin::Dashboard", type: :request do
         expect(data["radars"]).to be_present
         expect(data["buyPlans"]).to be_present
         expect(data["transactions"]).to be_present
+
+        # Holdings stats
+        expect(data["holdings"]["totalHoldings"]).to eq(1)
+        expect(data["holdings"]["usersWithHoldings"]).to eq(1)
+        expect(data["holdings"]["avgHoldingsPerUser"]).to eq(1.0)
+
+        # Pulse stats
+        expect(data["pulse"]["usersWithSlug"]).to eq(1)
+        expect(data["pulse"]["adoptionRate"]).to be > 0
       end
     end
   end

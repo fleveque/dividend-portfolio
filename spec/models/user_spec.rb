@@ -5,6 +5,7 @@ RSpec.describe User, type: :model do
     it { should have_many(:dividends) }
     it { should have_one(:radar) }
     it { should have_many(:stocks).through(:transactions) }
+    it { should have_many(:holdings).dependent(:delete_all) }
   end
 
   describe 'validations' do
@@ -14,6 +15,45 @@ RSpec.describe User, type: :model do
     it { should validate_uniqueness_of(:email_address).case_insensitive }
     it { should validate_presence_of(:password).on(:create) }
     it { should validate_length_of(:password).is_at_least(6) }
+    it { should validate_uniqueness_of(:portfolio_slug) }
+  end
+
+  describe 'portfolio_slug validation' do
+    it 'accepts valid slugs' do
+      user = build(:user, portfolio_slug: 'my-portfolio')
+      expect(user).to be_valid
+    end
+
+    it 'rejects slugs shorter than 3 characters' do
+      user = build(:user, portfolio_slug: 'ab')
+      expect(user).not_to be_valid
+    end
+
+    it 'rejects slugs with uppercase' do
+      user = build(:user, portfolio_slug: 'MyPortfolio')
+      expect(user).not_to be_valid
+    end
+
+    it 'allows nil slug' do
+      user = build(:user, portfolio_slug: nil)
+      expect(user).to be_valid
+    end
+  end
+
+  describe 'NATS callbacks' do
+    it 'publishes portfolio.opted_in when slug is set' do
+      user = create(:user)
+      expect(NatsPublisher).to receive(:publish).with("portfolio.opted_in", hash_including(slug: "my-slug"))
+
+      user.update!(portfolio_slug: "my-slug")
+    end
+
+    it 'publishes portfolio.opted_out when slug is cleared' do
+      user = create(:user, portfolio_slug: "old-slug")
+      expect(NatsPublisher).to receive(:publish).with("portfolio.opted_out", hash_including(slug: "old-slug"))
+
+      user.update!(portfolio_slug: nil)
+    end
   end
 
   describe 'callbacks' do

@@ -59,7 +59,8 @@ module Api
         {
           id: user.id,
           emailAddress: user.email_address,
-          admin: user.admin?
+          admin: user.admin?,
+          portfolioSlug: user.portfolio_slug
         }
       end
     end

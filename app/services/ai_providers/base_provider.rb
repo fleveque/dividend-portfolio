@@ -10,6 +10,14 @@ module AiProviders
       raise NotImplementedError, "Subclasses must implement radar_insights"
     end
 
+    # Generate insights for a user's portfolio holdings
+    #
+    # @param stocks_data [Array<Hash>] array of stock data hashes
+    # @return [Hash] structured insights
+    def portfolio_insights(stocks_data)
+      raise NotImplementedError, "Subclasses must implement portfolio_insights"
+    end
+
     # Generate a summary for a single stock
     #
     # @param stock_data [Hash] stock data hash

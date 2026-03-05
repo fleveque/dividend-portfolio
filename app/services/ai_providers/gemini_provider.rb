@@ -15,6 +15,19 @@ module AiProviders
       end
     end
 
+    def portfolio_insights(stocks_data)
+      return empty_portfolio_insights if stocks_data.blank?
+
+      fingerprint = Digest::MD5.hexdigest(stocks_data.to_json)
+      cache_key = "ai/portfolio/#{fingerprint}"
+
+      cache_fetch(cache_key) do
+        prompt = build_portfolio_prompt(stocks_data)
+        response = call_gemini(prompt, radar_response_schema)
+        parse_response(response)
+      end
+    end
+
     def stock_summary(stock_data)
       return empty_stock_summary if stock_data.blank?
 
@@ -94,6 +107,29 @@ module AiProviders
       }
     end
 
+    def build_portfolio_prompt(stocks_data)
+      {
+        system: <<~SYSTEM,
+          You are a dividend investment analyst assistant. Analyze the user's actual portfolio holdings and provide actionable insights.
+          Focus on dividend investing strategy: yield quality, payout sustainability, portfolio diversification by payment months, and value opportunities.
+          Be concise and specific. Reference stocks by their symbol.
+          All prices are in USD.
+        SYSTEM
+        user: <<~USER
+          Analyze this portfolio of owned stocks and provide insights:
+
+          #{stocks_data.to_json}
+
+          Provide:
+          1. A brief portfolio summary (2-3 sentences)
+          2. Buying opportunities (stocks that could strengthen the portfolio, or existing positions worth adding to)
+          3. Dividend coverage gaps (months with no dividend income)
+          4. Risk flags (high payout ratios, low scores, concentration risk, stocks trading well above MA200)
+          5. Portfolio strengths (good diversification, strong yields, consistent payers)
+        USER
+      }
+    end
+
     def build_stock_prompt(stock_data)
       {
         system: <<~SYSTEM,
@@ -163,6 +199,16 @@ module AiProviders
     def empty_radar_insights
       {
         summary: "Add stocks to your radar to get AI-powered portfolio insights.",
+        buyingOpportunities: [],
+        coverageGaps: "No stocks to analyze.",
+        riskFlags: [],
+        strengths: []
+      }
+    end
+
+    def empty_portfolio_insights
+      {
+        summary: "Add stocks to your portfolio to get AI-powered insights.",
         buyingOpportunities: [],
         coverageGaps: "No stocks to analyze.",
         riskFlags: [],
