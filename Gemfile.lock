@@ -216,6 +216,12 @@ GEM
       bigdecimal (>= 3.1, < 5)
     multipart-post (2.4.1)
     mutex_m (0.3.0)
+    nats-pure (2.5.0)
+      base64
+      concurrent-ruby (~> 1.0)
+      json
+      securerandom
+      uri
     net-imap (0.5.9)
       date
       net-protocol
@@ -491,6 +497,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   kamal
+  nats-pure (~> 2.4)
   omniauth (~> 2.1)
   omniauth-google-oauth2
   omniauth-rails_csrf_protection

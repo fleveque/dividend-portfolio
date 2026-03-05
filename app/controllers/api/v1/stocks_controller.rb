@@ -39,6 +39,15 @@ module Api
         render_success(stocks.map { |s| serialize_stock(s) })
       end
 
+      # GET /api/v1/stocks/most_held
+      # Returns stocks most frequently held in portfolios
+      def most_held
+        stocks = Rails.cache.fetch("most_held_stocks", expires_in: 1.hour) do
+          Holding.most_added_stocks(10)
+        end
+        render_success(stocks.map { |s| serialize_stock(s) })
+      end
+
       # GET /api/v1/stocks/top_scored
       # Returns stocks with the highest dividend scores
       def top_scored

@@ -5,12 +5,12 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import type { RadarStock } from '../types'
+import type { Stock } from '../types'
 
 const MONTH_HEADERS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 interface DividendCalendarProps {
-  stocks: RadarStock[]
+  stocks: Stock[]
 }
 
 export function DividendCalendar({ stocks }: DividendCalendarProps) {

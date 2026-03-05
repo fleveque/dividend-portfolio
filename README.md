@@ -1,34 +1,67 @@
 # Dividend Portfolio
 
-Dividend Portfolio will be a multi-user web application built with Rails 8 that allows users to track their stock and ETF investments, record transactions, add dividends, and view statistics about their gains, losses, and dividends. The application also includes a radar feature where users can add stocks they are interested in and view basic stock information.
+AI-enhanced dividend investing platform built with Rails 8 and React. Track your portfolio, set target prices on your radar, plan purchases, and get intelligent insights — all in one place.
 
-## Work in progress
 [![Build Status](https://github.com/fleveque/dividend-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/fleveque/dividend-portfolio/actions)
 
-This is a pet project I will be working on. 
+## Services Architecture
 
-Currently, it is in a very early stage, and many things may fail or not work at all. 
+```
+                         Internet
+                            |
+              +-------------+-------------+
+              |             |             |
+        quantic.es    pulse.quantic.es  logos.quantic.es
+              |             |             |
+    +---------+--+  +-------+------+  +---+--------+
+    |  Rails App |  |    Pulse     |  | Logo       |
+    |   (this)   |  |   Phoenix    |  | Service    |
+    |            |  |   LiveView   |  | (Go)       |
+    | - Auth     |  |              |  +------------+
+    | - Radar    |  | - Public     |
+    | - Holdings |  |   portfolios |
+    | - Buy Plan |  | - Community  |
+    | - AI       |  |   dashboard  |
+    +-----+------+  +------+-------+
+          |                |
+          +---+  +---------+
+              |  |
+          +---+--+---+
+          |   NATS   |
+          | JetStream|
+          +----------+
+```
 
-- The first iteration will focus on authentication and retrieving basic stock information using different finance providers client gems.
-- The second iteration is focusing on enabling each user to create their own radar and search, add or remove stocks.
-- Next iterations to be defined.
+**Rails App** (`quantic.es`) — this app. User auth, stock radar with target prices, portfolio management with holdings, buy plan mode, dividend calendar, and AI-powered insights via Google Gemini. Publishes events to NATS when portfolio data changes.
+
+**Pulse** (`pulse.quantic.es`) — Elixir/Phoenix app. Consumes NATS events and serves public portfolio pages and a real-time community dashboard. No database — state is held in-memory via GenServers and ETS. See [pulse repo](https://github.com/fleveque/pulse).
+
+**NATS** — lightweight messaging server (~10MB RAM). Runs as a Docker container on the same VPS. JetStream enabled for persistent event streams. Environment isolation via subject prefixes (`prod.`, `beta.`, `dev.`).
+
+**Logo Service** (`logos.quantic.es`) — Go microservice for company logo images. See [logo-service repo](https://github.com/fleveque/logo-service).
+
+### NATS Event Flow
+
+```
+Rails publishes on holding changes:
+  {env}.portfolio.updated     {slug, holdings: [{symbol, quantity, avg_price}]}
+
+Pulse consumes -> updates GenServer state -> pushes to LiveView via PubSub
+```
 
 ## Features
 
-- **User Authentication**: Secure user authentication using Rails 8 built-in authentication.
-- **Multiple Financial Data Providers**: Choose the one that better fits your needs.
-    * Yahoo client: [yahoo_finance_client](https://github.com/fleveque/yahoo_finance_client). Probably not working as Y! closed API
-    * Alpha Vantage: [alphavantage_ruby](https://github.com/codespore/alphavantage_ruby)
-- **Portfolio Management**: Track buys and sales of stocks and ETFs in your portfolio.
-- **Dividend Tracking**: Add and manage dividends received from your investments.
-- **Statistics**: View statistics about your gains, losses, and total dividends.
-- **Stock Data**: Fetch stock data from reliable internet sources.
-- **Stock Logos**: Company logos served by a self-hosted [logo-service](https://github.com/fleveque/logo-service), with fallback to colored initials for missing tickers.
-- **Portfolio Overview**: View your current portfolio with company logos and percentage allocation.
-- **Radar**: Add stocks to your radar and view basic stock information such as payout, yield, P/E ratio, EPS, and stock price.
-- **AI Portfolio Insights**: AI-powered analysis of your radar portfolio using Google Gemini — highlights buying opportunities, dividend coverage gaps, risk flags, and per-stock summaries.
-
-- **Admin Dashboard**: Protected admin area with app stats, user management, and manual stock refresh.
+- **Stock Radar**: Track stocks with target prices, financial metrics (P/E, EPS, yield, payout ratio), and price status indicators. Card and compact list views.
+- **Portfolio Management**: Manage holdings with quantity, average price, real-time gain/loss tracking, and weighted average price merging. Import directly from buy plan cart.
+- **Dividend Calendar**: Visualize dividend payment schedules across all your stocks. Spot income gaps by month.
+- **Buy Plan Mode**: Plan purchases with a shopping cart — set quantities, see estimated costs, and move to portfolio when ready.
+- **AI-Powered Insights**: Google Gemini analysis for both radar and portfolio — buying opportunities, dividend coverage gaps, risk flags, and per-stock summaries.
+- **User Authentication**: Rails 8 built-in authentication + Google OAuth.
+- **Multiple Financial Data Providers**: Pluggable provider pattern supporting Yahoo Finance ([yahoo_finance_client](https://github.com/fleveque/yahoo_finance_client)) and Alpha Vantage.
+- **Stock Logos**: Company logos served by a self-hosted [logo-service](https://github.com/fleveque/logo-service), with fallback to colored initials.
+- **Pulse Integration**: Opt-in to share your portfolio publicly via [Pulse](https://github.com/fleveque/pulse). Set a portfolio slug in settings; holdings sync in real-time via NATS.
+- **Admin Dashboard**: Protected admin area with app stats (users, stocks, radars, portfolios, Pulse adoption), user management, and manual stock refresh.
+- **Mobile Responsive**: Full functionality on any device with hamburger menu navigation.
 
 ## Admin
 
@@ -49,8 +82,8 @@ bin/kamal app exec "bin/rails admin:grant[your@email.com]"
 
 ### Admin Features
 
-- **Dashboard stats**: Users, stocks, radars, buy plans, and transactions overview
-- **User management**: View all users with metadata, delete users
+- **Dashboard stats**: Users, stocks, radars, buy plans, portfolios, holdings, and Pulse adoption
+- **User management**: View all users with metadata (holdings count, Pulse slug), delete users
 - **Stock refresh**: Manually trigger a stock data refresh job
 
 ## Limitations

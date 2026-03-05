@@ -66,7 +66,15 @@ function UserRow({
         </TableCell>
         <TableCell className="text-muted-foreground">{user.provider || 'email'}</TableCell>
         <TableCell className="text-muted-foreground text-center">{user.radarStocksCount}</TableCell>
+        <TableCell className="text-muted-foreground text-center">{user.holdingsCount}</TableCell>
         <TableCell className="text-muted-foreground text-center">{user.transactionsCount}</TableCell>
+        <TableCell className="text-muted-foreground">
+          {user.portfolioSlug ? (
+            <Badge variant="success">{user.portfolioSlug}</Badge>
+          ) : (
+            <span className="text-xs text-muted-foreground">-</span>
+          )}
+        </TableCell>
         <TableCell className="text-muted-foreground text-sm">
           {new Date(user.createdAt).toLocaleDateString()}
         </TableCell>
@@ -162,6 +170,11 @@ export function AdminDashboardPage() {
             <StatCard label="Avg Stocks/Radar" value={stats.radars.avgStocksPerRadar} />
             <StatCard label="Buy Plans" value={stats.buyPlans.total} />
             <StatCard label="Transactions" value={stats.transactions.total} />
+            <StatCard label="Total Portfolios" value={stats.holdings.usersWithHoldings} />
+            <StatCard label="Total Holdings" value={stats.holdings.totalHoldings} />
+            <StatCard label="Avg Holdings/User" value={stats.holdings.avgHoldingsPerUser} />
+            <StatCard label="Pulse Users" value={stats.pulse.usersWithSlug} />
+            <StatCard label="Pulse Adoption" value={`${stats.pulse.adoptionRate}%`} />
           </div>
         )}
       </section>
@@ -201,7 +214,7 @@ export function AdminDashboardPage() {
         {users && (
           <Card>
             <CardContent className="p-0 overflow-x-auto">
-              <Table className="min-w-[640px]">
+              <Table className="min-w-[900px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Email</TableHead>
@@ -209,7 +222,9 @@ export function AdminDashboardPage() {
                     <TableHead>Role</TableHead>
                     <TableHead>Provider</TableHead>
                     <TableHead className="text-center">Radar Stocks</TableHead>
+                    <TableHead className="text-center">Holdings</TableHead>
                     <TableHead className="text-center">Transactions</TableHead>
+                    <TableHead>Pulse Slug</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
