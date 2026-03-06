@@ -5,15 +5,21 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import type { Stock } from '../types'
+import type { Stock, Holding } from '../types'
 
 const MONTH_HEADERS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-interface DividendCalendarProps {
-  stocks: Stock[]
-}
+type DividendCalendarProps =
+  | { holdings: Holding[]; stocks?: never }
+  | { stocks: Stock[]; holdings?: never }
 
-export function DividendCalendar({ stocks }: DividendCalendarProps) {
+export function DividendCalendar(props: DividendCalendarProps) {
+  const hasHoldings = !!props.holdings
+  const stocks = props.holdings ? props.holdings.map((h) => h.stock) : props.stocks
+  const quantityByStockId = props.holdings
+    ? new Map(props.holdings.map((h) => [h.stock.id, h.quantity]))
+    : new Map<number, number>()
+
   const scheduledStocks = stocks.filter((s) => s.dividendScheduleAvailable)
   const unknownStocks = stocks.filter((s) => !s.dividendScheduleAvailable && s.dividend)
   const noDividendStocks = stocks.filter((s) => !s.dividend)
@@ -26,13 +32,26 @@ export function DividendCalendar({ stocks }: DividendCalendarProps) {
     )
   }
 
-  // Calculate monthly totals (only primary months, not shifted)
+  // Calculate monthly per-share totals (only primary months, not shifted)
   const monthlyTotals = Array.from({ length: 12 }, (_, i) => {
     const month = i + 1
     return scheduledStocks.reduce((total, stock) => {
       const isPrimary = stock.paymentMonths.includes(month) && !stock.shiftedPaymentMonths.includes(month)
       if (isPrimary && stock.dividendPerPayment) {
         return total + stock.dividendPerPayment
+      }
+      return total
+    }, 0)
+  })
+
+  // Calculate monthly estimated income (per-share × quantity)
+  const monthlyIncome = Array.from({ length: 12 }, (_, i) => {
+    const month = i + 1
+    return scheduledStocks.reduce((total, stock) => {
+      const isPrimary = stock.paymentMonths.includes(month) && !stock.shiftedPaymentMonths.includes(month)
+      if (isPrimary && stock.dividendPerPayment) {
+        const qty = quantityByStockId.get(stock.id) ?? 0
+        return total + stock.dividendPerPayment * qty
       }
       return total
     }, 0)
@@ -90,7 +109,7 @@ export function DividendCalendar({ stocks }: DividendCalendarProps) {
           </TableBody>
           <TableFooter>
             <TableRow>
-              <TableCell className="sticky left-0 bg-muted/50 z-10 font-bold">Total</TableCell>
+              <TableCell className="sticky left-0 bg-muted/50 z-10 font-bold">{hasHoldings ? 'Per Share' : 'Total'}</TableCell>
               {monthlyTotals.map((total, i) => (
                 <TableCell key={i} className="text-center px-1">
                   {total > 0 ? (
@@ -101,6 +120,20 @@ export function DividendCalendar({ stocks }: DividendCalendarProps) {
                 </TableCell>
               ))}
             </TableRow>
+            {hasHoldings && (
+              <TableRow className="bg-emerald-50/50 dark:bg-emerald-950/20">
+                <TableCell className="sticky left-0 bg-emerald-50/50 dark:bg-emerald-950/20 z-10 font-bold">Est. Income</TableCell>
+                {monthlyIncome.map((income, i) => (
+                  <TableCell key={i} className="text-center px-1">
+                    {income > 0 ? (
+                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">${income.toFixed(2)}</span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground/40">—</span>
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            )}
           </TableFooter>
         </Table>
 
