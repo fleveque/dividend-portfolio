@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Loader2, Check } from 'lucide-react'
+import { Loader2, Check, Activity, ExternalLink } from 'lucide-react'
 import { useProfile, useUpdateProfile } from '../hooks/useProfileQueries'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -55,7 +55,10 @@ function PortfolioSharingSection() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Portfolio Sharing</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Activity className="size-5 text-purple-600 dark:text-purple-400" />
+          Portfolio Sharing
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
@@ -82,7 +85,16 @@ function PortfolioSharingSection() {
           </div>
           {slug && (
             <p className="text-xs text-muted-foreground">
-              Public URL: <span className="font-mono">pulse.quantic.es/p/{slug}</span>
+              Public URL:{' '}
+              <a
+                href={`https://pulse.quantic.es/p/${slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono inline-flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:underline"
+              >
+                pulse.quantic.es/p/{slug}
+                <ExternalLink className="size-3" />
+              </a>
             </p>
           )}
         </div>

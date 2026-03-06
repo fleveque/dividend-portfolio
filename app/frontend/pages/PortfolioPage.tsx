@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Loader2, Minus, Maximize2, Package, Calendar } from 'lucide-react'
 import { PortfolioStockCard } from '../components/PortfolioStockCard'
 import { PortfolioStockRow } from '../components/PortfolioStockRow'
@@ -18,6 +18,9 @@ import { cn } from '@/lib/utils'
 import type { Stock } from '../types'
 
 const METRICS_PREFERENCE_KEY = 'portfolio-show-metrics'
+const SORT_PREFERENCE_KEY = 'portfolio-sort-preference'
+
+type SortBy = 'marketValue' | 'gainLoss' | 'gainLossPercent' | 'symbol'
 
 export function PortfolioPage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -25,6 +28,9 @@ export function PortfolioPage() {
   const [showMetrics, setShowMetrics] = useState(() => {
     const saved = localStorage.getItem(METRICS_PREFERENCE_KEY)
     return saved === 'true'
+  })
+  const [sortBy, setSortBy] = useState<SortBy>(() => {
+    return (localStorage.getItem(SORT_PREFERENCE_KEY) as SortBy) || 'marketValue'
   })
   const [addingStockId, setAddingStockId] = useState<number | null>(null)
   const [quantity, setQuantity] = useState('')
@@ -34,6 +40,10 @@ export function PortfolioPage() {
   useEffect(() => {
     localStorage.setItem(METRICS_PREFERENCE_KEY, String(showMetrics))
   }, [showMetrics])
+
+  useEffect(() => {
+    localStorage.setItem(SORT_PREFERENCE_KEY, sortBy)
+  }, [sortBy])
 
   const {
     data: holdingsData,
@@ -52,7 +62,24 @@ export function PortfolioPage() {
   const deleteHolding = useDeleteHolding()
 
   const holdings = holdingsData?.holdings ?? []
-  const stocks = holdings.map((h) => h.stock)
+
+  const sortedHoldings = useMemo(() => {
+    if (holdings.length === 0) return holdings
+    return [...holdings].sort((a, b) => {
+      switch (sortBy) {
+        case 'marketValue':
+          return b.marketValue - a.marketValue
+        case 'gainLoss':
+          return b.gainLoss - a.gainLoss
+        case 'gainLossPercent':
+          return b.gainLossPercent - a.gainLossPercent
+        case 'symbol':
+          return a.stock.symbol.localeCompare(b.stock.symbol)
+        default:
+          return 0
+      }
+    })
+  }, [holdings, sortBy])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -244,6 +271,16 @@ export function PortfolioPage() {
                 My Holdings ({holdings.length})
               </h2>
               <div className="flex items-center gap-4">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortBy)}
+                  className="text-xs border rounded-md px-2 py-1.5 bg-background text-foreground"
+                >
+                  <option value="marketValue">Sort: Value</option>
+                  <option value="gainLoss">Sort: Gain/Loss</option>
+                  <option value="gainLossPercent">Sort: Gain %</option>
+                  <option value="symbol">Sort: Symbol</option>
+                </select>
                 <ViewToggle />
                 <Button
                   variant="link"
@@ -295,7 +332,7 @@ export function PortfolioPage() {
             {/* Card View */}
             {holdings.length > 0 && viewMode === 'card' && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {holdings.map((holding) => (
+                {sortedHoldings.map((holding) => (
                   <PortfolioStockCard
                     key={holding.id}
                     holding={holding}
@@ -352,7 +389,7 @@ export function PortfolioPage() {
                 </div>
                 {/* Stock Rows */}
                 <div>
-                  {holdings.map((holding) => (
+                  {sortedHoldings.map((holding) => (
                     <PortfolioStockRow
                       key={holding.id}
                       holding={holding}
@@ -383,7 +420,7 @@ export function PortfolioPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <DividendCalendar stocks={stocks} />
+            <DividendCalendar holdings={holdings} />
           </CardContent>
         </Card>
       )}
