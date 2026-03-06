@@ -6,5 +6,9 @@ proxy:
   hosts:
     - beta.quantic.es
 
+env:
+  clear:
+    NATS_ENV_PREFIX: beta
+
 volumes:
   - "dividend_portfolio_beta_storage:/rails/storage"
