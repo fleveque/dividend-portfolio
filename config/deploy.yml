@@ -40,6 +40,7 @@ env:
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
     SOLID_QUEUE_IN_PUMA: true
     NATS_URL: nats://dividend-portfolio-nats:4222
+    NATS_ENV_PREFIX: prod
 
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3
