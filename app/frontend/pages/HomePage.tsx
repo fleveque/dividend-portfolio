@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react'
+import { Loader2, Activity, ExternalLink } from 'lucide-react'
 import { Logo } from '../components/Logo'
 import { FeatureShowcase } from '../components/FeatureShowcase'
 import { TopScoredShowcase } from '../components/TopScoredShowcase'
@@ -58,6 +58,33 @@ export function HomePage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Pulse Banner */}
+      <Card className="mb-8 border-purple-200 dark:border-purple-800 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30">
+        <CardContent className="px-6 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Activity className="size-5 text-purple-600 dark:text-purple-400 shrink-0" />
+              <div>
+                <p className="font-semibold text-foreground text-sm sm:text-base">
+                  Pulse — Real-time portfolio dashboard
+                </p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Live price updates, portfolio sync, and event-driven alerts.
+                </p>
+              </div>
+            </div>
+            <a
+              href="https://pulse.quantic.es"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 shrink-0 rounded-md bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 text-sm font-medium transition-colors"
+            >
+              Try Pulse <ExternalLink className="size-3.5" />
+            </a>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Stock Lists — three columns on large screens */}
       <div className="grid lg:grid-cols-3 gap-4">
