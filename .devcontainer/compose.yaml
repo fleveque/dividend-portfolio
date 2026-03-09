@@ -32,4 +32,10 @@ services:
     ports:
     - "4222:4222"
     - "8222:8222"
+    networks:
+    - default
+    - shared-nats
 
+networks:
+  shared-nats:
+    name: shared-nats
