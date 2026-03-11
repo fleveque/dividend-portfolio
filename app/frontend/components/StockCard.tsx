@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { StockCardProps } from '../types'
 import { StockLogo } from './StockLogo'
 import { DividendMonthGrid } from './DividendMonthGrid'
@@ -7,6 +8,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 
 function StockCard({ stock }: StockCardProps) {
+  const { t } = useTranslation()
+
   return (
     <Card className="hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer">
       <CardContent className="p-4">
@@ -68,7 +71,7 @@ function StockCard({ stock }: StockCardProps) {
           <>
             <Separator className="my-3" />
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">Dividends</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">{t('stock.dividends')}</span>
               <DividendMonthGrid paymentMonths={stock.paymentMonths} shiftedPaymentMonths={stock.shiftedPaymentMonths} size="md" />
             </div>
           </>
@@ -79,7 +82,7 @@ function StockCard({ stock }: StockCardProps) {
           <>
             <Separator className="my-3" />
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide shrink-0">52W</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide shrink-0">{t('stock.fiftyTwoWeek')}</span>
               <FiftyTwoWeekRange
                 low={stock.formattedFiftyTwoWeekLow}
                 high={stock.formattedFiftyTwoWeekHigh}

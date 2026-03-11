@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Check, X, ChevronDown, ArrowDown, ArrowUp, Minus as MinusIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateTargetPrice } from '../hooks/useRadarQueries'
 import { StockLogo } from './StockLogo'
@@ -22,6 +23,7 @@ interface RadarStockRowProps {
 }
 
 export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false, actionSlot }: RadarStockRowProps) {
+  const { t } = useTranslation()
   const [isMobileExpanded, setIsMobileExpanded] = useState(false)
   const updateTargetPrice = useUpdateTargetPrice()
 
@@ -65,7 +67,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
       return <span className="text-xs font-medium text-red-600 dark:text-red-400 whitespace-nowrap">↑{stock.percentageDifference}</span>
     }
     if (stock.atTarget) {
-      return <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">At target</span>
+      return <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">{t('stock.atTarget')}</span>
     }
     return null
   }
@@ -119,7 +121,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
               <span
                 onClick={startEdit}
                 className="text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
-                title="Click to edit target"
+                title={t('common.clickToEdit')}
               >
                 {stock.formattedTargetPrice}
               </span>
@@ -150,7 +152,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
               onClick={onRemove}
               disabled={isRemoving}
               className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
-              title="Remove from radar"
+              title={t('common.remove')}
             >
               <X className="size-4" />
             </Button>
@@ -185,7 +187,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
               <Separator />
               {/* Target Price Edit */}
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground uppercase tracking-wide">Target Price</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wide">{t('stock.target')}</span>
                 {isEditing ? (
                   <span className="inline-flex items-center gap-1">
                     <Input
@@ -211,7 +213,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                     onClick={startEdit}
                     className="text-sm text-foreground font-medium cursor-pointer"
                   >
-                    {stock.formattedTargetPrice} (tap to edit)
+                    {stock.formattedTargetPrice} ({t('common.clickToEdit')})
                   </button>
                 )}
               </div>
@@ -219,10 +221,10 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
               {/* Status Badge */}
               {stock.percentageDifference && (
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground uppercase tracking-wide">Status</span>
-                  {stock.belowTarget && <Badge variant="success" className="text-xs">↓ {stock.percentageDifference} below target</Badge>}
-                  {stock.aboveTarget && <Badge variant="destructive" className="text-xs">↑ {stock.percentageDifference} above target</Badge>}
-                  {stock.atTarget && <Badge variant="secondary" className="text-xs">At target price</Badge>}
+                  <span className="text-xs text-muted-foreground uppercase tracking-wide">{t('stock.status')}</span>
+                  {stock.belowTarget && <Badge variant="success" className="text-xs">{t('stock.belowTarget', { percentage: stock.percentageDifference })}</Badge>}
+                  {stock.aboveTarget && <Badge variant="destructive" className="text-xs">{t('stock.aboveTarget', { percentage: stock.percentageDifference })}</Badge>}
+                  {stock.atTarget && <Badge variant="secondary" className="text-xs">{t('stock.atTarget')}</Badge>}
                 </div>
               )}
 
@@ -257,7 +259,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                   <span className="text-foreground font-medium">{stock.formattedMa200}</span>
                 </div>
                 <div className="col-span-2 flex items-center justify-between">
-                  <span className="text-muted-foreground">Dividends:</span>
+                  <span className="text-muted-foreground">{t('stock.dividends')}:</span>
                   <DividendMonthGrid paymentMonths={stock.paymentMonths} shiftedPaymentMonths={stock.shiftedPaymentMonths} size="md" />
                 </div>
               </div>
@@ -270,7 +272,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                   disabled={isRemoving}
                   className="w-full text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/10"
                 >
-                  {isRemoving ? 'Removing...' : 'Remove from Radar'}
+                  {isRemoving ? `${t('common.remove')}...` : t('common.remove')}
                 </Button>
               )}
             </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Loader2, Minus, Maximize2, Package, Calendar } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { PortfolioStockCard } from '../components/PortfolioStockCard'
 import { PortfolioStockRow } from '../components/PortfolioStockRow'
 import { ViewToggle } from '../components/ViewToggle'
@@ -23,6 +24,7 @@ const SORT_PREFERENCE_KEY = 'portfolio-sort-preference'
 type SortBy = 'marketValue' | 'gainLoss' | 'gainLossPercent' | 'symbol'
 
 export function PortfolioPage() {
+  const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState('')
   const [submittedQuery, setSubmittedQuery] = useState('')
   const [showMetrics, setShowMetrics] = useState(() => {
@@ -128,11 +130,11 @@ export function PortfolioPage() {
           <div className="flex items-center justify-between gap-2">
             <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2">
               <span className="w-1 h-8 bg-foreground rounded-full"></span>
-              My Portfolio
+              {t('portfolio.title')}
             </CardTitle>
             {holdingsData && holdings.length > 0 && (
               <div className="text-right text-sm">
-                <div className="text-muted-foreground">Total Value</div>
+                <div className="text-muted-foreground">{t('portfolio.totalValue')}</div>
                 <div className="font-bold text-foreground">${holdingsData.totalValue.toFixed(2)}</div>
                 <div className={cn('text-xs font-medium', holdingsData.totalGainLoss >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400')}>
                   {holdingsData.totalGainLoss >= 0 ? '+' : ''}${holdingsData.totalGainLoss.toFixed(2)} ({holdingsData.totalGainLossPercent.toFixed(1)}%)
@@ -149,11 +151,11 @@ export function PortfolioPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search stocks by symbol (e.g., AAPL)..."
+                placeholder={t('common.searchPlaceholder')}
                 className="flex-1"
               />
               <Button type="submit" disabled={searchLoading}>
-                {searchLoading ? 'Searching...' : 'Search'}
+                {searchLoading ? t('common.searching') : t('common.search')}
               </Button>
             </form>
           </div>
@@ -161,21 +163,21 @@ export function PortfolioPage() {
           {/* Search Error */}
           {searchError && (
             <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{searchError instanceof Error ? searchError.message : 'Search failed'}</AlertDescription>
+              <AlertDescription>{searchError instanceof Error ? searchError.message : t('common.searchFailed')}</AlertDescription>
             </Alert>
           )}
 
           {/* Add Stock Error */}
           {createHolding.error && (
             <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{createHolding.error instanceof Error ? createHolding.error.message : 'Failed to add holding'}</AlertDescription>
+              <AlertDescription>{createHolding.error instanceof Error ? createHolding.error.message : t('portfolio.failedToAddHolding')}</AlertDescription>
             </Alert>
           )}
 
           {/* Search Results */}
           {searchResults && searchResults.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-foreground mb-4">Search Results</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-4">{t('common.searchResults')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {searchResults.map((stock) => (
                   <div key={stock.id} className="relative">
@@ -184,12 +186,12 @@ export function PortfolioPage() {
                       {isInPortfolio(stock.id) ? (
                         addingStockId === stock.id ? (
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs text-muted-foreground">Add more:</span>
+                            <span className="text-xs text-muted-foreground">{t('portfolio.addMore')}:</span>
                             <Input
                               type="number"
                               value={quantity}
                               onChange={(e) => setQuantity(e.target.value)}
-                              placeholder="Qty"
+                              placeholder={t('stock.qty')}
                               className="w-20"
                               step="any"
                               min="0.0001"
@@ -198,21 +200,21 @@ export function PortfolioPage() {
                               type="number"
                               value={averagePrice}
                               onChange={(e) => setAveragePrice(e.target.value)}
-                              placeholder="Avg $"
+                              placeholder={t('stock.avgPrice')}
                               className="w-24"
                               step="0.01"
                               min="0"
                             />
                             <Button size="sm" onClick={() => handleConfirmAdd(stock)} disabled={createHolding.isPending || !quantity || !averagePrice}>
-                              {createHolding.isPending ? <Loader2 className="size-4 animate-spin" /> : 'Add'}
+                              {createHolding.isPending ? <Loader2 className="size-4 animate-spin" /> : t('common.add')}
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={handleCancelAdd}>Cancel</Button>
+                            <Button variant="ghost" size="sm" onClick={handleCancelAdd}>{t('common.cancel')}</Button>
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
-                            <Badge variant="success">In portfolio</Badge>
+                            <Badge variant="success">{t('portfolio.inPortfolio')}</Badge>
                             <Button variant="outline" size="sm" onClick={() => handleStartAdd(stock)}>
-                              Add more
+                              {t('portfolio.addMore')}
                             </Button>
                           </div>
                         )
@@ -222,7 +224,7 @@ export function PortfolioPage() {
                             type="number"
                             value={quantity}
                             onChange={(e) => setQuantity(e.target.value)}
-                            placeholder="Qty"
+                            placeholder={t('stock.qty')}
                             className="w-20"
                             step="any"
                             min="0.0001"
@@ -231,15 +233,15 @@ export function PortfolioPage() {
                             type="number"
                             value={averagePrice}
                             onChange={(e) => setAveragePrice(e.target.value)}
-                            placeholder="Avg $"
+                            placeholder={t('stock.avgPrice')}
                             className="w-24"
                             step="0.01"
                             min="0"
                           />
                           <Button size="sm" onClick={() => handleConfirmAdd(stock)} disabled={createHolding.isPending || !quantity || !averagePrice}>
-                            {createHolding.isPending ? <Loader2 className="size-4 animate-spin" /> : 'Add'}
+                            {createHolding.isPending ? <Loader2 className="size-4 animate-spin" /> : t('common.add')}
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={handleCancelAdd}>Cancel</Button>
+                          <Button variant="ghost" size="sm" onClick={handleCancelAdd}>{t('common.cancel')}</Button>
                         </div>
                       ) : (
                         <Button
@@ -247,7 +249,7 @@ export function PortfolioPage() {
                           className="w-full"
                           size="sm"
                         >
-                          Add to Portfolio
+                          {t('portfolio.addToPortfolio')}
                         </Button>
                       )}
                     </div>
@@ -260,7 +262,7 @@ export function PortfolioPage() {
           {/* No Results Found */}
           {submittedQuery && !searchLoading && searchResults && searchResults.length === 0 && (
             <Alert variant="warning" className="mb-8">
-              <AlertDescription>No stocks found for "{submittedQuery.toUpperCase()}". Please check the symbol and try again.</AlertDescription>
+              <AlertDescription>{t('common.noSearchResults', { query: submittedQuery.toUpperCase() })}</AlertDescription>
             </Alert>
           )}
 
@@ -268,7 +270,7 @@ export function PortfolioPage() {
           <div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
               <h2 className="text-xl sm:text-2xl font-semibold text-foreground">
-                My Holdings ({holdings.length})
+                {t('portfolio.myHoldings', { count: holdings.length })}
               </h2>
               <div className="flex items-center gap-4">
                 <select
@@ -276,10 +278,10 @@ export function PortfolioPage() {
                   onChange={(e) => setSortBy(e.target.value as SortBy)}
                   className="text-xs border rounded-md px-2 py-1.5 bg-background text-foreground"
                 >
-                  <option value="marketValue">Sort: Value</option>
-                  <option value="gainLoss">Sort: Gain/Loss</option>
-                  <option value="gainLossPercent">Sort: Gain %</option>
-                  <option value="symbol">Sort: Symbol</option>
+                  <option value="marketValue">{t('portfolio.sortValue')}</option>
+                  <option value="gainLoss">{t('portfolio.sortGainLoss')}</option>
+                  <option value="gainLossPercent">{t('portfolio.sortGainPercent')}</option>
+                  <option value="symbol">{t('portfolio.sortSymbol')}</option>
                 </select>
                 <ViewToggle />
                 <Button
@@ -289,7 +291,7 @@ export function PortfolioPage() {
                   disabled={holdingsLoading}
                   className="p-0"
                 >
-                  {holdingsLoading ? 'Refreshing...' : 'Refresh'}
+                  {holdingsLoading ? t('common.refreshing') : t('common.refresh')}
                 </Button>
               </div>
             </div>
@@ -297,14 +299,14 @@ export function PortfolioPage() {
             {/* Holdings Error */}
             {holdingsError && (
               <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{holdingsError instanceof Error ? holdingsError.message : 'Failed to load portfolio'}</AlertDescription>
+                <AlertDescription>{holdingsError instanceof Error ? holdingsError.message : t('portfolio.failedToLoadPortfolio')}</AlertDescription>
               </Alert>
             )}
 
             {/* Delete Error */}
             {deleteHolding.error && (
               <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{deleteHolding.error instanceof Error ? deleteHolding.error.message : 'Failed to remove holding'}</AlertDescription>
+                <AlertDescription>{deleteHolding.error instanceof Error ? deleteHolding.error.message : t('portfolio.failedToRemoveHolding')}</AlertDescription>
               </Alert>
             )}
 
@@ -312,7 +314,7 @@ export function PortfolioPage() {
             {holdingsLoading && holdings.length === 0 && (
               <div className="text-center py-12">
                 <Loader2 className="size-8 animate-spin text-muted-foreground mx-auto" />
-                <p className="mt-3 text-muted-foreground">Loading your portfolio...</p>
+                <p className="mt-3 text-muted-foreground">{t('portfolio.loadingPortfolio')}</p>
               </div>
             )}
 
@@ -322,9 +324,9 @@ export function PortfolioPage() {
                 <div className="size-16 mx-auto mb-4 rounded-full bg-background flex items-center justify-center">
                   <Package className="size-8 text-muted-foreground" />
                 </div>
-                <p className="text-foreground font-medium">Your portfolio is empty.</p>
+                <p className="text-foreground font-medium">{t('portfolio.emptyTitle')}</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Search for stocks above to add them to your portfolio.
+                  {t('portfolio.emptyDescription')}
                 </p>
               </div>
             )}
@@ -354,25 +356,25 @@ export function PortfolioPage() {
                     onClick={() => setShowMetrics(!showMetrics)}
                   >
                     {showMetrics ? (
-                      <><Minus className="size-3.5" /> Collapse</>
+                      <><Minus className="size-3.5" /> {t('common.collapse')}</>
                     ) : (
-                      <><Maximize2 className="size-3.5" /> Expand</>
+                      <><Maximize2 className="size-3.5" /> {t('common.expand')}</>
                     )}
                   </Button>
                 </div>
                 <p className={cn('text-xs text-muted-foreground text-center mb-2', showMetrics ? 'xl:hidden' : 'md:hidden')}>
-                  Tap a row to expand details
+                  {t('common.tapRowToExpand')}
                 </p>
                 {/* Header Row */}
                 <div className={cn('hidden px-4 py-2 items-center gap-4 text-xs font-medium text-muted-foreground uppercase tracking-wide border-b overflow-hidden', showMetrics ? 'xl:flex' : 'md:flex')}>
                   <span className="w-8 shrink-0"></span>
-                  <span className="w-16 shrink-0">Symbol</span>
-                  <span className="w-40 shrink min-w-0">Name</span>
-                  <span className="w-16 shrink-0">Score</span>
-                  <span className="w-20 text-right shrink-0">Price</span>
-                  <span className="w-14 text-right shrink-0">Qty</span>
-                  <span className="w-20 text-right shrink-0">Avg Price</span>
-                  <span className="w-24 text-right shrink-0">Gain/Loss</span>
+                  <span className="w-16 shrink-0">{t('stock.symbol')}</span>
+                  <span className="w-40 shrink min-w-0">{t('stock.name')}</span>
+                  <span className="w-16 shrink-0">{t('stock.score')}</span>
+                  <span className="w-20 text-right shrink-0">{t('stock.price')}</span>
+                  <span className="w-14 text-right shrink-0">{t('stock.qty')}</span>
+                  <span className="w-20 text-right shrink-0">{t('stock.avgPrice')}</span>
+                  <span className="w-24 text-right shrink-0">{t('stock.gainLoss')}</span>
                   {showMetrics && (
                     <>
                       <span className="w-14 text-right shrink-0">PER</span>
@@ -382,7 +384,7 @@ export function PortfolioPage() {
                       <span className="w-14 text-right shrink-0">Payout</span>
                       <span className="w-18 text-right shrink-0">MA50</span>
                       <span className="w-18 text-right shrink-0">MA200</span>
-                      <span className="w-28 text-right shrink-0">Schedule</span>
+                      <span className="w-28 text-right shrink-0">{t('stock.schedule')}</span>
                     </>
                   )}
                   <span className="w-6 shrink-0"></span>
@@ -416,7 +418,7 @@ export function PortfolioPage() {
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
               <Calendar className="size-5" />
-              Dividend Calendar
+              {t('portfolio.dividendCalendar')}
             </CardTitle>
           </CardHeader>
           <CardContent>

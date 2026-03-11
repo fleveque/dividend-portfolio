@@ -83,7 +83,7 @@ module Api
           updated_at: stock.updated_at.to_i
         }
 
-        result = AiInsightsService.stock_summary(stock_data)
+        result = AiInsightsService.stock_summary(stock_data, locale: params[:locale])
         render_success(result)
       rescue AiProviders::BaseProvider::AiError => e
         Rails.logger.error "AI summary error for stock #{params[:id]}: #{e.message}"

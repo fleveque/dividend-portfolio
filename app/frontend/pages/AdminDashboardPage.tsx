@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import {
   useAdminDashboard,
   useAdminUsers,
@@ -50,6 +51,7 @@ function UserRow({
   onDelete: (id: number) => void
   isDeleting: boolean
 }) {
+  const { t } = useTranslation()
   const [showConfirm, setShowConfirm] = useState(false)
 
   return (
@@ -59,12 +61,12 @@ function UserRow({
         <TableCell className="text-muted-foreground">{user.name || '-'}</TableCell>
         <TableCell>
           {user.admin ? (
-            <Badge variant="default">Admin</Badge>
+            <Badge variant="default">{t('admin.adminBadge')}</Badge>
           ) : (
-            <span className="text-xs text-muted-foreground">User</span>
+            <span className="text-xs text-muted-foreground">{t('admin.userBadge')}</span>
           )}
         </TableCell>
-        <TableCell className="text-muted-foreground">{user.provider || 'email'}</TableCell>
+        <TableCell className="text-muted-foreground">{user.provider || t('admin.emailProvider')}</TableCell>
         <TableCell className="text-muted-foreground text-center">{user.radarStocksCount}</TableCell>
         <TableCell className="text-muted-foreground text-center">{user.holdingsCount}</TableCell>
         <TableCell className="text-muted-foreground text-center">{user.transactionsCount}</TableCell>
@@ -85,7 +87,7 @@ function UserRow({
             onClick={() => setShowConfirm(true)}
             className="text-destructive hover:text-destructive hover:bg-destructive/10"
           >
-            Delete
+            {t('common.delete')}
           </Button>
         </TableCell>
       </TableRow>
@@ -93,13 +95,13 @@ function UserRow({
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete user?</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.deleteUser')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {user.emailAddress}? This action cannot be undone.
+              {t('admin.deleteUserConfirm', { email: user.emailAddress })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 onDelete(user.id)
@@ -108,7 +110,7 @@ function UserRow({
               disabled={isDeleting}
               className="bg-destructive text-white hover:bg-destructive/90"
             >
-              Delete
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -118,6 +120,7 @@ function UserRow({
 }
 
 export function AdminDashboardPage() {
+  const { t } = useTranslation()
   const { data: stats, isLoading: statsLoading, error: statsError } = useAdminDashboard()
   const { data: users, isLoading: usersLoading, error: usersError } = useAdminUsers()
   const deleteUser = useDeleteUser()
@@ -127,12 +130,12 @@ export function AdminDashboardPage() {
   const handleRefresh = () => {
     refreshStocks.mutate(undefined, {
       onSuccess: () => {
-        setRefreshMessage('Stock refresh job enqueued successfully.')
+        setRefreshMessage(t('admin.refreshSuccess'))
         setTimeout(() => setRefreshMessage(null), 5000)
       },
       onError: (err) => {
         const message = err instanceof Error ? err.message : String(err)
-        setRefreshMessage(`Error: ${message}`)
+        setRefreshMessage(t('admin.refreshError', { message }))
         setTimeout(() => setRefreshMessage(null), 5000)
       },
     })
@@ -142,52 +145,52 @@ export function AdminDashboardPage() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-8 flex items-center gap-2">
         <span className="w-1 h-8 bg-foreground rounded-full"></span>
-        Admin Dashboard
+        {t('admin.title')}
       </h1>
 
       {/* Stats Section */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold text-foreground mb-4">Overview</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-4">{t('admin.overview')}</h2>
         {statsLoading && (
           <div className="flex items-center gap-2 text-muted-foreground">
-            <Loader2 className="size-4 animate-spin" /> Loading stats...
+            <Loader2 className="size-4 animate-spin" /> {t('admin.loadingStats')}
           </div>
         )}
         {statsError && (
           <Alert variant="destructive">
-            <AlertDescription>Failed to load stats: {(statsError as Error).message}</AlertDescription>
+            <AlertDescription>{t('admin.failedToLoadStats', { message: (statsError as Error).message })}</AlertDescription>
           </Alert>
         )}
         {stats && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            <StatCard label="Total Users" value={stats.users.total} />
-            <StatCard label="Admins" value={stats.users.admins} />
-            <StatCard label="Recent Signups (30d)" value={stats.users.recentSignups} />
-            <StatCard label="Total Stocks" value={stats.stocks.total} />
-            <StatCard label="Stocks with Price" value={stats.stocks.withPrice} />
-            <StatCard label="Total Radars" value={stats.radars.total} />
-            <StatCard label="Stocks Tracked" value={stats.radars.totalStocksTracked} />
-            <StatCard label="Avg Stocks/Radar" value={stats.radars.avgStocksPerRadar} />
-            <StatCard label="Buy Plans" value={stats.buyPlans.total} />
-            <StatCard label="Transactions" value={stats.transactions.total} />
-            <StatCard label="Total Portfolios" value={stats.holdings.usersWithHoldings} />
-            <StatCard label="Total Holdings" value={stats.holdings.totalHoldings} />
-            <StatCard label="Avg Holdings/User" value={stats.holdings.avgHoldingsPerUser} />
-            <StatCard label="Pulse Users" value={stats.pulse.usersWithSlug} />
-            <StatCard label="Pulse Adoption" value={`${stats.pulse.adoptionRate}%`} />
+            <StatCard label={t('admin.totalUsers')} value={stats.users.total} />
+            <StatCard label={t('admin.admins')} value={stats.users.admins} />
+            <StatCard label={t('admin.recentSignups')} value={stats.users.recentSignups} />
+            <StatCard label={t('admin.totalStocks')} value={stats.stocks.total} />
+            <StatCard label={t('admin.stocksWithPrice')} value={stats.stocks.withPrice} />
+            <StatCard label={t('admin.totalRadars')} value={stats.radars.total} />
+            <StatCard label={t('admin.stocksTracked')} value={stats.radars.totalStocksTracked} />
+            <StatCard label={t('admin.avgStocksPerRadar')} value={stats.radars.avgStocksPerRadar} />
+            <StatCard label={t('admin.buyPlans')} value={stats.buyPlans.total} />
+            <StatCard label={t('admin.transactions')} value={stats.transactions.total} />
+            <StatCard label={t('admin.totalPortfolios')} value={stats.holdings.usersWithHoldings} />
+            <StatCard label={t('admin.totalHoldings')} value={stats.holdings.totalHoldings} />
+            <StatCard label={t('admin.avgHoldingsPerUser')} value={stats.holdings.avgHoldingsPerUser} />
+            <StatCard label={t('admin.pulseUsers')} value={stats.pulse.usersWithSlug} />
+            <StatCard label={t('admin.pulseAdoption')} value={`${stats.pulse.adoptionRate}%`} />
           </div>
         )}
       </section>
 
       {/* Stock Refresh Section */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold text-foreground mb-4">Stock Data</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-4">{t('admin.stockData')}</h2>
         <div className="flex items-center gap-4">
           <Button onClick={handleRefresh} disabled={refreshStocks.isPending}>
             {refreshStocks.isPending ? (
-              <><Loader2 className="size-4 animate-spin" /> Refreshing...</>
+              <><Loader2 className="size-4 animate-spin" /> {t('common.refreshing')}</>
             ) : (
-              'Refresh All Stocks'
+              t('admin.refreshAllStocks')
             )}
           </Button>
           {refreshMessage && (
@@ -200,15 +203,15 @@ export function AdminDashboardPage() {
 
       {/* Users Section */}
       <section>
-        <h2 className="text-xl font-semibold text-foreground mb-4">Users</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-4">{t('admin.users')}</h2>
         {usersLoading && (
           <div className="flex items-center gap-2 text-muted-foreground">
-            <Loader2 className="size-4 animate-spin" /> Loading users...
+            <Loader2 className="size-4 animate-spin" /> {t('admin.loadingUsers')}
           </div>
         )}
         {usersError && (
           <Alert variant="destructive">
-            <AlertDescription>Failed to load users: {(usersError as Error).message}</AlertDescription>
+            <AlertDescription>{t('admin.failedToLoadUsers', { message: (usersError as Error).message })}</AlertDescription>
           </Alert>
         )}
         {users && (
@@ -217,16 +220,16 @@ export function AdminDashboardPage() {
               <Table className="min-w-[900px]">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Provider</TableHead>
-                    <TableHead className="text-center">Radar Stocks</TableHead>
-                    <TableHead className="text-center">Holdings</TableHead>
-                    <TableHead className="text-center">Transactions</TableHead>
-                    <TableHead>Pulse Slug</TableHead>
-                    <TableHead>Joined</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t('admin.email')}</TableHead>
+                    <TableHead>{t('admin.name')}</TableHead>
+                    <TableHead>{t('admin.role')}</TableHead>
+                    <TableHead>{t('admin.provider')}</TableHead>
+                    <TableHead className="text-center">{t('admin.radarStocks')}</TableHead>
+                    <TableHead className="text-center">{t('admin.holdings')}</TableHead>
+                    <TableHead className="text-center">{t('admin.transactions')}</TableHead>
+                    <TableHead>{t('admin.pulseSlug')}</TableHead>
+                    <TableHead>{t('admin.joined')}</TableHead>
+                    <TableHead>{t('admin.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

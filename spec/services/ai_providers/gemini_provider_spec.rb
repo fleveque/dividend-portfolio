@@ -14,44 +14,20 @@ RSpec.describe AiProviders::GeminiProvider, type: :service do
 
   let(:gemini_radar_response) do
     {
-      "candidates" => [
-        {
-          "content" => {
-            "parts" => [
-              {
-                "text" => {
-                  summary: "A balanced portfolio",
-                  buyingOpportunities: [ { symbol: "KO", reason: "Below target" } ],
-                  coverageGaps: "No coverage in Jan-Feb",
-                  riskFlags: [],
-                  strengths: [ "Good diversification" ]
-                }.to_json
-              }
-            ]
-          }
-        }
-      ]
-    }
+      summary: "A balanced portfolio",
+      buyingOpportunities: [ { symbol: "KO", reason: "Below target" } ],
+      coverageGaps: "No coverage in Jan-Feb",
+      riskFlags: [],
+      strengths: [ "Good diversification" ]
+    }.to_json
   end
 
   let(:gemini_stock_response) do
     {
-      "candidates" => [
-        {
-          "content" => {
-            "parts" => [
-              {
-                "text" => {
-                  summary: "AAPL is a tech leader",
-                  verdict: "hold",
-                  keyPoints: [ "Low yield", "Strong growth" ]
-                }.to_json
-              }
-            ]
-          }
-        }
-      ]
-    }
+      summary: "AAPL is a tech leader",
+      verdict: "hold",
+      keyPoints: [ "Low yield", "Strong growth" ]
+    }.to_json
   end
 
   before do
@@ -82,12 +58,12 @@ RSpec.describe AiProviders::GeminiProvider, type: :service do
       end
 
       it "caches responses" do
-        faraday_response = stub_gemini_request(gemini_radar_response)
+        http = stub_gemini_request(gemini_radar_response)
 
         provider.radar_insights(stocks_data)
         provider.radar_insights(stocks_data)
 
-        expect(faraday_response).to have_received(:post).once
+        expect(http).to have_received(:request).once
       end
     end
 
@@ -140,27 +116,44 @@ RSpec.describe AiProviders::GeminiProvider, type: :service do
   private
 
   def stub_gemini_request(response_body)
-    faraday_response = instance_double(Faraday::Response, success?: true, body: response_body)
-    faraday_connection = instance_double(Faraday::Connection)
-    allow(faraday_connection).to receive(:post).and_yield(
-      Faraday::Request.new
-    ).and_return(faraday_response)
-    allow(Faraday).to receive(:new).and_return(faraday_connection)
-    faraday_connection
+    response = instance_double(Net::HTTPSuccess, body: wrap_gemini_response(response_body), code: "200", message: "OK")
+    allow(response).to receive(:is_a?).with(Net::HTTPSuccess).and_return(true)
+
+    http = instance_double(Net::HTTP)
+    allow(http).to receive(:use_ssl=)
+    allow(http).to receive(:open_timeout=)
+    allow(http).to receive(:read_timeout=)
+    allow(http).to receive(:request).and_return(response)
+
+    allow(Net::HTTP).to receive(:new).and_return(http)
+    http
   end
 
   def stub_gemini_error(status, message)
-    faraday_response = instance_double(
-      Faraday::Response,
-      success?: false,
-      status: status,
-      body: { "error" => { "message" => message } }
-    )
-    faraday_connection = instance_double(Faraday::Connection)
-    allow(faraday_connection).to receive(:post).and_yield(
-      Faraday::Request.new
-    ).and_return(faraday_response)
-    allow(Faraday).to receive(:new).and_return(faraday_connection)
-    faraday_connection
+    response = instance_double(Net::HTTPResponse, body: { "error" => { "message" => message } }.to_json, code: status.to_s, message: message)
+    allow(response).to receive(:is_a?).with(Net::HTTPSuccess).and_return(false)
+
+    http = instance_double(Net::HTTP)
+    allow(http).to receive(:use_ssl=)
+    allow(http).to receive(:open_timeout=)
+    allow(http).to receive(:read_timeout=)
+    allow(http).to receive(:request).and_return(response)
+
+    allow(Net::HTTP).to receive(:new).and_return(http)
+    http
+  end
+
+  def wrap_gemini_response(text)
+    {
+      "candidates" => [
+        {
+          "content" => {
+            "parts" => [
+              { "text" => text }
+            ]
+          }
+        }
+      ]
+    }.to_json
   end
 end

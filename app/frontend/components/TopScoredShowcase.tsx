@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Loader2, Plus, Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import {
   Carousel,
   CarouselContent,
@@ -18,6 +19,7 @@ import StockCard from './StockCard'
 const AUTO_ADVANCE_MS = 5000
 
 function AddToRadarButton({ stockId }: { stockId: number }) {
+  const { t } = useTranslation()
   const { isAuthenticated } = useAuth()
   const addStock = useAddStock()
 
@@ -47,12 +49,13 @@ function AddToRadarButton({ stockId }: { stockId: number }) {
       ) : (
         <Plus className="size-4 mr-2" />
       )}
-      {inRadar ? 'In Radar' : 'Add to Radar'}
+      {inRadar ? t('home.inRadar') : t('home.addToRadar')}
     </Button>
   )
 }
 
 export function TopScoredShowcase() {
+  const { t } = useTranslation()
   const { data: stocks, isLoading } = useTopScoredStocks()
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
@@ -91,7 +94,7 @@ export function TopScoredShowcase() {
   if (!stocks || stocks.length === 0) {
     return (
       <p className="text-muted-foreground text-center py-6 text-sm">
-        No top scored stocks available.
+        {t('home.noTopScored')}
       </p>
     )
   }
@@ -103,7 +106,7 @@ export function TopScoredShowcase() {
     >
       <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
         <span className="w-1 h-5 bg-foreground rounded-full"></span>
-        Top Dividend Scores
+        {t('home.topDividendScores')}
       </h3>
 
       <Carousel opts={{ loop: true }} setApi={setApi}>
@@ -122,7 +125,7 @@ export function TopScoredShowcase() {
         {Array.from({ length: count }).map((_, i) => (
           <button
             key={i}
-            aria-label={`Go to stock ${i + 1}`}
+            aria-label={t('features.goToStock', { number: i + 1 })}
             onClick={() => scrollTo(i)}
             className={cn(
               'h-2 rounded-full transition-all duration-300 cursor-pointer',

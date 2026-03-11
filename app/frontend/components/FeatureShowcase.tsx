@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Radar, CalendarDays, ShoppingCart, Sparkles, Smartphone, Briefcase } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import {
   Carousel,
   CarouselContent,
@@ -15,64 +16,59 @@ import aiInsightsImg from '@/assets/screenshots/ai-insights.png'
 import mobileRadarImg from '@/assets/screenshots/mobile-radar.png'
 import portfolioImg from '@/assets/screenshots/portfolio.png'
 
-const slides = [
-  {
-    icon: Radar,
-    title: 'Stock Radar',
-    description:
-      'Track stocks with target prices, financial metrics, and status indicators.',
-    image: radarCardsImg,
-    mobile: false,
-  },
-  {
-    icon: CalendarDays,
-    title: 'Dividend Calendar',
-    description:
-      'See which stocks pay dividends each month and spot income gaps.',
-    image: dividendCalendarImg,
-    mobile: false,
-  },
-  {
-    icon: ShoppingCart,
-    title: 'Buy Plan Mode',
-    description:
-      'Plan purchases with a shopping cart — set quantities and see estimated costs.',
-    image: buyPlanModeImg,
-    mobile: false,
-  },
-  {
-    icon: Briefcase,
-    title: 'Portfolio Tracker',
-    description:
-      'Manage your holdings with real-time gain/loss tracking, weighted average prices, and market value calculations.',
-    image: portfolioImg,
-    mobile: false,
-  },
-  {
-    icon: Sparkles,
-    title: 'AI-Powered Insights',
-    description:
-      'Get AI-driven analysis with buying opportunities, risk flags, and per-stock summaries for both your radar and portfolio.',
-    image: aiInsightsImg,
-    mobile: false,
-  },
-  {
-    icon: Smartphone,
-    title: 'Mobile Ready',
-    description:
-      'Full functionality on any device with responsive design.',
-    image: mobileRadarImg,
-    mobile: true,
-  },
-] as const
-
 const AUTO_ADVANCE_MS = 6000
 
 export function FeatureShowcase() {
+  const { t } = useTranslation()
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
   const hovering = useRef(false)
+
+  const slides = [
+    {
+      icon: Radar,
+      title: t('features.stockRadar'),
+      description: t('features.stockRadarDesc'),
+      image: radarCardsImg,
+      mobile: false,
+    },
+    {
+      icon: CalendarDays,
+      title: t('features.dividendCalendar'),
+      description: t('features.dividendCalendarDesc'),
+      image: dividendCalendarImg,
+      mobile: false,
+    },
+    {
+      icon: ShoppingCart,
+      title: t('features.buyPlanMode'),
+      description: t('features.buyPlanModeDesc'),
+      image: buyPlanModeImg,
+      mobile: false,
+    },
+    {
+      icon: Briefcase,
+      title: t('features.portfolioTracker'),
+      description: t('features.portfolioTrackerDesc'),
+      image: portfolioImg,
+      mobile: false,
+    },
+    {
+      icon: Sparkles,
+      title: t('features.aiInsights'),
+      description: t('features.aiInsightsDesc'),
+      image: aiInsightsImg,
+      mobile: false,
+    },
+    {
+      icon: Smartphone,
+      title: t('features.mobileReady'),
+      description: t('features.mobileReadyDesc'),
+      image: mobileRadarImg,
+      mobile: true,
+    },
+  ]
 
   useEffect(() => {
     if (!api) return
@@ -146,7 +142,7 @@ export function FeatureShowcase() {
         {Array.from({ length: count }).map((_, i) => (
           <button
             key={i}
-            aria-label={`Go to slide ${i + 1}`}
+            aria-label={t('features.goToSlide', { number: i + 1 })}
             onClick={() => scrollTo(i)}
             className={cn(
               'h-2 rounded-full transition-all duration-300 cursor-pointer',

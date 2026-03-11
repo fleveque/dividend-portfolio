@@ -40,7 +40,7 @@ RSpec.describe AiInsightsService, type: :service do
       result = described_class.radar_insights(stocks_data)
 
       expect(result).to eq(radar_insights_result)
-      expect(provider).to have_received(:radar_insights).with(stocks_data)
+      expect(provider).to have_received(:radar_insights).with(stocks_data, locale: nil)
     end
   end
 
@@ -52,7 +52,7 @@ RSpec.describe AiInsightsService, type: :service do
       result = described_class.stock_summary(stock_data)
 
       expect(result).to eq(stock_summary_result)
-      expect(provider).to have_received(:stock_summary).with(stock_data)
+      expect(provider).to have_received(:stock_summary).with(stock_data, locale: nil)
     end
   end
 end

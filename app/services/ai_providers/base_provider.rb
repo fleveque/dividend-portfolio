@@ -5,24 +5,27 @@ module AiProviders
     # Generate insights for a radar's stock portfolio
     #
     # @param stocks_data [Array<Hash>] array of stock data hashes
+    # @param locale [String, nil] language locale (e.g., "en", "es")
     # @return [Hash] structured insights
-    def radar_insights(stocks_data)
+    def radar_insights(stocks_data, locale: nil)
       raise NotImplementedError, "Subclasses must implement radar_insights"
     end
 
     # Generate insights for a user's portfolio holdings
     #
     # @param stocks_data [Array<Hash>] array of stock data hashes
+    # @param locale [String, nil] language locale (e.g., "en", "es")
     # @return [Hash] structured insights
-    def portfolio_insights(stocks_data)
+    def portfolio_insights(stocks_data, locale: nil)
       raise NotImplementedError, "Subclasses must implement portfolio_insights"
     end
 
     # Generate a summary for a single stock
     #
     # @param stock_data [Hash] stock data hash
+    # @param locale [String, nil] language locale (e.g., "en", "es")
     # @return [Hash] structured summary with verdict
-    def stock_summary(stock_data)
+    def stock_summary(stock_data, locale: nil)
       raise NotImplementedError, "Subclasses must implement stock_summary"
     end
 

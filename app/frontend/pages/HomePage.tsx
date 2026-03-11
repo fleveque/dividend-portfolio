@@ -1,4 +1,5 @@
 import { Loader2, Activity, ExternalLink } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Logo } from '../components/Logo'
 import { FeatureShowcase } from '../components/FeatureShowcase'
 import { TopScoredShowcase } from '../components/TopScoredShowcase'
@@ -8,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export function HomePage() {
+  const { t } = useTranslation()
+
   const {
     data: lastAdded,
     isLoading: lastAddedLoading,
@@ -38,10 +41,10 @@ export function HomePage() {
           <Logo size="lg" showText={false} />
         </div>
         <h1 className="text-2xl sm:text-4xl font-bold text-foreground mb-2">
-          Dividend Stocks Portfolio & Radar
+          {t('home.heroTitle')}
         </h1>
         <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
-          AI-enhanced dividend investing. Track your portfolio, set target prices on your radar, plan purchases, and get intelligent insights — all in one place.
+          {t('home.heroSubtitle')}
         </p>
       </div>
 
@@ -67,10 +70,10 @@ export function HomePage() {
               <Activity className="size-5 text-purple-600 dark:text-purple-400 shrink-0" />
               <div>
                 <p className="font-semibold text-foreground text-sm sm:text-base">
-                  Pulse — Real-time portfolio dashboard
+                  {t('home.pulseTitle')}
                 </p>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Live price updates, portfolio sync, and event-driven alerts.
+                  {t('home.pulseDescription')}
                 </p>
               </div>
             </div>
@@ -80,7 +83,7 @@ export function HomePage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 shrink-0 rounded-md bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 text-sm font-medium transition-colors"
             >
-              Try Pulse <ExternalLink className="size-3.5" />
+              {t('home.tryPulse')} <ExternalLink className="size-3.5" />
             </a>
           </div>
         </CardContent>
@@ -93,27 +96,27 @@ export function HomePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <span className="w-1 h-5 bg-foreground rounded-full"></span>
-              Most Added to Radar
+              {t('home.mostAddedToRadar')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {mostAddedLoading && (
               <div className="flex items-center justify-center p-6">
                 <Loader2 className="size-6 animate-spin text-muted-foreground" />
-                <span className="ml-3 text-muted-foreground text-sm">Loading...</span>
+                <span className="ml-3 text-muted-foreground text-sm">{t('common.loading')}</span>
               </div>
             )}
 
             {mostAddedError && (
               <Alert variant="destructive">
                 <AlertDescription>
-                  {mostAddedError instanceof Error ? mostAddedError.message : 'Failed to load'}
+                  {mostAddedError instanceof Error ? mostAddedError.message : t('common.failedToLoad')}
                 </AlertDescription>
               </Alert>
             )}
 
             {!mostAddedLoading && !mostAddedError && (!topMostAdded || topMostAdded.length === 0) && (
-              <p className="text-muted-foreground text-center py-6 text-sm">No stocks found.</p>
+              <p className="text-muted-foreground text-center py-6 text-sm">{t('common.noStocksFound')}</p>
             )}
 
             {!mostAddedLoading && !mostAddedError && topMostAdded && topMostAdded.length > 0 && (
@@ -131,27 +134,27 @@ export function HomePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <span className="w-1 h-5 bg-foreground rounded-full"></span>
-              Most Held in Portfolios
+              {t('home.mostHeldInPortfolios')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {mostHeldLoading && (
               <div className="flex items-center justify-center p-6">
                 <Loader2 className="size-6 animate-spin text-muted-foreground" />
-                <span className="ml-3 text-muted-foreground text-sm">Loading...</span>
+                <span className="ml-3 text-muted-foreground text-sm">{t('common.loading')}</span>
               </div>
             )}
 
             {mostHeldError && (
               <Alert variant="destructive">
                 <AlertDescription>
-                  {mostHeldError instanceof Error ? mostHeldError.message : 'Failed to load'}
+                  {mostHeldError instanceof Error ? mostHeldError.message : t('common.failedToLoad')}
                 </AlertDescription>
               </Alert>
             )}
 
             {!mostHeldLoading && !mostHeldError && (!topMostHeld || topMostHeld.length === 0) && (
-              <p className="text-muted-foreground text-center py-6 text-sm">No stocks found.</p>
+              <p className="text-muted-foreground text-center py-6 text-sm">{t('common.noStocksFound')}</p>
             )}
 
             {!mostHeldLoading && !mostHeldError && topMostHeld && topMostHeld.length > 0 && (
@@ -169,27 +172,27 @@ export function HomePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <span className="w-1 h-5 bg-foreground rounded-full"></span>
-              Recently Updated
+              {t('home.recentlyUpdated')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {lastAddedLoading && (
               <div className="flex items-center justify-center p-6">
                 <Loader2 className="size-6 animate-spin text-muted-foreground" />
-                <span className="ml-3 text-muted-foreground text-sm">Loading...</span>
+                <span className="ml-3 text-muted-foreground text-sm">{t('common.loading')}</span>
               </div>
             )}
 
             {lastAddedError && (
               <Alert variant="destructive">
                 <AlertDescription>
-                  {lastAddedError instanceof Error ? lastAddedError.message : 'Failed to load'}
+                  {lastAddedError instanceof Error ? lastAddedError.message : t('common.failedToLoad')}
                 </AlertDescription>
               </Alert>
             )}
 
             {!lastAddedLoading && !lastAddedError && (!topLastAdded || topLastAdded.length === 0) && (
-              <p className="text-muted-foreground text-center py-6 text-sm">No stocks found.</p>
+              <p className="text-muted-foreground text-center py-6 text-sm">{t('common.noStocksFound')}</p>
             )}
 
             {!lastAddedLoading && !lastAddedError && topLastAdded && topLastAdded.length > 0 && (

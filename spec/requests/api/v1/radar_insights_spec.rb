@@ -67,7 +67,7 @@ RSpec.describe "Api::V1::Radars#insights", type: :request do
           get "/api/v1/radar/insights"
 
           expect(response).to have_http_status(:ok)
-          expect(AiInsightsService).to have_received(:radar_insights).with([])
+          expect(AiInsightsService).to have_received(:radar_insights).with([], locale: nil)
         end
       end
 

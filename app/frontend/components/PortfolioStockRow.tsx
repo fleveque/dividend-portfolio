@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { Check, X, ChevronDown } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateHolding } from '../hooks/useHoldingsQueries'
 import { StockLogo } from './StockLogo'
@@ -20,6 +21,7 @@ interface PortfolioStockRowProps {
 }
 
 export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics = false }: PortfolioStockRowProps) {
+  const { t } = useTranslation()
   const [isMobileExpanded, setIsMobileExpanded] = useState(false)
   const [editingField, setEditingField] = useState<'qty' | 'avg' | null>(null)
   const { stock } = holding
@@ -34,7 +36,7 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
     initialValue: holding.quantity.toString(),
     onSave: async (newValue) => {
       const qty = parseFloat(newValue)
-      if (qty <= 0 || isNaN(qty)) throw new Error('Quantity must be greater than 0')
+      if (qty <= 0 || isNaN(qty)) throw new Error(t('stock.qtyMustBePositive'))
       await updateHolding.mutateAsync({ id: holding.id, quantity: qty, averagePrice: holding.averagePrice })
     },
   })
@@ -43,7 +45,7 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
     initialValue: holding.averagePrice.toFixed(2),
     onSave: async (newValue) => {
       const price = parseFloat(newValue)
-      if (price < 0 || isNaN(price)) throw new Error('Price must be 0 or greater')
+      if (price < 0 || isNaN(price)) throw new Error(t('stock.priceMustBePositive'))
       await updateHolding.mutateAsync({ id: holding.id, quantity: holding.quantity, averagePrice: price })
     },
   })
@@ -129,7 +131,7 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
               <span
                 onClick={startQtyEdit}
                 className="text-sm text-foreground cursor-pointer hover:text-muted-foreground transition-colors"
-                title="Click to edit quantity"
+                title={t('common.clickToEdit')}
               >
                 {holding.quantity}
               </span>
@@ -162,7 +164,7 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
               <span
                 onClick={startAvgEdit}
                 className="text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
-                title="Click to edit avg price"
+                title={t('common.clickToEdit')}
               >
                 ${holding.averagePrice.toFixed(2)}
               </span>
@@ -195,7 +197,7 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
               onClick={onRemove}
               disabled={isRemoving}
               className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
-              title="Remove from portfolio"
+              title={t('common.remove')}
             >
               <X className="size-4" />
             </Button>
@@ -230,7 +232,7 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
               {/* Position Details - Editable */}
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Qty:</span>
+                  <span className="text-muted-foreground">{t('stock.qty')}:</span>
                   {editingField === 'qty' && qtyEdit.isEditing ? (
                     <span className="inline-flex items-center gap-1">
                       <Input
@@ -253,12 +255,12 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
                     </span>
                   ) : (
                     <button onClick={startQtyEdit} className="text-foreground font-medium cursor-pointer">
-                      {holding.quantity} (tap to edit)
+                      {holding.quantity} ({t('common.clickToEdit')})
                     </button>
                   )}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Avg Price:</span>
+                  <span className="text-muted-foreground">{t('stock.avgPrice')}:</span>
                   {editingField === 'avg' && avgPriceEdit.isEditing ? (
                     <span className="inline-flex items-center gap-1">
                       <Input
@@ -281,16 +283,16 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
                     </span>
                   ) : (
                     <button onClick={startAvgEdit} className="text-foreground font-medium cursor-pointer">
-                      ${holding.averagePrice.toFixed(2)} (tap to edit)
+                      ${holding.averagePrice.toFixed(2)} ({t('common.clickToEdit')})
                     </button>
                   )}
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Value:</span>
+                  <span className="text-muted-foreground">{t('stock.marketValue')}:</span>
                   <span className="text-foreground font-medium">${holding.marketValue.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Gain/Loss:</span>
+                  <span className="text-muted-foreground">{t('stock.gainLoss')}:</span>
                   <span className={cn('font-medium', gainLossColor)}>
                     ${holding.gainLoss.toFixed(2)}
                   </span>
@@ -333,7 +335,7 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
                   <span className="text-foreground font-medium">{stock.formattedMa200}</span>
                 </div>
                 <div className="col-span-2 flex items-center justify-between">
-                  <span className="text-muted-foreground">Dividends:</span>
+                  <span className="text-muted-foreground">{t('stock.dividends')}:</span>
                   <DividendMonthGrid paymentMonths={stock.paymentMonths} shiftedPaymentMonths={stock.shiftedPaymentMonths} size="md" />
                 </div>
               </div>
@@ -346,7 +348,7 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
                   disabled={isRemoving}
                   className="w-full text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/10"
                 >
-                  {isRemoving ? 'Removing...' : 'Remove from Portfolio'}
+                  {isRemoving ? `${t('common.remove')}...` : t('common.remove')}
                 </Button>
               )}
             </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ShoppingCart, Minus, Plus, Trash2, Loader2, Briefcase } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useBuyPlanContext } from '../contexts/BuyPlanContext'
 import { useImportFromCart } from '../hooks/useHoldingsQueries'
 import { StockLogo } from './StockLogo'
@@ -31,6 +32,7 @@ interface CartDrawerProps {
 }
 
 export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
+  const { t } = useTranslation()
   const {
     items,
     totalItems,
@@ -108,8 +110,8 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
       <Sheet open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
         <SheetContent side="bottom" className="max-h-[85vh] flex flex-col rounded-t-2xl safe-area-bottom" showCloseButton={true}>
           <SheetHeader>
-            <SheetTitle>Your Buy Plan</SheetTitle>
-            <SheetDescription className="sr-only">Manage your stock buy plan cart</SheetDescription>
+            <SheetTitle>{t('cart.title')}</SheetTitle>
+            <SheetDescription className="sr-only">{t('cart.description')}</SheetDescription>
           </SheetHeader>
 
           {/* Cart Items */}
@@ -117,8 +119,8 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             {items.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <ShoppingCart className="size-12 mx-auto mb-3" />
-                <p>Your cart is empty</p>
-                <p className="text-sm mt-1">Add stocks from your radar to plan purchases</p>
+                <p>{t('cart.emptyTitle')}</p>
+                <p className="text-sm mt-1">{t('cart.emptyDescription')}</p>
               </div>
             ) : (
               items.map((item) => (
@@ -159,7 +161,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                           size="icon-xs"
                           onClick={() => removeFromCart(item.stockId)}
                           className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-1"
-                          title="Remove"
+                          title={t('common.remove')}
                         >
                           <Trash2 className="size-3" />
                         </Button>
@@ -177,7 +179,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 <Separator />
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
-                    Total: {totalItems} share{totalItems !== 1 ? 's' : ''}
+                    {t('cart.totalShares', { count: totalItems })}
                   </span>
                   <span className="font-bold text-foreground text-lg">{formattedTotal}</span>
                 </div>
@@ -187,8 +189,8 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             <div className="flex gap-2">
               <Button onClick={handleSave} disabled={!isDirty || isSaving} className="flex-1">
                 {isSaving ? (
-                  <><Loader2 className="size-4 animate-spin" /> Saving...</>
-                ) : isDirty ? 'Save Cart' : 'Saved'}
+                  <><Loader2 className="size-4 animate-spin" /> {t('common.saving')}</>
+                ) : isDirty ? t('cart.saveCart') : t('common.saved')}
               </Button>
               <Button
                 variant="outline"
@@ -196,7 +198,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 disabled={items.length === 0 || isSaving}
                 className="text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/10"
               >
-                Reset
+                {t('cart.reset')}
               </Button>
             </div>
 
@@ -207,14 +209,14 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               className="w-full"
             >
               {importFromCart.isPending ? (
-                <><Loader2 className="size-4 animate-spin" /> Moving...</>
+                <><Loader2 className="size-4 animate-spin" /> {t('cart.moving')}</>
               ) : (
-                <><Briefcase className="size-4" /> Move to Portfolio</>
+                <><Briefcase className="size-4" /> {t('cart.moveToPortfolio')}</>
               )}
             </Button>
 
             <Button variant="outline" onClick={handleDone} className="w-full">
-              Done Planning
+              {t('cart.donePlanning')}
             </Button>
           </SheetFooter>
         </SheetContent>
@@ -224,15 +226,15 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
       <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Reset buy plan?</AlertDialogTitle>
+            <AlertDialogTitle>{t('cart.resetTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will clear your entire buy plan. This action cannot be undone.
+              {t('cart.resetDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleReset} className="bg-destructive text-white hover:bg-destructive/90">
-              Reset
+              {t('cart.reset')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -242,14 +244,14 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
       <AlertDialog open={showDoneDialog} onOpenChange={setShowDoneDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogTitle>{t('cart.unsavedTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              You have unsaved changes. Would you like to save before exiting?
+              {t('cart.unsavedDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleDoneDiscard}>Discard</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDoneSave}>Save & Exit</AlertDialogAction>
+            <AlertDialogCancel onClick={handleDoneDiscard}>{t('cart.discard')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDoneSave}>{t('cart.saveAndExit')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -258,15 +260,15 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
       <AlertDialog open={showMoveDialog} onOpenChange={setShowMoveDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Move to Portfolio?</AlertDialogTitle>
+            <AlertDialogTitle>{t('cart.moveTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will add {totalItems} share{totalItems !== 1 ? 's' : ''} to your portfolio using current market prices as the average price. Your buy plan cart will be cleared.
+              {t('cart.moveDescription', { count: totalItems })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleMoveToPortfolio}>
-              Move to Portfolio
+              {t('cart.moveToPortfolio')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

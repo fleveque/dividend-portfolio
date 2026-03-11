@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { Check, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateHolding } from '../hooks/useHoldingsQueries'
 import { StockLogo } from './StockLogo'
@@ -21,6 +22,7 @@ interface PortfolioStockCardProps {
 }
 
 export function PortfolioStockCard({ holding, onRemove, isRemoving }: PortfolioStockCardProps) {
+  const { t } = useTranslation()
   const { stock } = holding
   const isPositive = holding.gainLoss >= 0
   const updateHolding = useUpdateHolding()
@@ -30,7 +32,7 @@ export function PortfolioStockCard({ holding, onRemove, isRemoving }: PortfolioS
     initialValue: holding.quantity.toString(),
     onSave: async (newValue) => {
       const qty = parseFloat(newValue)
-      if (qty <= 0 || isNaN(qty)) throw new Error('Quantity must be greater than 0')
+      if (qty <= 0 || isNaN(qty)) throw new Error(t('stock.qtyMustBePositive'))
       await updateHolding.mutateAsync({ id: holding.id, quantity: qty, averagePrice: holding.averagePrice })
     },
   })
@@ -39,7 +41,7 @@ export function PortfolioStockCard({ holding, onRemove, isRemoving }: PortfolioS
     initialValue: holding.averagePrice.toFixed(2),
     onSave: async (newValue) => {
       const price = parseFloat(newValue)
-      if (price < 0 || isNaN(price)) throw new Error('Price must be 0 or greater')
+      if (price < 0 || isNaN(price)) throw new Error(t('stock.priceMustBePositive'))
       await updateHolding.mutateAsync({ id: holding.id, quantity: holding.quantity, averagePrice: price })
     },
   })
@@ -103,7 +105,7 @@ export function PortfolioStockCard({ holding, onRemove, isRemoving }: PortfolioS
                   disabled={isRemoving}
                   className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0 cursor-pointer"
                 >
-                  {isRemoving ? '...' : 'Remove'}
+                  {isRemoving ? '...' : t('common.remove')}
                 </Button>
               )}
             </div>
@@ -114,7 +116,7 @@ export function PortfolioStockCard({ holding, onRemove, isRemoving }: PortfolioS
         <Separator className="mb-3" />
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <span className="text-muted-foreground block text-xs uppercase tracking-wide">Qty</span>
+            <span className="text-muted-foreground block text-xs uppercase tracking-wide">{t('stock.qty')}</span>
             {editingField === 'qty' && qtyEdit.isEditing ? (
               <span className="inline-flex items-center gap-1">
                 <Input
@@ -139,14 +141,14 @@ export function PortfolioStockCard({ holding, onRemove, isRemoving }: PortfolioS
               <span
                 onClick={startQtyEdit}
                 className="font-semibold text-foreground cursor-pointer hover:text-muted-foreground transition-colors"
-                title="Click to edit"
+                title={t('common.clickToEdit')}
               >
                 {holding.quantity}
               </span>
             )}
           </div>
           <div>
-            <span className="text-muted-foreground block text-xs uppercase tracking-wide">Avg Price</span>
+            <span className="text-muted-foreground block text-xs uppercase tracking-wide">{t('stock.avgPrice')}</span>
             {editingField === 'avg' && avgPriceEdit.isEditing ? (
               <span className="inline-flex items-center gap-1">
                 <Input
@@ -171,18 +173,18 @@ export function PortfolioStockCard({ holding, onRemove, isRemoving }: PortfolioS
               <span
                 onClick={startAvgEdit}
                 className="font-semibold text-foreground cursor-pointer hover:text-muted-foreground transition-colors"
-                title="Click to edit"
+                title={t('common.clickToEdit')}
               >
                 ${holding.averagePrice.toFixed(2)}
               </span>
             )}
           </div>
           <div>
-            <span className="text-muted-foreground block text-xs uppercase tracking-wide">Market Value</span>
+            <span className="text-muted-foreground block text-xs uppercase tracking-wide">{t('stock.marketValue')}</span>
             <span className="font-semibold text-foreground">${holding.marketValue.toFixed(2)}</span>
           </div>
           <div>
-            <span className="text-muted-foreground block text-xs uppercase tracking-wide">Gain/Loss</span>
+            <span className="text-muted-foreground block text-xs uppercase tracking-wide">{t('stock.gainLoss')}</span>
             <span className={cn('font-semibold', isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400')}>
               ${holding.gainLoss.toFixed(2)} ({holding.gainLossPercent.toFixed(1)}%)
             </span>
@@ -195,7 +197,7 @@ export function PortfolioStockCard({ holding, onRemove, isRemoving }: PortfolioS
 
         {/* Current Price */}
         <div className="mt-2">
-          <span className="text-muted-foreground text-xs uppercase tracking-wide">Current: </span>
+          <span className="text-muted-foreground text-xs uppercase tracking-wide">{t('stock.current')}: </span>
           <span className="text-sm font-semibold text-foreground">{stock.formattedPrice}</span>
         </div>
 
@@ -237,7 +239,7 @@ export function PortfolioStockCard({ holding, onRemove, isRemoving }: PortfolioS
           <>
             <Separator className="my-3" />
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">Dividends</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">{t('stock.dividends')}</span>
               <DividendMonthGrid paymentMonths={stock.paymentMonths} shiftedPaymentMonths={stock.shiftedPaymentMonths} size="md" />
             </div>
           </>
@@ -248,7 +250,7 @@ export function PortfolioStockCard({ holding, onRemove, isRemoving }: PortfolioS
           <>
             <Separator className="my-3" />
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide shrink-0">52W</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide shrink-0">{t('stock.fiftyTwoWeek')}</span>
               <FiftyTwoWeekRange
                 low={stock.formattedFiftyTwoWeekLow}
                 high={stock.formattedFiftyTwoWeekHigh}
