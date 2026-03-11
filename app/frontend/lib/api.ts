@@ -115,7 +115,7 @@ export const stocksApi = {
   /**
    * Get AI-generated summary for a stock (authenticated)
    */
-  getAiSummary: (id: number) => apiFetch<StockAiSummary>(`/stocks/${id}/ai_summary`),
+  getAiSummary: (id: number, locale?: string) => apiFetch<StockAiSummary>(`/stocks/${id}/ai_summary${locale ? `?locale=${locale}` : ''}`),
 }
 
 // ============================================================================
@@ -162,7 +162,7 @@ export const radarApi = {
   /**
    * Get AI-generated insights for the radar portfolio (authenticated)
    */
-  getInsights: () => apiFetch<RadarInsights>('/radar/insights'),
+  getInsights: (locale?: string) => apiFetch<RadarInsights>(`/radar/insights${locale ? `?locale=${locale}` : ''}`),
 }
 
 // ============================================================================
@@ -259,7 +259,7 @@ export const holdingsApi = {
       method: 'DELETE',
     }),
 
-  getInsights: () => apiFetch<RadarInsights>('/holdings/insights'),
+  getInsights: (locale?: string) => apiFetch<RadarInsights>(`/holdings/insights${locale ? `?locale=${locale}` : ''}`),
 
   importFromCart: (items: { stock_id: number; quantity: number }[]) =>
     apiFetch<{ imported: number }>('/holdings/import_from_cart', {

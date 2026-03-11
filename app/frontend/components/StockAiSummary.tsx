@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Sparkles } from 'lucide-react'
 import { useStockAiSummary } from '../hooks/useAiInsights'
 import { Badge } from '@/components/ui/badge'
@@ -11,15 +12,24 @@ interface StockAiSummaryProps {
   stockId: number
 }
 
-const verdictConfig: Record<StockAiSummaryType['verdict'], { label: string; variant: 'success' | 'warning' | 'destructive' | 'secondary' }> = {
-  strong_buy: { label: 'Strong Buy', variant: 'success' },
-  buy: { label: 'Buy', variant: 'success' },
-  hold: { label: 'Hold', variant: 'secondary' },
-  caution: { label: 'Caution', variant: 'warning' },
-  avoid: { label: 'Avoid', variant: 'destructive' },
+const verdictVariant: Record<StockAiSummaryType['verdict'], 'success' | 'warning' | 'destructive' | 'secondary'> = {
+  strong_buy: 'success',
+  buy: 'success',
+  hold: 'secondary',
+  caution: 'warning',
+  avoid: 'destructive',
+}
+
+const verdictKeys: Record<StockAiSummaryType['verdict'], string> = {
+  strong_buy: 'stockAi.strongBuy',
+  buy: 'stockAi.buy',
+  hold: 'stockAi.hold',
+  caution: 'stockAi.caution',
+  avoid: 'stockAi.avoid',
 }
 
 export function StockAiSummary({ stockId }: StockAiSummaryProps) {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const { data, isLoading, error, refetch } = useStockAiSummary(isOpen ? stockId : null)
 
@@ -48,9 +58,9 @@ export function StockAiSummary({ stockId }: StockAiSummaryProps) {
 
           {error && (
             <div className="text-xs text-muted-foreground">
-              <span>Failed to load AI summary. </span>
+              <span>{t('stockAi.failedToLoad')} </span>
               <button onClick={() => refetch()} className="underline hover:text-foreground">
-                Retry
+                {t('stockAi.retry')}
               </button>
             </div>
           )}
@@ -58,8 +68,8 @@ export function StockAiSummary({ stockId }: StockAiSummaryProps) {
           {data && !isLoading && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Badge variant={verdictConfig[data.verdict].variant}>
-                  {verdictConfig[data.verdict].label}
+                <Badge variant={verdictVariant[data.verdict]}>
+                  {t(verdictKeys[data.verdict])}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">{data.summary}</p>
@@ -73,7 +83,7 @@ export function StockAiSummary({ stockId }: StockAiSummaryProps) {
                   ))}
                 </ul>
               )}
-              <p className="text-[10px] text-muted-foreground/50">AI-generated — not financial advice</p>
+              <p className="text-[10px] text-muted-foreground/50">{t('stockAi.disclaimer')}</p>
             </div>
           )}
         </>

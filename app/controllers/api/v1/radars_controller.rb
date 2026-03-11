@@ -42,7 +42,7 @@ module Api
       def insights
         stocks = @radar.sorted_stocks || []
         stocks_data = stocks.map { |s| serialize_stock_for_ai(s) }
-        result = AiInsightsService.radar_insights(stocks_data)
+        result = AiInsightsService.radar_insights(stocks_data, locale: params[:locale])
         render_success(result)
       rescue AiProviders::BaseProvider::AiError => e
         Rails.logger.error "AI insights error: #{e.message}"

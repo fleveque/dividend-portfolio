@@ -96,7 +96,7 @@ module Api
       def insights
         holdings = Current.user.holdings.includes(:stock)
         stocks_data = holdings.map { |h| serialize_stock_for_ai(h.stock) }
-        result = AiInsightsService.portfolio_insights(stocks_data)
+        result = AiInsightsService.portfolio_insights(stocks_data, locale: params[:locale])
         render_success(result)
       rescue AiProviders::BaseProvider::AiError => e
         Rails.logger.error "AI portfolio insights error: #{e.message}"

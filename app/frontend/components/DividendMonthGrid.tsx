@@ -1,11 +1,6 @@
+import { useTranslation } from 'react-i18next'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-
-const MONTH_LABELS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
-const MONTH_NAMES = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-]
 
 interface DividendMonthGridProps {
   paymentMonths: number[]
@@ -14,20 +9,35 @@ interface DividendMonthGridProps {
 }
 
 export function DividendMonthGrid({ paymentMonths, shiftedPaymentMonths = [], size = 'sm' }: DividendMonthGridProps) {
+  const { t, i18n } = useTranslation()
+
   if (paymentMonths.length === 0) {
-    return <span className="text-xs text-muted-foreground">No schedule</span>
+    return <span className="text-xs text-muted-foreground">{t('stock.noSchedule')}</span>
+  }
+
+  const monthFormatter = new Intl.DateTimeFormat(i18n.language, { month: 'short' })
+  const monthLabelFormatter = new Intl.DateTimeFormat(i18n.language, { month: 'narrow' })
+
+  const getMonthName = (m: number) => {
+    const date = new Date(2024, m - 1, 1)
+    return monthFormatter.format(date)
+  }
+
+  const getMonthLabel = (m: number) => {
+    const date = new Date(2024, m - 1, 1)
+    return monthLabelFormatter.format(date)
   }
 
   const primaryMonths = paymentMonths.filter((m) => !shiftedPaymentMonths.includes(m))
-  const primaryNames = primaryMonths.map((m) => MONTH_NAMES[m - 1]).join(', ')
-  const shiftedNames = shiftedPaymentMonths.map((m) => MONTH_NAMES[m - 1]).join(', ')
+  const primaryNames = primaryMonths.map(getMonthName).join(', ')
+  const shiftedNames = shiftedPaymentMonths.map(getMonthName).join(', ')
 
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="inline-flex items-end gap-px">
-            {MONTH_LABELS.map((label, i) => {
+            {Array.from({ length: 12 }, (_, i) => {
               const month = i + 1
               const isShifted = shiftedPaymentMonths.includes(month)
               const isPrimary = paymentMonths.includes(month) && !isShifted
@@ -49,7 +59,7 @@ export function DividendMonthGrid({ paymentMonths, shiftedPaymentMonths = [], si
                       isPrimary && 'text-emerald-600 dark:text-emerald-400 font-medium',
                       isShifted && 'text-amber-600 dark:text-amber-400 font-medium'
                     )}>
-                      {label}
+                      {getMonthLabel(month)}
                     </span>
                   )}
                 </div>
@@ -58,9 +68,9 @@ export function DividendMonthGrid({ paymentMonths, shiftedPaymentMonths = [], si
           </div>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Pays in {primaryNames}</p>
+          <p>{t('stock.paysIn', { months: primaryNames })}</p>
           {shiftedNames && (
-            <p className="text-amber-400">Sometimes in {shiftedNames}</p>
+            <p className="text-amber-400">{t('stock.sometimesIn', { months: shiftedNames })}</p>
           )}
         </TooltipContent>
       </Tooltip>

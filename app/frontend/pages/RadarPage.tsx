@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Loader2, ShoppingCart, Minus, Maximize2, Package, Calendar } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { RadarStockCard } from '../components/RadarStockCard'
 import { RadarStockRow } from '../components/RadarStockRow'
 import { ViewToggle } from '../components/ViewToggle'
@@ -25,6 +26,7 @@ import type { Stock } from '../types'
 const METRICS_PREFERENCE_KEY = 'radar-show-metrics'
 
 export function RadarPage() {
+  const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState('')
   const [submittedQuery, setSubmittedQuery] = useState('')
   const [showMetrics, setShowMetrics] = useState(() => {
@@ -86,7 +88,7 @@ export function RadarPage() {
           <div className="flex items-center justify-between gap-2">
             <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2">
               <span className="w-1 h-8 bg-foreground rounded-full"></span>
-              My Radar
+              {t('radar.title')}
             </CardTitle>
             <BuyPlanModeToggle />
           </div>
@@ -97,7 +99,7 @@ export function RadarPage() {
             <Alert variant="warning" className="mb-4">
               <ShoppingCart className="size-4" />
               <AlertDescription>
-                <span className="font-medium">Buy Plan Mode</span> — Add stocks to your buy plan cart. Click "View Cart" at the bottom to save.
+                <span className="font-medium">{t('features.buyPlanMode')}</span> — {t('radar.buyPlanModeBanner')}
               </AlertDescription>
             </Alert>
           )}
@@ -109,44 +111,44 @@ export function RadarPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search stocks by symbol (e.g., AAPL)..."
+                placeholder={t('common.searchPlaceholder')}
                 className="flex-1"
                 disabled={isBuyPlanMode}
               />
               <Button type="submit" disabled={searchLoading || isBuyPlanMode}>
-                {searchLoading ? 'Searching...' : 'Search'}
+                {searchLoading ? t('common.searching') : t('common.search')}
               </Button>
             </form>
             {isBuyPlanMode && (
-              <p className="text-xs text-muted-foreground mt-1">Search is disabled in buy plan mode</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('radar.searchDisabled')}</p>
             )}
           </div>
 
           {/* Search Error */}
           {searchError && (
             <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{searchError instanceof Error ? searchError.message : 'Search failed'}</AlertDescription>
+              <AlertDescription>{searchError instanceof Error ? searchError.message : t('common.searchFailed')}</AlertDescription>
             </Alert>
           )}
 
           {/* Add Stock Error */}
           {addStock.error && (
             <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{addStock.error instanceof Error ? addStock.error.message : 'Failed to add stock'}</AlertDescription>
+              <AlertDescription>{addStock.error instanceof Error ? addStock.error.message : t('radar.failedToAddStock')}</AlertDescription>
             </Alert>
           )}
 
           {/* Search Results */}
           {searchResults && searchResults.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-foreground mb-4">Search Results</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-4">{t('common.searchResults')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {searchResults.map((stock) => (
                   <div key={stock.id} className="relative">
                     <StockCard stock={stock} />
                     <div className="mt-3">
                       {isOnRadar(stock.id) ? (
-                        <Badge variant="success">Already on your radar</Badge>
+                        <Badge variant="success">{t('radar.alreadyOnRadar')}</Badge>
                       ) : (
                         <Button
                           onClick={() => handleAddStock(stock)}
@@ -154,7 +156,7 @@ export function RadarPage() {
                           className="w-full"
                           size="sm"
                         >
-                          {addStock.isPending ? 'Adding...' : 'Add to Radar'}
+                          {addStock.isPending ? t('radar.adding') : t('radar.addToRadar')}
                         </Button>
                       )}
                     </div>
@@ -167,7 +169,7 @@ export function RadarPage() {
           {/* No Results Found */}
           {submittedQuery && !searchLoading && searchResults && searchResults.length === 0 && (
             <Alert variant="warning" className="mb-8">
-              <AlertDescription>No stocks found for "{submittedQuery.toUpperCase()}". Please check the symbol and try again.</AlertDescription>
+              <AlertDescription>{t('common.noSearchResults', { query: submittedQuery.toUpperCase() })}</AlertDescription>
             </Alert>
           )}
 
@@ -175,7 +177,7 @@ export function RadarPage() {
           <div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
               <h2 className="text-xl sm:text-2xl font-semibold text-foreground">
-                Stocks on My Radar ({radarStocks.length})
+                {t('radar.stocksOnRadar', { count: radarStocks.length })}
               </h2>
               <div className="flex items-center gap-4">
                 <ViewToggle />
@@ -186,7 +188,7 @@ export function RadarPage() {
                   disabled={radarLoading}
                   className="p-0"
                 >
-                  {radarLoading ? 'Refreshing...' : 'Refresh'}
+                  {radarLoading ? t('common.refreshing') : t('common.refresh')}
                 </Button>
               </div>
             </div>
@@ -194,14 +196,14 @@ export function RadarPage() {
             {/* Radar Error */}
             {radarError && (
               <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{radarError instanceof Error ? radarError.message : 'Failed to load radar'}</AlertDescription>
+                <AlertDescription>{radarError instanceof Error ? radarError.message : t('radar.failedToLoadRadar')}</AlertDescription>
               </Alert>
             )}
 
             {/* Remove Stock Error */}
             {removeStock.error && (
               <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{removeStock.error instanceof Error ? removeStock.error.message : 'Failed to remove stock'}</AlertDescription>
+                <AlertDescription>{removeStock.error instanceof Error ? removeStock.error.message : t('radar.failedToRemoveStock')}</AlertDescription>
               </Alert>
             )}
 
@@ -209,7 +211,7 @@ export function RadarPage() {
             {radarLoading && radarStocks.length === 0 && (
               <div className="text-center py-12">
                 <Loader2 className="size-8 animate-spin text-muted-foreground mx-auto" />
-                <p className="mt-3 text-muted-foreground">Loading your radar...</p>
+                <p className="mt-3 text-muted-foreground">{t('radar.loadingRadar')}</p>
               </div>
             )}
 
@@ -219,9 +221,9 @@ export function RadarPage() {
                 <div className="size-16 mx-auto mb-4 rounded-full bg-background flex items-center justify-center">
                   <Package className="size-8 text-muted-foreground" />
                 </div>
-                <p className="text-foreground font-medium">Your radar is empty.</p>
+                <p className="text-foreground font-medium">{t('radar.emptyTitle')}</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Search for stocks above to add them to your radar.
+                  {t('radar.emptyDescription')}
                 </p>
               </div>
             )}
@@ -257,24 +259,24 @@ export function RadarPage() {
                     onClick={() => setShowMetrics(!showMetrics)}
                   >
                     {showMetrics ? (
-                      <><Minus className="size-3.5" /> Collapse</>
+                      <><Minus className="size-3.5" /> {t('common.collapse')}</>
                     ) : (
-                      <><Maximize2 className="size-3.5" /> Expand</>
+                      <><Maximize2 className="size-3.5" /> {t('common.expand')}</>
                     )}
                   </Button>
                 </div>
                 <p className={cn('text-xs text-muted-foreground text-center mb-2', showMetrics ? 'xl:hidden' : 'md:hidden')}>
-                  Tap a row to expand details
+                  {t('common.tapRowToExpand')}
                 </p>
                 {/* Header Row */}
                 <div className={cn('hidden px-4 py-2 items-center gap-4 text-xs font-medium text-muted-foreground uppercase tracking-wide border-b overflow-hidden', showMetrics ? 'xl:flex' : 'md:flex')}>
                   <span className="w-8 shrink-0"></span>
-                  <span className="w-16 shrink-0">Symbol</span>
-                  <span className="w-40 shrink min-w-0">Name</span>
-                  <span className="w-16 shrink-0">Score</span>
-                  <span className="w-20 text-right shrink-0">Price</span>
-                  <span className="w-24 shrink-0">Target</span>
-                  <span className="w-16 text-right shrink-0">Status</span>
+                  <span className="w-16 shrink-0">{t('stock.symbol')}</span>
+                  <span className="w-40 shrink min-w-0">{t('stock.name')}</span>
+                  <span className="w-16 shrink-0">{t('stock.score')}</span>
+                  <span className="w-20 text-right shrink-0">{t('stock.price')}</span>
+                  <span className="w-24 shrink-0">{t('stock.target')}</span>
+                  <span className="w-16 text-right shrink-0">{t('stock.status')}</span>
                   {showMetrics && (
                     <>
                       <span className="w-14 text-right shrink-0">PER</span>
@@ -284,11 +286,11 @@ export function RadarPage() {
                       <span className="w-14 text-right shrink-0">Payout</span>
                       <span className="w-18 text-right shrink-0">MA50</span>
                       <span className="w-18 text-right shrink-0">MA200</span>
-                      <span className="w-28 text-right shrink-0">Schedule</span>
+                      <span className="w-28 text-right shrink-0">{t('stock.schedule')}</span>
                     </>
                   )}
                   {isBuyPlanMode ? (
-                    <span className="w-28 shrink-0 text-right">Add to Cart</span>
+                    <span className="w-28 shrink-0 text-right">{t('radar.addToCart')}</span>
                   ) : (
                     <span className="w-6 shrink-0"></span>
                   )}
@@ -323,7 +325,7 @@ export function RadarPage() {
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
               <Calendar className="size-5" />
-              Dividend Calendar
+              {t('radar.dividendCalendar')}
             </CardTitle>
           </CardHeader>
           <CardContent>

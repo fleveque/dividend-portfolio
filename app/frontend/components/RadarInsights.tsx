@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   ShieldCheck,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useRadarInsights } from '../hooks/useAiInsights'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -20,6 +21,7 @@ interface RadarInsightsProps {
 }
 
 export function RadarInsights({ hasStocks }: RadarInsightsProps) {
+  const { t } = useTranslation()
   const [isExpanded, setIsExpanded] = useState(false)
   const { data, isLoading, error, refetch, isFetching } = useRadarInsights(isExpanded && hasStocks)
 
@@ -32,7 +34,7 @@ export function RadarInsights({ hasStocks }: RadarInsightsProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl flex items-center gap-2">
             <Sparkles className="size-5 text-violet-500" />
-            AI Portfolio Insights
+            {t('insights.title')}
           </CardTitle>
           <div className="flex items-center gap-2">
             {isExpanded && (
@@ -64,10 +66,10 @@ export function RadarInsights({ hasStocks }: RadarInsightsProps) {
           {error && (
             <div className="text-center py-6">
               <p className="text-sm text-muted-foreground mb-3">
-                {error instanceof Error ? error.message : 'Failed to load AI insights'}
+                {error instanceof Error ? error.message : t('insights.failedToLoad')}
               </p>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try again
+                {t('insights.tryAgain')}
               </Button>
             </div>
           )}
@@ -84,7 +86,7 @@ export function RadarInsights({ hasStocks }: RadarInsightsProps) {
                 <div>
                   <h3 className="text-sm font-medium text-foreground mb-2 flex items-center gap-1.5">
                     <TrendingDown className="size-4 text-emerald-500" />
-                    Buying Opportunities
+                    {t('insights.buyingOpportunities')}
                   </h3>
                   <div className="space-y-2">
                     {data.buyingOpportunities.map((opp, i) => (
@@ -103,7 +105,7 @@ export function RadarInsights({ hasStocks }: RadarInsightsProps) {
                   <Separator />
                   <div>
                     <h3 className="text-sm font-medium text-foreground mb-2">
-                      Dividend Coverage Gaps
+                      {t('insights.coverageGaps')}
                     </h3>
                     <p className="text-sm text-muted-foreground">{data.coverageGaps}</p>
                   </div>
@@ -117,7 +119,7 @@ export function RadarInsights({ hasStocks }: RadarInsightsProps) {
                   <div>
                     <h3 className="text-sm font-medium text-foreground mb-2 flex items-center gap-1.5">
                       <AlertTriangle className="size-4 text-amber-500" />
-                      Risk Flags
+                      {t('insights.riskFlags')}
                     </h3>
                     <div className="space-y-2">
                       {data.riskFlags.map((risk, i) => (
@@ -138,7 +140,7 @@ export function RadarInsights({ hasStocks }: RadarInsightsProps) {
                   <div>
                     <h3 className="text-sm font-medium text-foreground mb-2 flex items-center gap-1.5">
                       <ShieldCheck className="size-4 text-emerald-500" />
-                      Strengths
+                      {t('insights.strengths')}
                     </h3>
                     <ul className="space-y-1">
                       {data.strengths.map((strength, i) => (
@@ -154,7 +156,7 @@ export function RadarInsights({ hasStocks }: RadarInsightsProps) {
 
               {/* Disclaimer */}
               <p className="text-[11px] text-muted-foreground/60 text-right pt-2">
-                Powered by AI — not financial advice
+                {t('insights.disclaimer')}
               </p>
             </div>
           )}

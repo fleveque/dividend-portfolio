@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { Menu } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 import { Logo } from './Logo'
 import { ThemeToggle } from './ThemeToggle'
+import { LanguageToggle } from './LanguageToggle'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
@@ -26,6 +28,7 @@ export function Layout() {
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { t } = useTranslation()
 
   const handleLogout = async () => {
     await logout()
@@ -46,45 +49,47 @@ export function Layout() {
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-2 lg:gap-4">
-              <NavLink to="/" end className={navLinkClass}>Home</NavLink>
+              <NavLink to="/" end className={navLinkClass}>{t('nav.home')}</NavLink>
 
               {isAuthenticated && (
                 <>
-                  <NavLink to="/radar" className={navLinkClass}>Radar</NavLink>
-                  <NavLink to="/portfolio" className={navLinkClass}>Portfolio</NavLink>
-                  <NavLink to="/settings" className={navLinkClass}>Settings</NavLink>
+                  <NavLink to="/radar" className={navLinkClass}>{t('nav.radar')}</NavLink>
+                  <NavLink to="/portfolio" className={navLinkClass}>{t('nav.portfolio')}</NavLink>
+                  <NavLink to="/settings" className={navLinkClass}>{t('nav.settings')}</NavLink>
                 </>
               )}
 
               {isAuthenticated && user?.admin && (
-                <NavLink to="/admin" className={navLinkClass}>Admin</NavLink>
+                <NavLink to="/admin" className={navLinkClass}>{t('nav.admin')}</NavLink>
               )}
 
               <Separator orientation="vertical" className="h-6 mx-1" />
+              <LanguageToggle />
               <ThemeToggle />
 
               <div className="flex items-center gap-2 ml-1">
                 {isLoading ? (
-                  <span className="text-muted-foreground text-sm">Loading...</span>
+                  <span className="text-muted-foreground text-sm">{t('common.loading')}</span>
                 ) : isAuthenticated && user ? (
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground text-sm hidden lg:inline truncate max-w-48">
                       {user.emailAddress}
                     </span>
                     <Button variant="ghost" size="sm" onClick={handleLogout} className="hover:bg-destructive/10 hover:text-destructive">
-                      Logout
+                      {t('nav.logout')}
                     </Button>
                   </div>
                 ) : (
                   <Button asChild size="sm">
-                    <Link to="/login">Sign In</Link>
+                    <Link to="/login">{t('nav.signIn')}</Link>
                   </Button>
                 )}
               </div>
             </nav>
 
-            {/* Mobile: theme toggle + hamburger */}
+            {/* Mobile: language + theme toggle + hamburger */}
             <div className="flex items-center gap-2 md:hidden">
+              <LanguageToggle />
               <ThemeToggle />
               <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(true)}>
                 <Menu className="size-5" />
@@ -98,28 +103,28 @@ export function Layout() {
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetContent side="right" className="w-72 p-0">
           <SheetHeader className="p-4 border-b">
-            <SheetTitle className="text-left">Menu</SheetTitle>
-            <SheetDescription className="sr-only">Navigation menu</SheetDescription>
+            <SheetTitle className="text-left">{t('nav.menu')}</SheetTitle>
+            <SheetDescription className="sr-only">{t('nav.navigationMenu')}</SheetDescription>
           </SheetHeader>
           <nav className="flex flex-col gap-1 p-4">
-            <NavLink to="/" end className={mobileNavLinkClass} onClick={closeMobile}>Home</NavLink>
+            <NavLink to="/" end className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.home')}</NavLink>
 
             {isAuthenticated && (
               <>
-                <NavLink to="/radar" className={mobileNavLinkClass} onClick={closeMobile}>Radar</NavLink>
-                <NavLink to="/portfolio" className={mobileNavLinkClass} onClick={closeMobile}>Portfolio</NavLink>
-                <NavLink to="/settings" className={mobileNavLinkClass} onClick={closeMobile}>Settings</NavLink>
+                <NavLink to="/radar" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.radar')}</NavLink>
+                <NavLink to="/portfolio" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.portfolio')}</NavLink>
+                <NavLink to="/settings" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.settings')}</NavLink>
               </>
             )}
 
             {isAuthenticated && user?.admin && (
-              <NavLink to="/admin" className={mobileNavLinkClass} onClick={closeMobile}>Admin</NavLink>
+              <NavLink to="/admin" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.admin')}</NavLink>
             )}
 
             <Separator className="my-2" />
 
             {isLoading ? (
-              <span className="text-muted-foreground text-sm px-4 py-2">Loading...</span>
+              <span className="text-muted-foreground text-sm px-4 py-2">{t('common.loading')}</span>
             ) : isAuthenticated && user ? (
               <>
                 <span className="text-muted-foreground text-sm px-4 py-2 truncate">
@@ -130,12 +135,12 @@ export function Layout() {
                   onClick={() => { handleLogout(); closeMobile() }}
                   className="justify-start hover:bg-destructive/10 hover:text-destructive"
                 >
-                  Logout
+                  {t('nav.logout')}
                 </Button>
               </>
             ) : (
               <Button asChild className="mx-4">
-                <Link to="/login" onClick={closeMobile}>Sign In</Link>
+                <Link to="/login" onClick={closeMobile}>{t('nav.signIn')}</Link>
               </Button>
             )}
           </nav>
@@ -151,7 +156,7 @@ export function Layout() {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <Logo size="sm" showText={true} />
             <div className="text-muted-foreground text-xs sm:text-sm text-center">
-              <p>Built with Ruby on Rails, React, TypeScript, and Tailwind CSS</p>
+              <p>{t('footer.builtWith')}</p>
               <p className="mt-1">
                 &copy; {new Date().getFullYear()}{' '}
                 <a

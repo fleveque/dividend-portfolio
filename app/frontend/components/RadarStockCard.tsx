@@ -1,4 +1,5 @@
 import { Check, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateTargetPrice } from '../hooks/useRadarQueries'
 import { StockLogo } from './StockLogo'
@@ -21,6 +22,7 @@ interface RadarStockCardProps {
 }
 
 export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardProps) {
+  const { t } = useTranslation()
   const updateTargetPrice = useUpdateTargetPrice()
 
   const {
@@ -75,7 +77,7 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
                   disabled={isRemoving}
                   className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0 cursor-pointer"
                 >
-                  {isRemoving ? '...' : 'Remove'}
+                  {isRemoving ? '...' : t('common.remove')}
                 </Button>
               )}
             </div>
@@ -86,11 +88,11 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
         <Separator className="mb-3" />
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <span className="text-muted-foreground block text-xs uppercase tracking-wide">Current</span>
+            <span className="text-muted-foreground block text-xs uppercase tracking-wide">{t('stock.current')}</span>
             <span className="font-semibold text-foreground">{stock.formattedPrice}</span>
           </div>
           <div>
-            <span className="text-muted-foreground block text-xs uppercase tracking-wide">Target</span>
+            <span className="text-muted-foreground block text-xs uppercase tracking-wide">{t('stock.target')}</span>
             {isEditing ? (
               <span className="inline-flex items-center gap-1">
                 <Input
@@ -115,7 +117,7 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
               <span
                 onClick={startEdit}
                 className="font-semibold text-foreground cursor-pointer hover:text-muted-foreground transition-colors"
-                title="Click to edit"
+                title={t('common.clickToEdit')}
               >
                 {stock.formattedTargetPrice}
               </span>
@@ -165,7 +167,7 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
           <>
             <Separator className="my-3" />
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">Dividends</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">{t('stock.dividends')}</span>
               <DividendMonthGrid paymentMonths={stock.paymentMonths} shiftedPaymentMonths={stock.shiftedPaymentMonths} size="md" />
             </div>
           </>
@@ -176,7 +178,7 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
           <>
             <Separator className="my-3" />
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide shrink-0">52W</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide shrink-0">{t('stock.fiftyTwoWeek')}</span>
               <FiftyTwoWeekRange
                 low={stock.formattedFiftyTwoWeekLow}
                 high={stock.formattedFiftyTwoWeekHigh}
@@ -195,22 +197,22 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
           <>
             {stock.belowTarget && (
               <Badge variant="success">
-                ↓ {stock.percentageDifference} below target
+                {t('stock.belowTarget', { percentage: stock.percentageDifference })}
               </Badge>
             )}
             {stock.aboveTarget && (
               <Badge variant="destructive">
-                ↑ {stock.percentageDifference} above target
+                {t('stock.aboveTarget', { percentage: stock.percentageDifference })}
               </Badge>
             )}
             {stock.atTarget && (
               <Badge variant="secondary">
-                At target price
+                {t('stock.atTarget')}
               </Badge>
             )}
           </>
         ) : (
-          <Badge variant="outline">No target set</Badge>
+          <Badge variant="outline">{t('stock.noTargetSet')}</Badge>
         )}
       </CardContent>
     </Card>

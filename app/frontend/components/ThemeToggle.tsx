@@ -1,29 +1,31 @@
 import { Sun, Moon, Monitor } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '../contexts/ThemeContext'
 import { Button } from '@/components/ui/button'
 
 export function ThemeToggle() {
   const { mode, toggleMode } = useTheme()
+  const { t } = useTranslation()
 
   const getLabel = () => {
     switch (mode) {
       case 'light':
-        return 'Light'
+        return t('theme.light')
       case 'dark':
-        return 'Dark'
+        return t('theme.dark')
       case 'system':
-        return 'System'
+        return t('theme.system')
     }
   }
 
   const getTitle = () => {
     switch (mode) {
       case 'light':
-        return 'Switch to dark mode'
+        return t('theme.switchToDark')
       case 'dark':
-        return 'Switch to system mode'
+        return t('theme.switchToSystem')
       case 'system':
-        return 'Switch to light mode'
+        return t('theme.switchToLight')
     }
   }
 

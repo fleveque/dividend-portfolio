@@ -2,45 +2,61 @@ module AiProviders
   class GeminiProvider < BaseProvider
     GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent".freeze
 
-    def radar_insights(stocks_data)
+    def radar_insights(stocks_data, locale: nil)
       return empty_radar_insights if stocks_data.blank?
 
       fingerprint = Digest::MD5.hexdigest(stocks_data.to_json)
-      cache_key = "ai/radar/#{fingerprint}"
+      lang = normalized_locale(locale)
+      cache_key = "ai/radar/#{fingerprint}/#{lang}"
 
       cache_fetch(cache_key) do
-        prompt = build_radar_prompt(stocks_data)
+        prompt = build_radar_prompt(stocks_data, lang)
         response = call_gemini(prompt, radar_response_schema)
         parse_response(response)
       end
     end
 
-    def portfolio_insights(stocks_data)
+    def portfolio_insights(stocks_data, locale: nil)
       return empty_portfolio_insights if stocks_data.blank?
 
       fingerprint = Digest::MD5.hexdigest(stocks_data.to_json)
-      cache_key = "ai/portfolio/#{fingerprint}"
+      lang = normalized_locale(locale)
+      cache_key = "ai/portfolio/#{fingerprint}/#{lang}"
 
       cache_fetch(cache_key) do
-        prompt = build_portfolio_prompt(stocks_data)
+        prompt = build_portfolio_prompt(stocks_data, lang)
         response = call_gemini(prompt, radar_response_schema)
         parse_response(response)
       end
     end
 
-    def stock_summary(stock_data)
+    def stock_summary(stock_data, locale: nil)
       return empty_stock_summary if stock_data.blank?
 
-      cache_key = "ai/stock/#{stock_data[:id]}/#{stock_data[:updated_at]}"
+      lang = normalized_locale(locale)
+      cache_key = "ai/stock/#{stock_data[:id]}/#{stock_data[:updated_at]}/#{lang}"
 
       cache_fetch(cache_key) do
-        prompt = build_stock_prompt(stock_data)
+        prompt = build_stock_prompt(stock_data, lang)
         response = call_gemini(prompt, stock_response_schema)
         parse_response(response)
       end
     end
 
     private
+
+    SUPPORTED_LOCALES = %w[en es].freeze
+
+    def normalized_locale(locale)
+      lang = locale.to_s.split("-").first&.downcase
+      SUPPORTED_LOCALES.include?(lang) ? lang : "en"
+    end
+
+    def language_instruction(lang)
+      return "" if lang == "en"
+
+      "\nIMPORTANT: Respond entirely in Spanish (Español). All text in your response must be in Spanish."
+    end
 
     def api_key
       ENV["GEMINI_API_KEY"]
@@ -49,48 +65,53 @@ module AiProviders
     def call_gemini(prompt, schema)
       raise AiError, "GEMINI_API_KEY is not configured" if api_key.blank?
 
-      conn = Faraday.new(url: "#{GEMINI_API_URL}?key=#{api_key}") do |f|
-        f.request :json
-        f.response :json
-        f.options.timeout = 30
-        f.options.open_timeout = 10
-      end
+      uri = URI("#{GEMINI_API_URL}?key=#{api_key}")
 
       body = {
         system_instruction: { parts: [ { text: prompt[:system] } ] },
         contents: [ { parts: [ { text: prompt[:user] } ] } ],
         generationConfig: {
-          response_mime_type: "application/json",
-          response_schema: schema
+          responseMimeType: "application/json",
+          responseSchema: schema,
+          temperature: 0.7,
+          maxOutputTokens: 1024
         }
       }
 
-      response = conn.post { |req| req.body = body }
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      http.open_timeout = 10
+      http.read_timeout = 30
 
-      unless response.success?
-        error_msg = response.body.dig("error", "message") || "HTTP #{response.status}"
-        raise AiError, "Gemini API error: #{error_msg}"
+      request = Net::HTTP::Post.new(uri)
+      request["Content-Type"] = "application/json"
+      request.body = body.to_json
+
+      response = http.request(request)
+
+      unless response.is_a?(Net::HTTPSuccess)
+        raise AiError, "Gemini API error: #{response.code} #{response.message}"
       end
 
-      response.body
+      JSON.parse(response.body)
     end
 
     def parse_response(response)
       text = response.dig("candidates", 0, "content", "parts", 0, "text")
-      raise AiError, "Empty response from Gemini" if text.blank?
+      raise AiError, "Unexpected Gemini response structure" if text.blank?
 
-      JSON.parse(text, symbolize_names: true)
-    rescue JSON::ParserError => e
-      raise AiError, "Failed to parse Gemini response: #{e.message}"
+      parsed = JSON.parse(text)
+      parsed.deep_symbolize_keys
     end
 
-    def build_radar_prompt(stocks_data)
+    def build_radar_prompt(stocks_data, lang = "en")
       {
         system: <<~SYSTEM,
           You are a dividend investment analyst assistant. Analyze the user's stock watchlist and provide actionable insights.
           Focus on dividend investing strategy: yield quality, payout sustainability, portfolio diversification by payment months, and value opportunities.
           Be concise and specific. Reference stocks by their symbol.
           All prices are in USD.
+          IMPORTANT: The "targetPrice" field is NOT an analyst target — it is the price at which the user personally wants to act (buy or sell). Treat it as the user's desired action price.#{language_instruction(lang)}
         SYSTEM
         user: <<~USER
           Analyze this stock watchlist and provide insights:
@@ -107,13 +128,14 @@ module AiProviders
       }
     end
 
-    def build_portfolio_prompt(stocks_data)
+    def build_portfolio_prompt(stocks_data, lang = "en")
       {
         system: <<~SYSTEM,
           You are a dividend investment analyst assistant. Analyze the user's actual portfolio holdings and provide actionable insights.
           Focus on dividend investing strategy: yield quality, payout sustainability, portfolio diversification by payment months, and value opportunities.
           Be concise and specific. Reference stocks by their symbol.
           All prices are in USD.
+          IMPORTANT: The "targetPrice" field is NOT an analyst target — it is the price at which the user personally wants to act (buy or sell). Treat it as the user's desired action price.#{language_instruction(lang)}
         SYSTEM
         user: <<~USER
           Analyze this portfolio of owned stocks and provide insights:
@@ -130,12 +152,13 @@ module AiProviders
       }
     end
 
-    def build_stock_prompt(stock_data)
+    def build_stock_prompt(stock_data, lang = "en")
       {
         system: <<~SYSTEM,
           You are a dividend investment analyst assistant. Provide a concise assessment of an individual stock for dividend investing.
           Consider yield, payout ratio, PE ratio, price vs target, 52-week position, dividend score, and MA200 trend.
           Be specific and actionable. All prices are in USD.
+          IMPORTANT: The "targetPrice" field is NOT an analyst target — it is the price at which the user personally wants to act (buy or sell). Treat it as the user's desired action price.#{language_instruction(lang)}
         SYSTEM
         user: <<~USER
           Assess this stock for dividend investing:

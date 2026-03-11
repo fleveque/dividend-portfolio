@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import {
   Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
@@ -7,13 +8,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils'
 import type { Stock, Holding } from '../types'
 
-const MONTH_HEADERS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
 type DividendCalendarProps =
   | { holdings: Holding[]; stocks?: never }
   | { stocks: Stock[]; holdings?: never }
 
 export function DividendCalendar(props: DividendCalendarProps) {
+  const { t, i18n } = useTranslation()
   const hasHoldings = !!props.holdings
   const stocks = props.holdings ? props.holdings.map((h) => h.stock) : props.stocks
   const quantityByStockId = props.holdings
@@ -24,10 +24,16 @@ export function DividendCalendar(props: DividendCalendarProps) {
   const unknownStocks = stocks.filter((s) => !s.dividendScheduleAvailable && s.dividend)
   const noDividendStocks = stocks.filter((s) => !s.dividend)
 
+  // Generate localized month headers
+  const monthHeaders = Array.from({ length: 12 }, (_, i) => {
+    const date = new Date(2024, i, 1)
+    return new Intl.DateTimeFormat(i18n.language, { month: 'short' }).format(date)
+  })
+
   if (scheduledStocks.length === 0) {
     return (
       <p className="text-sm text-muted-foreground text-center py-4">
-        No dividend schedule data available yet. Refresh stock data to populate.
+        {t('dividendCalendar.noScheduleData')}
       </p>
     )
   }
@@ -63,8 +69,8 @@ export function DividendCalendar(props: DividendCalendarProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="sticky left-0 bg-background z-10 min-w-24">Stock</TableHead>
-              {MONTH_HEADERS.map((month) => (
+              <TableHead className="sticky left-0 bg-background z-10 min-w-24">{t('dividendCalendar.stock')}</TableHead>
+              {monthHeaders.map((month) => (
                 <TableHead key={month} className="text-center text-xs px-1 min-w-12">{month}</TableHead>
               ))}
             </TableRow>
@@ -94,8 +100,8 @@ export function DividendCalendar(props: DividendCalendarProps) {
                           </TooltipTrigger>
                           <TooltipContent>
                             {stock.symbol} · {stock.formattedPaymentFrequency}
-                            {isShifted && ' · Payment sometimes shifts to this month'}
-                            {!isShifted && ` · Ex-div: ${stock.formattedExDividendDate}`}
+                            {isShifted && ` · ${t('dividendCalendar.paymentShifted')}`}
+                            {!isShifted && ` · ${t('dividendCalendar.exDiv', { date: stock.formattedExDividendDate })}`}
                           </TooltipContent>
                         </Tooltip>
                       ) : (
@@ -109,20 +115,20 @@ export function DividendCalendar(props: DividendCalendarProps) {
           </TableBody>
           <TableFooter>
             <TableRow>
-              <TableCell className="sticky left-0 bg-muted/50 z-10 font-bold">{hasHoldings ? 'Per Share' : 'Total'}</TableCell>
+              <TableCell className="sticky left-0 bg-muted/50 z-10 font-bold">{hasHoldings ? t('dividendCalendar.perShare') : t('dividendCalendar.total')}</TableCell>
               {monthlyTotals.map((total, i) => (
                 <TableCell key={i} className="text-center px-1">
                   {total > 0 ? (
                     <span className="text-xs font-semibold text-foreground">${total.toFixed(2)}</span>
                   ) : (
-                    <Badge variant="destructive" className="text-[10px] px-1 py-0">Gap</Badge>
+                    <Badge variant="destructive" className="text-[10px] px-1 py-0">{t('dividendCalendar.gap')}</Badge>
                   )}
                 </TableCell>
               ))}
             </TableRow>
             {hasHoldings && (
               <TableRow className="bg-emerald-50/50 dark:bg-emerald-950/20">
-                <TableCell className="sticky left-0 bg-emerald-50/50 dark:bg-emerald-950/20 z-10 font-bold">Est. Income</TableCell>
+                <TableCell className="sticky left-0 bg-emerald-50/50 dark:bg-emerald-950/20 z-10 font-bold">{t('dividendCalendar.estIncome')}</TableCell>
                 {monthlyIncome.map((income, i) => (
                   <TableCell key={i} className="text-center px-1">
                     {income > 0 ? (
@@ -142,13 +148,13 @@ export function DividendCalendar(props: DividendCalendarProps) {
             <AlertDescription className="text-xs space-y-1">
               {unknownStocks.length > 0 && (
                 <p>
-                  <span className="font-medium">Unknown schedule:</span>{' '}
-                  {unknownStocks.map((s) => s.symbol).join(', ')} — refresh data to populate
+                  <span className="font-medium">{t('dividendCalendar.unknownSchedule')}</span>{' '}
+                  {unknownStocks.map((s) => s.symbol).join(', ')} {t('dividendCalendar.refreshToPopulate')}
                 </p>
               )}
               {noDividendStocks.length > 0 && (
                 <p>
-                  <span className="font-medium">No dividend:</span>{' '}
+                  <span className="font-medium">{t('dividendCalendar.noDividend')}</span>{' '}
                   {noDividendStocks.map((s) => s.symbol).join(', ')}
                 </p>
               )}

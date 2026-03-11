@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 import { Logo } from '../components/Logo'
 import { Card, CardContent } from '@/components/ui/card'
@@ -20,6 +21,7 @@ export function SignUpPage() {
   const { signUp, isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const { t } = useTranslation()
 
   const from = (location.state as LocationState)?.from?.pathname || '/'
 
@@ -39,7 +41,7 @@ export function SignUpPage() {
     setError(null)
 
     if (password !== passwordConfirmation) {
-      setError('Passwords do not match')
+      setError(t('auth.passwordsDoNotMatch'))
       return
     }
 
@@ -49,7 +51,7 @@ export function SignUpPage() {
       await signUp(email, password, passwordConfirmation)
       navigate(from, { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed')
+      setError(err instanceof Error ? err.message : t('auth.registrationFailed'))
       setIsSubmitting(false)
     }
   }
@@ -62,7 +64,7 @@ export function SignUpPage() {
             <Logo size="lg" showText={false} />
           </div>
           <h1 className="text-2xl font-bold text-foreground">
-            Create your Quantic account
+            {t('auth.signUpTitle')}
           </h1>
         </div>
 
@@ -76,7 +78,7 @@ export function SignUpPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth.email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -85,13 +87,13 @@ export function SignUpPage() {
                   required
                   autoFocus
                   autoComplete="email"
-                  placeholder="Enter your email address"
+                  placeholder={t('auth.emailPlaceholder')}
                   disabled={isSubmitting}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('auth.password')}</Label>
                 <Input
                   id="password"
                   type="password"
@@ -99,7 +101,7 @@ export function SignUpPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="new-password"
-                  placeholder="Create a password (min 6 characters)"
+                  placeholder={t('auth.createPasswordPlaceholder')}
                   minLength={6}
                   maxLength={72}
                   disabled={isSubmitting}
@@ -107,7 +109,7 @@ export function SignUpPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="passwordConfirmation">Confirm Password</Label>
+                <Label htmlFor="passwordConfirmation">{t('auth.confirmPassword')}</Label>
                 <Input
                   id="passwordConfirmation"
                   type="password"
@@ -115,7 +117,7 @@ export function SignUpPage() {
                   onChange={(e) => setPasswordConfirmation(e.target.value)}
                   required
                   autoComplete="new-password"
-                  placeholder="Confirm your password"
+                  placeholder={t('auth.confirmPasswordPlaceholder')}
                   minLength={6}
                   maxLength={72}
                   disabled={isSubmitting}
@@ -124,9 +126,9 @@ export function SignUpPage() {
 
               <Button type="submit" disabled={isSubmitting} className="w-full">
                 {isSubmitting ? (
-                  <><Loader2 className="size-4 animate-spin" /> Creating account...</>
+                  <><Loader2 className="size-4 animate-spin" /> {t('auth.creatingAccount')}</>
                 ) : (
-                  'Create account'
+                  t('auth.createAccount')
                 )}
               </Button>
             </form>
@@ -134,7 +136,7 @@ export function SignUpPage() {
             <div className="relative my-6">
               <Separator />
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="px-2 bg-card text-muted-foreground text-sm">or</span>
+                <span className="px-2 bg-card text-muted-foreground text-sm">{t('common.or')}</span>
               </div>
             </div>
 
@@ -151,16 +153,16 @@ export function SignUpPage() {
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
-                Continue with Google
+                {t('auth.continueWithGoogle')}
               </Button>
             </form>
 
             <Separator className="my-6" />
 
             <p className="text-sm text-muted-foreground text-center">
-              Already have an account?{' '}
+              {t('auth.hasAccount')}{' '}
               <Link to="/login" className="text-foreground hover:underline font-medium">
-                Sign in
+                {t('auth.signIn')}
               </Link>
             </p>
           </CardContent>

@@ -1,4 +1,5 @@
 import { ShoppingCart, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useBuyPlanContext } from '../contexts/BuyPlanContext'
 import { Badge } from '@/components/ui/badge'
 
@@ -7,6 +8,7 @@ interface CartSummaryBarProps {
 }
 
 export function CartSummaryBar({ onOpenDrawer }: CartSummaryBarProps) {
+  const { t } = useTranslation()
   const { isActive, items, totalItems, formattedTotal, isDirty } = useBuyPlanContext()
 
   if (!isActive || items.length === 0) {
@@ -31,14 +33,13 @@ export function CartSummaryBar({ onOpenDrawer }: CartSummaryBarProps) {
 
             <div>
               <p className="text-sm font-medium text-foreground">
-                {totalItems} share{totalItems !== 1 ? 's' : ''} in {items.length} stock
-                {items.length !== 1 ? 's' : ''}
+                {t('cart.sharesInStocks', { shares: totalItems, stocks: items.length })}
               </p>
               <p className="text-xs text-muted-foreground">
-                Est. total: {formattedTotal}
+                {t('cart.estTotal', { total: formattedTotal })}
                 {isDirty && (
                   <span className="text-amber-500 dark:text-amber-400 ml-2">
-                    (unsaved)
+                    {t('cart.unsaved')}
                   </span>
                 )}
               </p>
@@ -46,7 +47,7 @@ export function CartSummaryBar({ onOpenDrawer }: CartSummaryBarProps) {
           </div>
 
           <div className="flex items-center gap-2 text-foreground font-medium">
-            <span className="text-sm hidden sm:inline">View Cart</span>
+            <span className="text-sm hidden sm:inline">{t('cart.viewCart')}</span>
             <ChevronRight className="size-5" />
           </div>
         </div>
