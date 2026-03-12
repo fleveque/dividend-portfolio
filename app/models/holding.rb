@@ -23,7 +23,7 @@ class Holding < ApplicationRecord
     NatsPublisher.publish("portfolio.updated", {
       slug: user.portfolio_slug,
       holdings: user.holdings.includes(:stock).map { |h|
-        { symbol: h.stock.symbol, quantity: h.quantity.to_f, avg_price: h.average_price.to_f }
+        { symbol: h.stock.symbol, quantity: h.quantity.to_f, avg_price: h.average_price.to_f, price: (h.stock.price || 0).to_f }
       }
     })
   end
