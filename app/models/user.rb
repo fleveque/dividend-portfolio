@@ -36,7 +36,7 @@ class User < ApplicationRecord
       NatsPublisher.publish("portfolio.opted_in", {
         slug: portfolio_slug,
         holdings: holdings.includes(:stock).map { |h|
-          { symbol: h.stock.symbol, quantity: h.quantity.to_f, avg_price: h.average_price.to_f }
+          { symbol: h.stock.symbol, quantity: h.quantity.to_f, avg_price: h.average_price.to_f, price: (h.stock.price || 0).to_f }
         }
       })
     else

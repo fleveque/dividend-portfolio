@@ -48,6 +48,19 @@ RSpec.describe User, type: :model do
       user.update!(portfolio_slug: "my-slug")
     end
 
+    it 'includes price in opted_in payload' do
+      user = create(:user)
+      stock = create(:stock, price: 175.0)
+      create(:holding, user: user, stock: stock)
+
+      expect(NatsPublisher).to receive(:publish).with(
+        "portfolio.opted_in",
+        hash_including(holdings: array_including(hash_including(price: 175.0)))
+      )
+
+      user.update!(portfolio_slug: "price-slug")
+    end
+
     it 'publishes portfolio.opted_out when slug is cleared' do
       user = create(:user, portfolio_slug: "old-slug")
       expect(NatsPublisher).to receive(:publish).with("portfolio.opted_out", hash_including(slug: "old-slug"))

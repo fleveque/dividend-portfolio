@@ -24,6 +24,17 @@ RSpec.describe Holding, type: :model do
       create(:holding, user: user, stock: stock)
     end
 
+    it 'includes price in the NATS payload' do
+      stock.update!(price: 150.0)
+
+      expect(NatsPublisher).to receive(:publish).with(
+        "portfolio.updated",
+        hash_including(holdings: array_including(hash_including(price: 150.0)))
+      )
+
+      create(:holding, user: user, stock: stock)
+    end
+
     it 'does not publish when user has no slug' do
       user_no_slug = create(:user)
       expect(NatsPublisher).not_to receive(:publish)
