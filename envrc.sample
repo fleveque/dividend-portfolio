@@ -1,0 +1,4 @@
+# Copy to .envrc, then run: direnv allow
+# Loads .env (see env.sample) into the shell — needed for kamal commands
+# (OP_SERVICE_ACCOUNT_TOKEN) and local dev config.
+dotenv

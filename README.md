@@ -225,17 +225,25 @@ If you fork this project, update these files with your own server, domains, and 
 
 - `config/deploy.yml` — production server IP, domains, and container registry
 - `config/deploy.beta.yml` — beta domain
-- `.kamal/secrets` and `.kamal/secrets.beta` — secret references (no raw values)
+- `.kamal/secrets` and `.kamal/secrets.beta` — fetch secrets from 1Password (no raw values)
 
-Then add these GitHub Actions secrets to your repository:
+Deploy secrets live in a 1Password vault and are pulled at deploy time by `.kamal/secrets`
+via `kamal secrets fetch --adapter 1password`. The only GitHub Actions secrets you need:
 
 | Secret | Description |
 |---|---|
 | `SSH_PRIVATE_KEY` | SSH key authorized on your server |
-| `KAMAL_REGISTRY_PASSWORD` | Container registry token (e.g. GHCR PAT with `packages:write`) |
-| `RAILS_MASTER_KEY` | Contents of `config/master.key` |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
-| `GEMINI_API_KEY` | Google Gemini API key (optional) |
-| `VITE_LOGO_SERVICE_URL` | Logo service URL (optional) |
-| `VITE_LOGO_SERVICE_API_KEY` | Logo service API key (optional) |
+| `OP_SERVICE_ACCOUNT_TOKEN` | 1Password service account token — `.kamal/secrets` uses it to fetch all other secrets |
+
+`.github/workflows/deploy.yml` also sets two plain (non-secret) env values — `OP_ACCOUNT` and
+`OP_VAULT` — that select the 1Password account and vault.
+
+#### Local development
+
+Copy the sample files and fill in your values (both are gitignored; `direnv` loads `.env`):
+
+```
+cp env.sample .env       # fill in OP_SERVICE_ACCOUNT_TOKEN + dev config
+cp envrc.sample .envrc
+direnv allow
+```
