@@ -9,6 +9,10 @@ services:
     volumes:
     - ../..:/workspaces:cached
 
+    # App config / secrets for local dev (gitignored .env in the repo root).
+    env_file:
+    - ../.env
+
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
 
