@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { RadarStockCard } from '../components/RadarStockCard'
 import { RadarStockRow } from '../components/RadarStockRow'
 import { ViewToggle } from '../components/ViewToggle'
-import StockCard from '../components/StockCard'
+import { SearchResultCard } from '../components/SearchResultCard'
 import { BuyPlanModeToggle } from '../components/BuyPlanModeToggle'
 import { AddToCartButton } from '../components/AddToCartButton'
 import { CartSummaryBar } from '../components/CartSummaryBar'
@@ -12,7 +12,7 @@ import { CartDrawer } from '../components/CartDrawer'
 import { DividendCalendar } from '../components/DividendCalendar'
 import { RadarInsights } from '../components/RadarInsights'
 import { useRadar, useAddStock, useRemoveStock } from '../hooks/useRadarQueries'
-import { useStockSearch } from '../hooks/useStockQueries'
+import { useStockSearch, useResolveStock } from '../hooks/useStockQueries'
 import { useViewPreference } from '../contexts/ViewPreferenceContext'
 import { useBuyPlanContext } from '../contexts/BuyPlanContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import type { Stock } from '../types'
+import type { StockSearchResult } from '../types'
 
 const METRICS_PREFERENCE_KEY = 'radar-show-metrics'
 
@@ -56,6 +56,8 @@ export function RadarPage() {
 
   const addStock = useAddStock()
   const removeStock = useRemoveStock()
+  const resolveStock = useResolveStock()
+  const [resolvingSymbol, setResolvingSymbol] = useState<string | null>(null)
 
   const radarStocks = radarData?.stocks ?? []
 
@@ -64,21 +66,31 @@ export function RadarPage() {
     setSubmittedQuery(searchQuery.trim())
   }
 
-  const handleAddStock = (stock: Stock) => {
-    addStock.mutate(stock.id, {
-      onSuccess: () => {
-        setSearchQuery('')
-        setSubmittedQuery('')
-      },
-    })
+  const handleAddStock = async (result: StockSearchResult) => {
+    try {
+      let stockId = result.stockId
+      if (!result.inDb || stockId == null) {
+        setResolvingSymbol(result.symbol)
+        const resolved = await resolveStock.mutateAsync(result.symbol)
+        stockId = resolved.id
+      }
+      addStock.mutate(stockId, {
+        onSuccess: () => {
+          setSearchQuery('')
+          setSubmittedQuery('')
+        },
+      })
+    } finally {
+      setResolvingSymbol(null)
+    }
   }
 
   const handleRemoveStock = (stockId: number) => {
     removeStock.mutate(stockId)
   }
 
-  const isOnRadar = (stockId: number) => {
-    return radarStocks.some((s) => s.id === stockId)
+  const isOnRadar = (symbol: string) => {
+    return radarStocks.some((s) => s.symbol === symbol)
   }
 
   return (
@@ -143,25 +155,33 @@ export function RadarPage() {
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-foreground mb-4">{t('common.searchResults')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {searchResults.map((stock) => (
-                  <div key={stock.id} className="relative">
-                    <StockCard stock={stock} />
-                    <div className="mt-3">
-                      {isOnRadar(stock.id) ? (
-                        <Badge variant="success">{t('radar.alreadyOnRadar')}</Badge>
-                      ) : (
-                        <Button
-                          onClick={() => handleAddStock(stock)}
-                          disabled={addStock.isPending}
-                          className="w-full"
-                          size="sm"
-                        >
-                          {addStock.isPending ? t('radar.adding') : t('radar.addToRadar')}
-                        </Button>
-                      )}
+                {searchResults.map((result) => {
+                  const isResolving = resolvingSymbol === result.symbol
+                  const isAdding = addStock.isPending && isResolving
+                  return (
+                    <div key={result.symbol} className="relative">
+                      <SearchResultCard result={result} />
+                      <div className="mt-3">
+                        {isOnRadar(result.symbol) ? (
+                          <Badge variant="success">{t('radar.alreadyOnRadar')}</Badge>
+                        ) : (
+                          <Button
+                            onClick={() => handleAddStock(result)}
+                            disabled={isResolving || addStock.isPending}
+                            className="w-full"
+                            size="sm"
+                          >
+                            {isResolving
+                              ? t('common.resolving')
+                              : isAdding
+                                ? t('radar.adding')
+                                : t('radar.addToRadar')}
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}
