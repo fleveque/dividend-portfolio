@@ -4,6 +4,10 @@ class FinancialDataService
       provider.get_stock(symbol)
     end
 
+    def search_stocks(query)
+      provider.search(query)
+    end
+
     def refresh_stocks
       provider.refresh_stocks
     end

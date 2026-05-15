@@ -124,6 +124,75 @@ RSpec.describe FinancialDataProviders::AlphaVantageProvider, type: :model do
     end
   end
 
+  describe '#fetch_and_normalize_search' do
+    let(:api_key) { 'test-key' }
+    let(:response_body) do
+      {
+        "bestMatches" => [
+          { "1. symbol" => "AAPL", "2. name" => "Apple Inc.", "3. type" => "Equity",
+            "4. region" => "United States" },
+          { "1. symbol" => "MSFT", "2. name" => "Microsoft", "3. type" => "Equity",
+            "4. region" => "United States" }
+        ]
+      }
+    end
+    let(:av_response) { instance_double(HTTParty::Response, parsed_response: response_body) }
+
+    before do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("ALPHAVANTAGE_API_KEY").and_return(api_key)
+    end
+
+    it 'hits SYMBOL_SEARCH and normalizes bestMatches' do
+      allow(HTTParty).to receive(:get).with(
+        "https://www.alphavantage.co/query",
+        query: { function: "SYMBOL_SEARCH", keywords: "apple", apikey: api_key }
+      ).and_return(av_response)
+
+      result = provider.send(:fetch_and_normalize_search, 'apple')
+      expect(result).to eq(
+        [
+          { symbol: "AAPL", name: "Apple Inc.", exchange: "United States", type: "Equity" },
+          { symbol: "MSFT", name: "Microsoft", exchange: "United States", type: "Equity" }
+        ]
+      )
+    end
+
+    it 'returns [] when the API key is missing' do
+      allow(ENV).to receive(:[]).with("ALPHAVANTAGE_API_KEY").and_return(nil)
+      expect(provider.send(:fetch_and_normalize_search, 'apple')).to eq([])
+    end
+
+    it 'returns [] when bestMatches is missing' do
+      allow(HTTParty).to receive(:get).and_return(
+        instance_double(HTTParty::Response, parsed_response: { "Note" => "rate limit" })
+      )
+      expect(provider.send(:fetch_and_normalize_search, 'apple')).to eq([])
+    end
+
+    it 'returns [] when HTTParty raises' do
+      allow(HTTParty).to receive(:get).and_raise(StandardError.new('boom'))
+      expect(provider.send(:fetch_and_normalize_search, 'apple')).to eq([])
+    end
+
+    it 'filters out entries missing a symbol' do
+      allow(HTTParty).to receive(:get).and_return(
+        instance_double(HTTParty::Response,
+                        parsed_response: { "bestMatches" => [ { "1. symbol" => "", "2. name" => "X" } ] })
+      )
+      expect(provider.send(:fetch_and_normalize_search, 'x')).to eq([])
+    end
+
+    it 'caps at 10 results' do
+      matches = (1..15).map { |i| { "1. symbol" => "SYM#{i}", "2. name" => "S#{i}",
+                                    "3. type" => "Equity", "4. region" => "US" } }
+      allow(HTTParty).to receive(:get).and_return(
+        instance_double(HTTParty::Response, parsed_response: { "bestMatches" => matches })
+      )
+      expect(provider.send(:fetch_and_normalize_search, 'sym').size).to eq(10)
+    end
+  end
+
   describe '#refresh_stocks' do
     before { Rails.cache.clear }
 

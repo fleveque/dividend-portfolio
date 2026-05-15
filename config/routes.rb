@@ -29,6 +29,7 @@ Rails.application.routes.draw do
           get :top_scored   # GET /api/v1/stocks/top_scored
           get :most_held    # GET /api/v1/stocks/most_held
           get :search       # GET /api/v1/stocks/search?query=AAPL
+          post :resolve     # POST /api/v1/stocks/resolve  body: { symbol }
         end
       end
 

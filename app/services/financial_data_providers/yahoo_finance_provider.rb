@@ -13,6 +13,13 @@ module FinancialDataProviders
       nil
     end
 
+    def fetch_and_normalize_search(query)
+      YahooFinanceClient::Stock.search(query, count: 10)
+    rescue StandardError => e
+      Rails.logger.warn "Yahoo Finance search error: #{e.message}"
+      []
+    end
+
     def fetch_and_normalize_stocks(symbols)
       quotes = YahooFinanceClient::Stock.get_quotes(symbols)
       symbols.index_with do |symbol|

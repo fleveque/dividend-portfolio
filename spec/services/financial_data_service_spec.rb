@@ -47,6 +47,26 @@ RSpec.describe FinancialDataService, type: :service do
     end
   end
 
+  describe '.search_stocks' do
+    let(:search_result) do
+      [ { symbol: 'AAPL', name: 'Apple Inc.', exchange: 'NasdaqGS', type: 'EQUITY',
+         stock_id: nil, in_db: false } ]
+    end
+
+    after { described_class.instance_variable_set(:@provider, nil) }
+
+    before do
+      allow(Rails.application.config).to receive(:financial_data_provider).and_return(:yahoo_finance)
+      allow(FinancialDataProviders::YahooFinanceProvider).to receive(:new)
+        .and_return(double('YahooFinanceProvider', search: search_result))
+    end
+
+    it 'delegates to the configured provider' do
+      result = described_class.search_stocks('apple')
+      expect(result).to eq(search_result)
+    end
+  end
+
   describe '.refresh_stocks' do
     let(:refresh_result) { { updated: 5, errors: [] } }
 

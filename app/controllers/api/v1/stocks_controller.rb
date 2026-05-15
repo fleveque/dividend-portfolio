@@ -91,24 +91,37 @@ module Api
       end
 
       # GET /api/v1/stocks/search?query=AAPL
-      # Searches for a stock by symbol using the financial data provider
+      # Returns lightweight search results matching the query by ticker or name.
       def search
         return render_success([]) if params[:query].blank?
 
-        result = FinancialDataService.get_stock(params[:query])
-        if result.is_a?(Stock)
-          render_success([ serialize_stock(result) ])
-        else
-          render_success([])
-        end
+        results = FinancialDataService.search_stocks(params[:query])
+        render_success(results.map { |r| serialize_search_result(r) })
       rescue StandardError => e
-        # Log the error but return empty results to the user
-        # This handles cases where the financial provider fails or returns invalid data
         Rails.logger.warn "Stock search failed for '#{params[:query]}': #{e.message}"
         render_success([])
       end
 
+      # POST /api/v1/stocks/resolve
+      # Materializes a full Stock from a symbol — used at Add time to hydrate
+      # lightweight search results.
+      def resolve
+        return render_error("Symbol required", status: :unprocessable_entity) if params[:symbol].blank?
+
+        stock = FinancialDataService.get_stock(params[:symbol])
+        return render_error("Stock not found", status: :not_found) unless stock.is_a?(Stock)
+
+        render_success(serialize_stock(stock))
+      end
+
       private
+
+      def serialize_search_result(result)
+        {
+          symbol: result[:symbol], name: result[:name], exchange: result[:exchange],
+          type: result[:type], stockId: result[:stock_id], inDb: !!result[:in_db]
+        }
+      end
 
       def serialize_stock(stock)
         decorated = StockDecorator.new(stock)
