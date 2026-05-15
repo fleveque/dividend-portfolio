@@ -110,6 +110,36 @@ RSpec.describe FinancialDataProviders::YahooFinanceProvider, type: :model do
     end
   end
 
+  describe '#fetch_and_normalize_search' do
+    it 'delegates to YahooFinanceClient::Stock.search with count: 10' do
+      allow(YahooFinanceClient::Stock).to receive(:search).with('apple', count: 10).and_return(
+        [ { symbol: 'AAPL', name: 'Apple Inc.', exchange: 'NasdaqGS', type: 'EQUITY' } ]
+      )
+      result = provider.send(:fetch_and_normalize_search, 'apple')
+      expect(result).to eq(
+        [ { symbol: 'AAPL', name: 'Apple Inc.', exchange: 'NasdaqGS', type: 'EQUITY' } ]
+      )
+    end
+
+    it 'returns [] when the gem raises' do
+      allow(YahooFinanceClient::Stock).to receive(:search).and_raise(StandardError.new('boom'))
+      expect(provider.send(:fetch_and_normalize_search, 'apple')).to eq([])
+    end
+  end
+
+  describe '#search (integration)' do
+    before { Rails.cache.clear }
+
+    it 'merges DB matches with gem results' do
+      create(:stock, symbol: 'AAPL', name: 'Apple Inc.')
+      allow(YahooFinanceClient::Stock).to receive(:search).with('app', count: 10).and_return(
+        [ { symbol: 'AAPLF', name: 'Apple Foreign', exchange: 'OTC', type: 'EQUITY' } ]
+      )
+      result = provider.search('app')
+      expect(result.map { |r| r[:symbol] }).to contain_exactly('AAPL', 'AAPLF')
+    end
+  end
+
   describe '#refresh_stocks' do
     before { Rails.cache.clear }
 

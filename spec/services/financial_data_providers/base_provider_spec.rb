@@ -214,6 +214,149 @@ RSpec.describe FinancialDataProviders::BaseProvider, type: :model do
     end
   end
 
+  describe '#search' do
+    let(:provider_class) do
+      klass = Class.new(described_class) do
+        attr_accessor :search_response
+
+        def fetch_and_normalize_search(_query)
+          @search_response || []
+        end
+      end
+      stub_const('FinancialDataProviders::TestSearchProvider', klass)
+      klass
+    end
+    let(:provider) { provider_class.new }
+    let(:other_provider_class) do
+      klass = Class.new(described_class) do
+        def fetch_and_normalize_search(_query)
+          []
+        end
+      end
+      stub_const('FinancialDataProviders::OtherTestProvider', klass)
+      klass
+    end
+    let(:other_provider) { other_provider_class.new }
+
+    before { Rails.cache.clear }
+
+    it 'returns [] for a blank query' do
+      expect(provider.search('   ')).to eq([])
+    end
+
+    it 'returns [] for nil' do
+      expect(provider.search(nil)).to eq([])
+    end
+
+    it 'merges DB matches with provider matches' do
+      create(:stock, symbol: 'AAPL', name: 'Apple Inc.')
+      provider.search_response = [
+        { symbol: 'AAPLF', name: 'Apple Foreign', exchange: 'OTC', type: 'EQUITY' }
+      ]
+      result = provider.search('app')
+      expect(result.map { |r| r[:symbol] }).to contain_exactly('AAPL', 'AAPLF')
+    end
+
+    it 'DB rows win on dedupe and carry stock_id + in_db' do
+      apple = create(:stock, symbol: 'AAPL', name: 'Apple Inc.')
+      provider.search_response = [
+        { symbol: 'AAPL', name: 'Provider Name', exchange: 'NMS', type: 'EQUITY' }
+      ]
+      result = provider.search('aapl')
+      aapl_row = result.find { |r| r[:symbol] == 'AAPL' }
+      expect(aapl_row[:stock_id]).to eq(apple.id)
+      expect(aapl_row[:in_db]).to be true
+      expect(aapl_row[:name]).to eq('Apple Inc.')
+    end
+
+    it 'flags provider-only rows with stock_id: nil and in_db: false' do
+      provider.search_response = [
+        { symbol: 'MSFT', name: 'Microsoft', exchange: 'NMS', type: 'EQUITY' }
+      ]
+      result = provider.search('msft')
+      msft_row = result.find { |r| r[:symbol] == 'MSFT' }
+      expect(msft_row[:stock_id]).to be_nil
+      expect(msft_row[:in_db]).to be false
+    end
+
+    it 'caps results at 10' do
+      provider.search_response = (1..15).map { |i| { symbol: "SYM#{i}", name: "Stock #{i}", type: 'EQUITY' } }
+      expect(provider.search('sym').size).to eq(10)
+    end
+
+    it 'caches by provider class so two providers do not share cached results' do
+      provider.search_response = [ { symbol: 'AAPL', name: 'A', type: 'EQUITY' } ]
+      provider.search('aapl')
+      provider.search_response = [ { symbol: 'XXX', name: 'X', type: 'EQUITY' } ]
+      # Same provider — cache hit, response unchanged
+      expect(provider.search('aapl').map { |r| r[:symbol] }).to eq([ 'AAPL' ])
+      # Different provider — cache miss, returns []
+      expect(other_provider.search('aapl')).to eq([])
+    end
+
+    it 'matches by name too' do
+      create(:stock, symbol: 'KO', name: 'The Coca-Cola Company')
+      provider.search_response = []
+      result = provider.search('coca')
+      expect(result.map { |r| r[:symbol] }).to eq([ 'KO' ])
+    end
+
+    it 'neutralizes % and _ in the query via sanitize_sql_like' do
+      create(:stock, symbol: 'AAA', name: 'Triple A')
+      provider.search_response = []
+      # If sanitize_sql_like weren't applied, "%" would match every row.
+      expect(provider.search('%')).to eq([])
+    end
+
+    it 'caches identical queries: the second call does not hit the provider' do
+      provider.search_response = [ { symbol: 'AAPL', name: 'Apple', type: 'EQUITY' } ]
+      provider.search('apple')
+      allow(provider).to receive(:fetch_and_normalize_search).and_return(
+        [ { symbol: 'NEWONE', name: 'New', type: 'EQUITY' } ]
+      )
+      result = provider.search('apple')
+      expect(result.map { |r| r[:symbol] }).to eq([ 'AAPL' ])
+      expect(provider).not_to have_received(:fetch_and_normalize_search)
+    end
+
+    it 'filters out non-searchable types (currency, crypto, index, future)' do
+      provider.search_response = [
+        { symbol: 'EURUSD=X', name: 'EUR/USD', type: 'CURRENCY' },
+        { symbol: 'BTC-USD', name: 'Bitcoin', type: 'CRYPTOCURRENCY' },
+        { symbol: '^GSPC', name: 'S&P 500', type: 'INDEX' },
+        { symbol: 'ESZ24.CME', name: 'E-mini S&P Dec 24', type: 'FUTURE' },
+        { symbol: 'AAPL', name: 'Apple Inc.', type: 'EQUITY' }
+      ]
+      result = provider.search('mix')
+      expect(result.map { |r| r[:symbol] }).to eq([ 'AAPL' ])
+    end
+
+    it 'keeps ETF and mutual fund results alongside equities' do
+      provider.search_response = [
+        { symbol: 'SCHD', name: 'Schwab US Dividend', type: 'ETF' },
+        { symbol: 'AAPL', name: 'Apple Inc.', type: 'EQUITY' },
+        # Spanish dividend funds (e.g. Baelo Dividendo Creciente) are mutual funds
+        { symbol: '0P0001D6BS.F', name: 'Baelo Dividendo Creciente', type: 'MUTUALFUND' }
+      ]
+      result = provider.search('div')
+      expect(result.map { |r| r[:symbol] }).to contain_exactly('AAPL', 'SCHD', '0P0001D6BS.F')
+    end
+
+    it 'matches type case-insensitively (Alpha Vantage uses "Equity"/"ETF")' do
+      provider.search_response = [
+        { symbol: 'AAPL', name: 'Apple Inc.', type: 'Equity' },
+        { symbol: 'SCHD', name: 'Schwab US Dividend', type: 'etf' }
+      ]
+      result = provider.search('mix')
+      expect(result.map { |r| r[:symbol] }).to contain_exactly('AAPL', 'SCHD')
+    end
+
+    it 'raises NotImplementedError when subclass omits fetch_and_normalize_search' do
+      base = described_class.new
+      expect { base.search('aapl') }.to raise_error(NotImplementedError)
+    end
+  end
+
   describe '#refresh_stocks' do
     let(:test_provider) do
       Class.new(described_class) do

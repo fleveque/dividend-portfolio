@@ -13,7 +13,7 @@
  * This prevents malicious sites from making requests on behalf of the user.
  */
 
-import type { Stock, RadarStock, User, BuyPlanResponse, AdminDashboardStats, AdminUser, RadarInsights, StockAiSummary, HoldingsResponse, Holding, UserProfile } from '../types'
+import type { Stock, StockSearchResult, RadarStock, User, BuyPlanResponse, AdminDashboardStats, AdminUser, RadarInsights, StockAiSummary, HoldingsResponse, Holding, UserProfile } from '../types'
 
 const API_BASE = '/api/v1'
 
@@ -107,10 +107,21 @@ export const stocksApi = {
   getMostHeld: () => apiFetch<Stock[]>('/stocks/most_held'),
 
   /**
-   * Search for a stock by symbol
+   * Search stocks by ticker or company name.
+   * Returns lightweight results — call resolve(symbol) to hydrate a full Stock.
    */
   search: (query: string) =>
-    apiFetch<Stock[]>(`/stocks/search?query=${encodeURIComponent(query)}`),
+    apiFetch<StockSearchResult[]>(`/stocks/search?query=${encodeURIComponent(query)}`),
+
+  /**
+   * Materialize a full Stock from a symbol. Used at Add time after the user
+   * picks a lightweight search result.
+   */
+  resolve: (symbol: string) =>
+    apiFetch<Stock>('/stocks/resolve', {
+      method: 'POST',
+      body: JSON.stringify({ symbol }),
+    }),
 
   /**
    * Get AI-generated summary for a stock (authenticated)

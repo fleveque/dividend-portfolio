@@ -19,7 +19,7 @@
  * ['stocks', 'search', query] - cache key for search results (per query)
  */
 
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { stocksApi } from '../lib/api'
 
 /**
@@ -90,5 +90,15 @@ export function useStockSearch(query: string) {
     queryFn: () => stocksApi.search(query),
     enabled: query.length > 0, // Only run when query is not empty
     staleTime: 1000 * 60 * 2, // Search results fresh for 2 minutes
+  })
+}
+
+/**
+ * Resolve a lightweight search result into a full Stock (with price, dividend data,
+ * score, etc). Used at Add time so the UI can call addStock(stock.id) afterwards.
+ */
+export function useResolveStock() {
+  return useMutation({
+    mutationFn: (symbol: string) => stocksApi.resolve(symbol),
   })
 }

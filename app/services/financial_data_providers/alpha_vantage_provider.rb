@@ -27,6 +27,31 @@ module FinancialDataProviders
       end
     end
 
+    # The third-party `alphavantage` gem does not expose SYMBOL_SEARCH, so call the
+    # HTTP endpoint directly. Search is user-initiated and infrequent; we deliberately
+    # skip the 25-second rate-limit sleep used during bulk refreshes — the BaseProvider
+    # cache absorbs repeat queries.
+    def fetch_and_normalize_search(query)
+      api_key = ENV["ALPHAVANTAGE_API_KEY"]
+      return [] if api_key.blank?
+
+      response = HTTParty.get(AV_BASE_URL, query: {
+        function: "SYMBOL_SEARCH", keywords: query, apikey: api_key
+      })
+      matches = response.parsed_response.is_a?(Hash) ? (response.parsed_response["bestMatches"] || []) : []
+      matches.filter_map { |m| format_search_match(m) }.first(10)
+    rescue StandardError => e
+      Rails.logger.warn "AlphaVantage search error: #{e.message}"
+      []
+    end
+
+    def format_search_match(match)
+      symbol = match["1. symbol"].to_s
+      return nil if symbol.empty?
+
+      { symbol: symbol, name: match["2. name"], exchange: match["4. region"], type: match["3. type"] }
+    end
+
     def build_stock_data(quote_data, overview)
       {
         symbol: quote_data.symbol,

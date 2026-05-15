@@ -61,6 +61,20 @@ export interface Stock {
 }
 
 /**
+ * Lightweight stock search result.
+ * Returned by GET /api/v1/stocks/search — no price, dividend, or score data.
+ * The Add flow calls POST /api/v1/stocks/resolve to materialize a full Stock.
+ */
+export interface StockSearchResult {
+  symbol: string
+  name: string
+  exchange: string | null
+  type: string | null
+  stockId: number | null  // present when the symbol already exists in our DB
+  inDb: boolean
+}
+
+/**
  * Stock with radar-specific data
  * Mirrors: RadarStock join model + StockDecorator with target_price
  *

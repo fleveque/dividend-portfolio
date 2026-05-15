@@ -4,11 +4,11 @@ import { useTranslation } from 'react-i18next'
 import { PortfolioStockCard } from '../components/PortfolioStockCard'
 import { PortfolioStockRow } from '../components/PortfolioStockRow'
 import { ViewToggle } from '../components/ViewToggle'
-import StockCard from '../components/StockCard'
+import { SearchResultCard } from '../components/SearchResultCard'
 import { DividendCalendar } from '../components/DividendCalendar'
 import { PortfolioInsights } from '../components/PortfolioInsights'
 import { useHoldings, useCreateHolding, useDeleteHolding } from '../hooks/useHoldingsQueries'
-import { useStockSearch } from '../hooks/useStockQueries'
+import { useStockSearch, useResolveStock } from '../hooks/useStockQueries'
 import { useViewPreference } from '../contexts/ViewPreferenceContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import type { Stock } from '../types'
+import type { Stock, StockSearchResult } from '../types'
 
 const METRICS_PREFERENCE_KEY = 'portfolio-show-metrics'
 const SORT_PREFERENCE_KEY = 'portfolio-sort-preference'
@@ -34,7 +34,9 @@ export function PortfolioPage() {
   const [sortBy, setSortBy] = useState<SortBy>(() => {
     return (localStorage.getItem(SORT_PREFERENCE_KEY) as SortBy) || 'marketValue'
   })
-  const [addingStockId, setAddingStockId] = useState<number | null>(null)
+  const [addingSymbol, setAddingSymbol] = useState<string | null>(null)
+  const [resolvedStock, setResolvedStock] = useState<Stock | null>(null)
+  const [resolvingSymbol, setResolvingSymbol] = useState<string | null>(null)
   const [quantity, setQuantity] = useState('')
   const [averagePrice, setAveragePrice] = useState('')
   const { viewMode } = useViewPreference()
@@ -62,6 +64,7 @@ export function PortfolioPage() {
 
   const createHolding = useCreateHolding()
   const deleteHolding = useDeleteHolding()
+  const resolveStock = useResolveStock()
 
   const holdings = holdingsData?.holdings ?? []
 
@@ -88,24 +91,51 @@ export function PortfolioPage() {
     setSubmittedQuery(searchQuery.trim())
   }
 
-  const isInPortfolio = (stockId: number) => {
-    return holdings.some((h) => h.stock.id === stockId)
+  const isInPortfolio = (symbol: string) => {
+    return holdings.some((h) => h.stock.symbol === symbol)
   }
 
-  const handleStartAdd = (stock: Stock) => {
-    setAddingStockId(stock.id)
-    setQuantity('1')
-    setAveragePrice(stock.price?.toFixed(2) ?? '')
+  // Resolve the Stock id for the row currently being added: prefer the freshly resolved
+  // stock; otherwise fall back to the existing holding's stock (for "add more").
+  const stockForSymbol = (symbol: string): Stock | undefined => {
+    if (resolvedStock?.symbol === symbol) return resolvedStock
+    const holding = holdings.find((h) => h.stock.symbol === symbol)
+    return holding?.stock
+  }
+
+  const handleStartAdd = async (result: StockSearchResult) => {
+    const existing = holdings.find((h) => h.stock.symbol === result.symbol)?.stock
+    if (existing) {
+      setAddingSymbol(result.symbol)
+      setResolvedStock(null)
+      setQuantity('1')
+      setAveragePrice(existing.price?.toFixed(2) ?? '')
+      return
+    }
+
+    try {
+      setResolvingSymbol(result.symbol)
+      const resolved = await resolveStock.mutateAsync(result.symbol)
+      setResolvedStock(resolved)
+      setAddingSymbol(result.symbol)
+      setQuantity('1')
+      setAveragePrice(resolved.price?.toFixed(2) ?? '')
+    } finally {
+      setResolvingSymbol(null)
+    }
   }
 
   const handleCancelAdd = () => {
-    setAddingStockId(null)
+    setAddingSymbol(null)
+    setResolvedStock(null)
     setQuantity('')
     setAveragePrice('')
   }
 
-  const handleConfirmAdd = (stock: Stock) => {
+  const handleConfirmAdd = (symbol: string) => {
     if (!quantity || !averagePrice) return
+    const stock = stockForSymbol(symbol)
+    if (!stock) return
 
     createHolding.mutate(
       { stockId: stock.id, quantity: parseFloat(quantity), averagePrice: parseFloat(averagePrice) },
@@ -179,12 +209,16 @@ export function PortfolioPage() {
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-foreground mb-4">{t('common.searchResults')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {searchResults.map((stock) => (
-                  <div key={stock.id} className="relative">
-                    <StockCard stock={stock} />
+                {searchResults.map((result) => {
+                  const inPortfolio = isInPortfolio(result.symbol)
+                  const isAdding = addingSymbol === result.symbol
+                  const isResolving = resolvingSymbol === result.symbol
+                  return (
+                  <div key={result.symbol} className="relative">
+                    <SearchResultCard result={result} />
                     <div className="mt-3">
-                      {isInPortfolio(stock.id) ? (
-                        addingStockId === stock.id ? (
+                      {inPortfolio ? (
+                        isAdding ? (
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-xs text-muted-foreground">{t('portfolio.addMore')}:</span>
                             <Input
@@ -205,7 +239,7 @@ export function PortfolioPage() {
                               step="0.01"
                               min="0"
                             />
-                            <Button size="sm" onClick={() => handleConfirmAdd(stock)} disabled={createHolding.isPending || !quantity || !averagePrice}>
+                            <Button size="sm" onClick={() => handleConfirmAdd(result.symbol)} disabled={createHolding.isPending || !quantity || !averagePrice}>
                               {createHolding.isPending ? <Loader2 className="size-4 animate-spin" /> : t('common.add')}
                             </Button>
                             <Button variant="ghost" size="sm" onClick={handleCancelAdd}>{t('common.cancel')}</Button>
@@ -213,12 +247,12 @@ export function PortfolioPage() {
                         ) : (
                           <div className="flex items-center gap-2">
                             <Badge variant="success">{t('portfolio.inPortfolio')}</Badge>
-                            <Button variant="outline" size="sm" onClick={() => handleStartAdd(stock)}>
-                              {t('portfolio.addMore')}
+                            <Button variant="outline" size="sm" onClick={() => handleStartAdd(result)} disabled={isResolving}>
+                              {isResolving ? t('common.resolving') : t('portfolio.addMore')}
                             </Button>
                           </div>
                         )
-                      ) : addingStockId === stock.id ? (
+                      ) : isAdding ? (
                         <div className="flex items-center gap-2 flex-wrap">
                           <Input
                             type="number"
@@ -238,23 +272,25 @@ export function PortfolioPage() {
                             step="0.01"
                             min="0"
                           />
-                          <Button size="sm" onClick={() => handleConfirmAdd(stock)} disabled={createHolding.isPending || !quantity || !averagePrice}>
+                          <Button size="sm" onClick={() => handleConfirmAdd(result.symbol)} disabled={createHolding.isPending || !quantity || !averagePrice}>
                             {createHolding.isPending ? <Loader2 className="size-4 animate-spin" /> : t('common.add')}
                           </Button>
                           <Button variant="ghost" size="sm" onClick={handleCancelAdd}>{t('common.cancel')}</Button>
                         </div>
                       ) : (
                         <Button
-                          onClick={() => handleStartAdd(stock)}
+                          onClick={() => handleStartAdd(result)}
+                          disabled={isResolving}
                           className="w-full"
                           size="sm"
                         >
-                          {t('portfolio.addToPortfolio')}
+                          {isResolving ? t('common.resolving') : t('portfolio.addToPortfolio')}
                         </Button>
                       )}
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}

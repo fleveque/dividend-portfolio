@@ -95,7 +95,7 @@ GEM
     bcrypt (3.1.20)
     bcrypt_pbkdf (1.1.1)
     benchmark (0.4.1)
-    bigdecimal (4.0.1)
+    bigdecimal (4.1.2)
     bindex (0.8.1)
     bootsnap (1.18.6)
       msgpack (~> 1.2)
@@ -212,7 +212,7 @@ GEM
     mini_mime (1.1.5)
     minitest (5.25.5)
     msgpack (1.8.0)
-    multi_xml (0.8.1)
+    multi_xml (0.9.1)
       bigdecimal (>= 3.1, < 5)
     multipart-post (2.4.1)
     mutex_m (0.3.0)
@@ -469,7 +469,7 @@ GEM
     websocket-extensions (0.1.5)
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    yahoo_finance_client (0.4.1)
+    yahoo_finance_client (0.5.0)
       csv
       httparty (~> 0.21.0)
     zeitwerk (2.7.3)
@@ -518,7 +518,7 @@ DEPENDENCIES
   tzinfo-data
   vite_rails
   web-console
-  yahoo_finance_client (~> 0.4.1)
+  yahoo_finance_client (~> 0.5.0)
 
 BUNDLED WITH
    2.6.2

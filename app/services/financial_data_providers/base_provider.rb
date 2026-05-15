@@ -6,6 +6,13 @@ module FinancialDataProviders
       :payout_ratio, :ma_50, :ma_200, :fifty_two_week_high, :fifty_two_week_low,
       :ex_dividend_date, :payment_frequency, :payment_months, :shifted_payment_months
     ].freeze
+    SEARCH_RESULT_LIMIT = 10
+    SEARCH_CACHE_TTL = 6.hours
+    # Provider search returns many quote types (currency, future, index, crypto, …) that
+    # don't fit a dividend-tracking app. Allowlist what we actually want; matched
+    # case-insensitively against the provider's type. MUTUALFUND is in because Spanish
+    # dividend funds like Baelo Dividendo Creciente are mutual funds, not ETFs.
+    SEARCHABLE_TYPES = %w[EQUITY ETF MUTUALFUND].freeze
 
     # Fetches stock data from the provider's API, stores it in the database and caches the result.
     #
@@ -19,6 +26,23 @@ module FinancialDataProviders
         return nil unless data
 
         store_stock_data(data)
+      end
+    end
+
+    # Searches local Stock rows and the provider's autocomplete index, merging results.
+    # Returns lightweight result hashes — no provider calls per result, so it works under
+    # rate-limited providers (Alpha Vantage).
+    #
+    # @param query [String] free-text query (ticker or company name)
+    # @return [Array<Hash>] each entry: { symbol:, name:, exchange:, type:, stock_id:, in_db: }
+    def search(query)
+      normalized = query.to_s.strip
+      return [] if normalized.empty?
+
+      Rails.cache.fetch(search_cache_key(normalized), expires_in: SEARCH_CACHE_TTL) do
+        db_matches = search_db(normalized)
+        provider_matches = filter_searchable(fetch_and_normalize_search(normalized) || [])
+        merge_results(db_matches, provider_matches).first(SEARCH_RESULT_LIMIT)
       end
     end
 
@@ -59,6 +83,46 @@ module FinancialDataProviders
     def fetch_and_normalize_stock(symbol)
       raise NotImplementedError, "Subclasses must implement the fetch_and_normalize_stock method " \
       "and be added to config/initializers/financial_data_provider.rb initializer."
+    end
+
+    # Provider-specific autocomplete lookup. Subclasses return a list of hashes shaped like
+    # { symbol:, name:, exchange:, type: } and may rescue upstream errors to [].
+    def fetch_and_normalize_search(query)
+      raise NotImplementedError, "Subclasses must implement fetch_and_normalize_search"
+    end
+
+    def search_cache_key(normalized)
+      "stock_search/#{self.class.name.demodulize}/#{Digest::MD5.hexdigest(normalized.downcase)}"
+    end
+
+    def filter_searchable(matches)
+      matches.select { |m| SEARCHABLE_TYPES.include?(m[:type].to_s.upcase) }
+    end
+
+    # SQLite LIKE is case-insensitive for ASCII so we downcase both sides.
+    def search_db(query)
+      pattern = "%#{ActiveRecord::Base.sanitize_sql_like(query.downcase)}%"
+      Stock.where("LOWER(symbol) LIKE ? OR LOWER(name) LIKE ?", pattern, pattern)
+           .limit(SEARCH_RESULT_LIMIT)
+           .map { |s| db_match(s) }
+    end
+
+    def db_match(stock)
+      { symbol: stock.symbol, name: stock.name, exchange: nil, type: "EQUITY",
+        stock_id: stock.id, in_db: true }
+    end
+
+    # DB rows take precedence over provider rows when symbols collide — they carry the
+    # real Stock id so the Add flow can skip the resolve call.
+    def merge_results(db_matches, provider_matches)
+      by_symbol = {}
+      db_matches.each { |m| by_symbol[m[:symbol]] ||= m }
+      provider_matches.each do |m|
+        next if m[:symbol].nil? || by_symbol.key?(m[:symbol])
+
+        by_symbol[m[:symbol]] = m.merge(stock_id: nil, in_db: false)
+      end
+      by_symbol.values
     end
 
     # Default sequential fallback. Subclasses can override for bulk fetching.
