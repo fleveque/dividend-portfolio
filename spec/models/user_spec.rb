@@ -16,6 +16,22 @@ RSpec.describe User, type: :model do
     it { should validate_presence_of(:password).on(:create) }
     it { should validate_length_of(:password).is_at_least(6) }
     it { should validate_uniqueness_of(:portfolio_slug) }
+    it { should validate_presence_of(:preferred_currency) }
+    it { should validate_inclusion_of(:preferred_currency).in_array(Stock::CURRENCY_SYMBOLS.keys) }
+  end
+
+  describe 'preferred_currency' do
+    it 'defaults to USD' do
+      expect(create(:user).preferred_currency).to eq("USD")
+    end
+
+    it 'accepts a supported currency' do
+      expect(build(:user, preferred_currency: "EUR")).to be_valid
+    end
+
+    it 'rejects an unsupported currency' do
+      expect(build(:user, preferred_currency: "XYZ")).not_to be_valid
+    end
   end
 
   describe 'portfolio_slug validation' do

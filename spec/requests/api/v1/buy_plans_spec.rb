@@ -59,6 +59,31 @@ RSpec.describe "Api::V1::BuyPlans", type: :request do
           expect(apple_item["formattedPrice"]).to eq("$150.00")
           expect(apple_item["formattedSubtotal"]).to eq("$1,500.00")
         end
+
+        it "exposes a displayTotal in the user's preferred currency" do
+          eur_stock = create(:stock, symbol: "IBE.MC", price: 14.0, currency: "EUR")
+          create(:buy_plan_item, buy_plan: buy_plan, stock: eur_stock, quantity: 20)
+          allow(FxRateService).to receive(:rate).with(from: "EUR", to: "USD").and_return(1.1)
+
+          get "/api/v1/buy_plan"
+
+          json = JSON.parse(response.body)
+          display = json["data"]["displayTotal"]
+          expect(display["currency"]).to eq("USD")
+          expect(display["total"]).to be_within(0.01).of(3500.0 + 280.0 * 1.1)
+          expect(display["conversions"]).to eq("EUR" => 1.1)
+        end
+
+        it "returns nil displayTotal when an FX rate is unavailable" do
+          eur_stock = create(:stock, symbol: "IBE.MC", price: 14.0, currency: "EUR")
+          create(:buy_plan_item, buy_plan: buy_plan, stock: eur_stock, quantity: 20)
+          allow(FxRateService).to receive(:rate).and_return(nil)
+
+          get "/api/v1/buy_plan"
+
+          json = JSON.parse(response.body)
+          expect(json["data"]["displayTotal"]).to be_nil
+        end
       end
     end
   end

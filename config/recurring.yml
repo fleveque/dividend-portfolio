@@ -3,3 +3,7 @@ production:
     class: RefreshStocksJob
     queue: default
     schedule: "<%= ENV.fetch('STOCK_REFRESH_SCHEDULE', 'every 24 hours') %>"
+  refresh_fx_rates:
+    class: RefreshFxRatesJob
+    queue: default
+    schedule: "<%= ENV.fetch('FX_REFRESH_SCHEDULE', 'every 24 hours') %>"

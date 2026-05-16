@@ -2,42 +2,45 @@ module AiProviders
   class GeminiProvider < BaseProvider
     GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent".freeze
 
-    def radar_insights(stocks_data, locale: nil)
+    def radar_insights(stocks_data, locale: nil, preferred_currency: nil)
       return empty_radar_insights if stocks_data.blank?
 
       fingerprint = Digest::MD5.hexdigest(stocks_data.to_json)
       lang = normalized_locale(locale)
-      cache_key = "ai/radar/#{fingerprint}/#{lang}"
+      ccy = preferred_currency || "USD"
+      cache_key = "ai/radar/#{fingerprint}/#{lang}/#{ccy}"
 
       cache_fetch(cache_key) do
-        prompt = build_radar_prompt(stocks_data, lang)
+        prompt = build_radar_prompt(stocks_data, lang, ccy)
         response = call_gemini(prompt, radar_response_schema)
         parse_response(response)
       end
     end
 
-    def portfolio_insights(stocks_data, locale: nil)
+    def portfolio_insights(stocks_data, locale: nil, preferred_currency: nil)
       return empty_portfolio_insights if stocks_data.blank?
 
       fingerprint = Digest::MD5.hexdigest(stocks_data.to_json)
       lang = normalized_locale(locale)
-      cache_key = "ai/portfolio/#{fingerprint}/#{lang}"
+      ccy = preferred_currency || "USD"
+      cache_key = "ai/portfolio/#{fingerprint}/#{lang}/#{ccy}"
 
       cache_fetch(cache_key) do
-        prompt = build_portfolio_prompt(stocks_data, lang)
+        prompt = build_portfolio_prompt(stocks_data, lang, ccy)
         response = call_gemini(prompt, radar_response_schema)
         parse_response(response)
       end
     end
 
-    def stock_summary(stock_data, locale: nil)
+    def stock_summary(stock_data, locale: nil, preferred_currency: nil)
       return empty_stock_summary if stock_data.blank?
 
       lang = normalized_locale(locale)
-      cache_key = "ai/stock/#{stock_data[:id]}/#{stock_data[:updated_at]}/#{lang}"
+      ccy = preferred_currency || "USD"
+      cache_key = "ai/stock/#{stock_data[:id]}/#{stock_data[:updated_at]}/#{lang}/#{ccy}"
 
       cache_fetch(cache_key) do
-        prompt = build_stock_prompt(stock_data, lang)
+        prompt = build_stock_prompt(stock_data, lang, ccy)
         response = call_gemini(prompt, stock_response_schema)
         parse_response(response)
       end
@@ -104,13 +107,14 @@ module AiProviders
       parsed.deep_symbolize_keys
     end
 
-    def build_radar_prompt(stocks_data, lang = "en")
+    def build_radar_prompt(stocks_data, lang = "en", preferred_currency = "USD")
       {
         system: <<~SYSTEM,
           You are a dividend investment analyst assistant. Analyze the user's stock watchlist and provide actionable insights.
           Focus on dividend investing strategy: yield quality, payout sustainability, portfolio diversification by payment months, and value opportunities.
           Be concise and specific. Reference stocks by their symbol.
           Prices are denominated in each stock's quoted currency, see the `currency` field on every row; do not assume a single currency across the portfolio.
+          The user's display currency is #{preferred_currency}. If you summarise any portfolio-wide value, use #{preferred_currency} and note that it's converted from each stock's native currency.
           IMPORTANT: The "targetPrice" field is NOT an analyst target — it is the price at which the user personally wants to act (buy or sell). Treat it as the user's desired action price.#{language_instruction(lang)}
         SYSTEM
         user: <<~USER
@@ -128,13 +132,14 @@ module AiProviders
       }
     end
 
-    def build_portfolio_prompt(stocks_data, lang = "en")
+    def build_portfolio_prompt(stocks_data, lang = "en", preferred_currency = "USD")
       {
         system: <<~SYSTEM,
           You are a dividend investment analyst assistant. Analyze the user's actual portfolio holdings and provide actionable insights.
           Focus on dividend investing strategy: yield quality, payout sustainability, portfolio diversification by payment months, and value opportunities.
           Be concise and specific. Reference stocks by their symbol.
           Prices are denominated in each stock's quoted currency, see the `currency` field on every row; do not assume a single currency across the portfolio.
+          The user's display currency is #{preferred_currency}. If you summarise any portfolio-wide value, use #{preferred_currency} and note that it's converted from each stock's native currency.
           IMPORTANT: The "targetPrice" field is NOT an analyst target — it is the price at which the user personally wants to act (buy or sell). Treat it as the user's desired action price.#{language_instruction(lang)}
         SYSTEM
         user: <<~USER
@@ -152,12 +157,13 @@ module AiProviders
       }
     end
 
-    def build_stock_prompt(stock_data, lang = "en")
+    def build_stock_prompt(stock_data, lang = "en", preferred_currency = "USD")
       {
         system: <<~SYSTEM,
           You are a dividend investment analyst assistant. Provide a concise assessment of an individual stock for dividend investing.
           Consider yield, payout ratio, PE ratio, price vs target, 52-week position, dividend score, and MA200 trend.
           Be specific and actionable. Prices are denominated in this stock's quoted currency, see the `currency` field.
+          The user's display currency is #{preferred_currency}; if you reference any computed value, use #{preferred_currency}.
           IMPORTANT: The "targetPrice" field is NOT an analyst target — it is the price at which the user personally wants to act (buy or sell). Treat it as the user's desired action price.#{language_instruction(lang)}
         SYSTEM
         user: <<~USER

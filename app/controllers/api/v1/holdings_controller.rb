@@ -24,7 +24,8 @@ module Api
 
         render_success({
           holdings: serialized,
-          totalsByCurrency: totals_by_currency_payload(totals)
+          totalsByCurrency: totals_by_currency_payload(totals),
+          displayTotal: display_total_payload(totals)
         })
       end
 
@@ -93,7 +94,7 @@ module Api
       def insights
         holdings = Current.user.holdings.includes(:stock)
         stocks_data = holdings.map { |h| serialize_stock_for_ai(h.stock) }
-        result = AiInsightsService.portfolio_insights(stocks_data, locale: params[:locale])
+        result = AiInsightsService.portfolio_insights(stocks_data, locale: params[:locale], preferred_currency: Current.user.preferred_currency)
         render_success(result)
       rescue AiProviders::BaseProvider::AiError => e
         Rails.logger.error "AI portfolio insights error: #{e.message}"
@@ -104,6 +105,44 @@ module Api
 
       def set_holding
         @holding = Current.user.holdings.find(params[:id])
+      end
+
+      # Single converted total in the user's preferred currency. Returns nil if any
+      # required FX rate is unavailable so the frontend can fall back to per-currency rows.
+      def display_total_payload(totals)
+        preferred = Current.user.preferred_currency
+        conversions = {}
+        total_value = 0.0
+        total_cost = 0.0
+
+        totals.each do |currency, t|
+          if currency == preferred
+            total_value += t[:value]
+            total_cost += t[:cost]
+            next
+          end
+
+          rate = FxRateService.rate(from: currency, to: preferred)
+          return nil unless rate
+
+          conversions[currency] = rate
+          total_value += t[:value] * rate
+          total_cost += t[:cost] * rate
+        end
+
+        build_display_total(preferred, total_value, total_cost, conversions)
+      end
+
+      def build_display_total(currency, value, cost, conversions)
+        gain_loss = value - cost
+        {
+          currency: currency,
+          value: value.to_f,
+          cost: cost.to_f,
+          gainLoss: gain_loss.to_f,
+          gainLossPercent: cost > 0 ? (gain_loss / cost * 100).to_f : 0.0,
+          conversions: conversions
+        }
       end
 
       def totals_by_currency_payload(totals)

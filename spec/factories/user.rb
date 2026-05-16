@@ -7,5 +7,9 @@ FactoryBot.define do
     trait :admin do
       admin { true }
     end
+
+    trait :eur_user do
+      preferred_currency { "EUR" }
+    end
   end
 end

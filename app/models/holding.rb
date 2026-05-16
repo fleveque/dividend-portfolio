@@ -20,11 +20,6 @@ class Holding < ApplicationRecord
   def publish_portfolio_updated
     return unless user.portfolio_slug.present?
 
-    NatsPublisher.publish("portfolio.updated", {
-      slug: user.portfolio_slug,
-      holdings: user.holdings.includes(:stock).map { |h|
-        { symbol: h.stock.symbol, quantity: h.quantity.to_f, avg_price: h.average_price.to_f, price: (h.stock.price || 0).to_f }
-      }
-    })
+    NatsPublisher.publish("portfolio.updated", PortfolioPayloadBuilder.call(user))
   end
 end

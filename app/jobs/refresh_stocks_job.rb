@@ -18,12 +18,7 @@ class RefreshStocksJob < ApplicationJob
 
   def publish_portfolio_updates
     User.where.not(portfolio_slug: nil).includes(holdings: :stock).find_each do |user|
-      NatsPublisher.publish("portfolio.updated", {
-        slug: user.portfolio_slug,
-        holdings: user.holdings.map { |h|
-          { symbol: h.stock.symbol, quantity: h.quantity.to_f, avg_price: h.average_price.to_f, price: (h.stock.price || 0).to_f }
-        }
-      })
+      NatsPublisher.publish("portfolio.updated", PortfolioPayloadBuilder.call(user))
     end
   end
 end

@@ -265,6 +265,8 @@ const en = {
     slugPlaceholder: 'my-portfolio',
     publicUrl: 'Public URL:',
     failedToUpdate: 'Failed to update',
+    displayCurrency: 'Display Currency',
+    displayCurrencyDescription: 'Choose the currency used to sum multi-currency totals. Per-stock prices stay in their listing currency.',
   },
 
   // Admin Page

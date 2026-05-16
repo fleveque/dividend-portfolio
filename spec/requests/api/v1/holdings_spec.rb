@@ -63,6 +63,47 @@ RSpec.describe "Api::V1::Holdings", type: :request do
         expect(totals["EUR"]["cost"]).to eq(240.0)
         expect(totals["EUR"]["gainLoss"]).to eq(40.0)
       end
+
+      describe "displayTotal" do
+        let(:eur_stock) { create(:stock, symbol: "IBE.MC", name: "Iberdrola", price: 14.0, currency: "EUR") }
+
+        before do
+          create(:holding, user: user, stock: stock, quantity: 10, average_price: 100.00)
+          create(:holding, user: user, stock: eur_stock, quantity: 20, average_price: 12.0)
+        end
+
+        it "converts mixed-currency totals into the user's preferred currency" do
+          allow(FxRateService).to receive(:rate).with(from: "EUR", to: "USD").and_return(1.1)
+
+          get "/api/v1/holdings"
+
+          json = JSON.parse(response.body)
+          display = json["data"]["displayTotal"]
+          expect(display["currency"]).to eq("USD")
+          expect(display["value"]).to be_within(0.01).of(1500.0 + 280.0 * 1.1)
+          expect(display["conversions"]).to eq("EUR" => 1.1)
+        end
+
+        it "honors a non-USD preferred currency" do
+          user.update!(preferred_currency: "EUR")
+          allow(FxRateService).to receive(:rate).with(from: "USD", to: "EUR").and_return(0.9)
+
+          get "/api/v1/holdings"
+
+          json = JSON.parse(response.body)
+          expect(json["data"]["displayTotal"]["currency"]).to eq("EUR")
+          expect(json["data"]["displayTotal"]["conversions"]).to eq("USD" => 0.9)
+        end
+
+        it "returns nil when any required rate is unavailable" do
+          allow(FxRateService).to receive(:rate).and_return(nil)
+
+          get "/api/v1/holdings"
+
+          json = JSON.parse(response.body)
+          expect(json["data"]["displayTotal"]).to be_nil
+        end
+      end
     end
   end
 
