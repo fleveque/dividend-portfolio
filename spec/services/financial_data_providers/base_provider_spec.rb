@@ -214,6 +214,52 @@ RSpec.describe FinancialDataProviders::BaseProvider, type: :model do
     end
   end
 
+  describe 'minor-unit currency normalization' do
+    let(:gbp_provider) do
+      Class.new(described_class) do
+        def fetch_and_normalize_stock(_symbol)
+          { symbol: 'DGE.L', price: 1529.50, currency: 'GBp',
+            eps: 80.0, dividend: 60.0, ma_50: 1500.0, ma_200: 1450.0,
+            fifty_two_week_high: 1800.0, fifty_two_week_low: 1200.0,
+            dividend_yield: 3.92, payout_ratio: 75.0, pe_ratio: 19.0 }
+        end
+      end.new
+    end
+
+    before { Rails.cache.clear }
+
+    it 'converts GBp prices to GBP and divides every monetary field by 100' do
+      stock = gbp_provider.get_stock('DGE.L')
+      expect(stock.currency).to eq('GBP')
+      # price is stored as decimal(10, 2), so 15.295 rounds to 15.30
+      expect(stock.price.to_f).to be_within(0.01).of(15.30)
+      expect(stock.eps.to_f).to eq(0.8)
+      expect(stock.dividend.to_f).to eq(0.6)
+      expect(stock.ma_50.to_f).to eq(15.0)
+      expect(stock.ma_200.to_f).to eq(14.5)
+      expect(stock.fifty_two_week_high.to_f).to eq(18.0)
+      expect(stock.fifty_two_week_low.to_f).to eq(12.0)
+    end
+
+    it 'leaves yield/payout/PE ratios untouched (they are unitless)' do
+      stock = gbp_provider.get_stock('DGE.L')
+      expect(stock.dividend_yield.to_f).to eq(3.92)
+      expect(stock.payout_ratio.to_f).to eq(75.0)
+      expect(stock.pe_ratio.to_f).to eq(19.0)
+    end
+
+    it 'leaves non-minor-unit currencies alone' do
+      usd_provider = Class.new(described_class) do
+        def fetch_and_normalize_stock(_symbol)
+          { symbol: 'AAPL', price: 150.0, currency: 'USD' }
+        end
+      end.new
+      stock = usd_provider.get_stock('AAPL')
+      expect(stock.currency).to eq('USD')
+      expect(stock.price.to_f).to eq(150.0)
+    end
+  end
+
   describe '#search' do
     let(:provider_class) do
       klass = Class.new(described_class) do
@@ -267,6 +313,17 @@ RSpec.describe FinancialDataProviders::BaseProvider, type: :model do
       expect(aapl_row[:stock_id]).to eq(apple.id)
       expect(aapl_row[:in_db]).to be true
       expect(aapl_row[:name]).to eq('Apple Inc.')
+    end
+
+    it 'backfills exchange/type from the provider when the DB row has none' do
+      create(:stock, symbol: 'DGE.L', name: 'Diageo plc')
+      provider.search_response = [
+        { symbol: 'DGE.L', name: 'Diageo plc', exchange: 'London', type: 'EQUITY' }
+      ]
+      result = provider.search('diageo')
+      row = result.find { |r| r[:symbol] == 'DGE.L' }
+      expect(row[:in_db]).to be true
+      expect(row[:exchange]).to eq('London')
     end
 
     it 'flags provider-only rows with stock_id: nil and in_db: false' do

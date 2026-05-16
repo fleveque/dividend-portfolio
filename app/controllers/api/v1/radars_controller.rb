@@ -80,6 +80,7 @@ module Api
           id: stock.id,
           symbol: stock.symbol,
           name: stock.name,
+          currency: stock.currency,
           price: stock.price,
           formattedPrice: decorated.formatted_price,
           targetPrice: stock.target_price,
@@ -101,6 +102,7 @@ module Api
           id: stock.id,
           symbol: stock.symbol,
           name: stock.name,
+          currency: stock.currency,
           price: stock.price,
           formattedPrice: decorated.formatted_price,
           targetPrice: radar_stock.target_price,
@@ -120,6 +122,7 @@ module Api
         {
           symbol: stock.symbol,
           name: stock.name,
+          currency: stock.currency,
           price: stock.price&.to_f,
           targetPrice: stock.target_price&.to_f,
           dividendYield: stock.dividend_yield&.to_f,

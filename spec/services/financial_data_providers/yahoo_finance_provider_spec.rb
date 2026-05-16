@@ -58,6 +58,12 @@ RSpec.describe FinancialDataProviders::YahooFinanceProvider, type: :model do
       expect(result[:ex_dividend_date]).to eq(Date.new(2024, 3, 14))
     end
 
+    it 'passes through currency from the gem' do
+      data = { symbol: 'IBE.MC', price: 14.5, currency: 'EUR' }
+      result = provider.send(:normalize_yahoo_data, data)
+      expect(result[:currency]).to eq('EUR')
+    end
+
     it 'does not set payment_frequency in normalize (handled by enrich)' do
       data = { symbol: 'AAPL', price: 150.00, dividend: 0.96 }
       result = provider.send(:normalize_yahoo_data, data)

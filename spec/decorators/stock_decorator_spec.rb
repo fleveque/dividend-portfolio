@@ -567,4 +567,42 @@ RSpec.describe StockDecorator do
       expect(decorated_stock.target_status_text).to eq('No target set')
     end
   end
+
+  describe 'multi-currency formatting' do
+    it 'formats price with the stock currency symbol' do
+      eur_stock = build(:stock, symbol: 'IBE.MC', price: 14.50, currency: 'EUR')
+      gbp_stock = build(:stock, symbol: 'SHEL.L', price: 27.30, currency: 'GBP')
+      jpy_stock = build(:stock, symbol: '7203.T', price: 2_500, currency: 'JPY')
+      expect(StockDecorator.new(eur_stock).formatted_price).to eq('€14.50')
+      expect(StockDecorator.new(gbp_stock).formatted_price).to eq('£27.30')
+      expect(StockDecorator.new(jpy_stock).formatted_price).to eq('¥2,500.00')
+    end
+
+    it 'threads currency through eps/dividend/ma_50/ma_200 formatters' do
+      eur_stock = build(:stock, symbol: 'TEF.MC', currency: 'EUR',
+                                eps: 0.30, dividend: 0.45, ma_50: 4.10, ma_200: 4.00,
+                                fifty_two_week_high: 4.50, fifty_two_week_low: 3.60)
+      decorated = StockDecorator.new(eur_stock)
+      expect(decorated.formatted_eps).to eq('€0.30')
+      expect(decorated.formatted_dividend).to eq('€0.45')
+      expect(decorated.formatted_ma_50).to eq('€4.10')
+      expect(decorated.formatted_ma_200).to eq('€4.00')
+      expect(decorated.formatted_fifty_two_week_high).to eq('€4.50')
+      expect(decorated.formatted_fifty_two_week_low).to eq('€3.60')
+    end
+
+    it 'falls back to "<CODE> " for currencies not in CURRENCY_SYMBOLS' do
+      sek_stock = build(:stock, symbol: 'VOLV-B.ST', price: 250.0, currency: 'SEK')
+      expect(StockDecorator.new(sek_stock).formatted_price).to eq('SEK 250.00')
+    end
+
+    it 'inserts thousands separators in formatted values' do
+      stock = build(:stock, symbol: 'BRK-A', price: 678_900.12, currency: 'USD')
+      expect(StockDecorator.new(stock).formatted_price).to eq('$678,900.12')
+    end
+
+    it 'exposes the currency_code accessor for API serializers' do
+      expect(StockDecorator.new(build(:stock, currency: 'EUR')).currency_code).to eq('EUR')
+    end
+  end
 end

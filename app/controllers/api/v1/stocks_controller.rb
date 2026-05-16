@@ -130,6 +130,7 @@ module Api
           id: stock.id,
           symbol: stock.symbol,
           name: stock.name,
+          currency: stock.currency,
           price: stock.price,
           formattedPrice: decorated.formatted_price,
           eps: stock.eps,

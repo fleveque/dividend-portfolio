@@ -39,6 +39,7 @@ module FinancialDataProviders
       {
         symbol: data[:symbol],
         price: data[:price],
+        currency: data[:currency],
         name: data[:name],
         eps: data[:eps],
         pe_ratio: data[:pe_ratio],
