@@ -5,6 +5,7 @@ import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateHolding } from '../hooks/useHoldingsQueries'
 import { StockLogo } from './StockLogo'
 import { DividendMonthGrid } from './DividendMonthGrid'
+import { formatCurrency } from '../lib/currency'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -166,7 +167,7 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
                 className="text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                 title={t('common.clickToEdit')}
               >
-                ${holding.averagePrice.toFixed(2)}
+                {formatCurrency(holding.averagePrice, holding.stock.currency)}
               </span>
             )}
           </div>
@@ -283,18 +284,18 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
                     </span>
                   ) : (
                     <button onClick={startAvgEdit} className="text-foreground font-medium cursor-pointer">
-                      ${holding.averagePrice.toFixed(2)} ({t('common.clickToEdit')})
+                      {formatCurrency(holding.averagePrice, holding.stock.currency)} ({t('common.clickToEdit')})
                     </button>
                   )}
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t('stock.marketValue')}:</span>
-                  <span className="text-foreground font-medium">${holding.marketValue.toFixed(2)}</span>
+                  <span className="text-foreground font-medium">{formatCurrency(holding.marketValue, holding.stock.currency)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t('stock.gainLoss')}:</span>
                   <span className={cn('font-medium', gainLossColor)}>
-                    ${holding.gainLoss.toFixed(2)}
+                    {formatCurrency(holding.gainLoss, holding.stock.currency)}
                   </span>
                 </div>
               </div>

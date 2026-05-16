@@ -18,6 +18,7 @@ import {
 } from 'react'
 import type { BuyPlanItem, RadarStock } from '../types'
 import { useBuyPlan, useSaveBuyPlan, useResetBuyPlan } from '../hooks/useBuyPlanQueries'
+import { formatCurrency } from '../lib/currency'
 
 interface BuyPlanContextType {
   // Mode state
@@ -46,8 +47,11 @@ interface BuyPlanContextType {
 
   // Computed values
   totalItems: number
-  totalEstimatedCost: number
-  formattedTotal: string
+  // Per-currency cart totals. The cart can mix currencies, so the UI renders
+  // one total per currency (e.g. "$1,234.00", "€890.00") instead of a single
+  // sum that would be meaningless across mismatched currencies.
+  totalsByCurrency: Record<string, number>
+  formattedTotals: string[]
 }
 
 const BuyPlanContext = createContext<BuyPlanContextType | undefined>(undefined)
@@ -96,7 +100,7 @@ export function BuyPlanProvider({ children }: { children: ReactNode }) {
                 quantity: item.quantity + quantity,
                 subtotal: stock.price ? stock.price * (item.quantity + quantity) : null,
                 formattedSubtotal: stock.price
-                  ? formatCurrency(stock.price * (item.quantity + quantity))
+                  ? formatCurrency(stock.price * (item.quantity + quantity), stock.currency)
                   : 'N/A',
               }
             : item
@@ -111,11 +115,12 @@ export function BuyPlanProvider({ children }: { children: ReactNode }) {
           stockId: stock.id,
           symbol: stock.symbol,
           name: stock.name,
+          currency: stock.currency,
           quantity,
           currentPrice: stock.price,
           formattedPrice: stock.formattedPrice,
           subtotal,
-          formattedSubtotal: subtotal ? formatCurrency(subtotal) : 'N/A',
+          formattedSubtotal: subtotal ? formatCurrency(subtotal, stock.currency) : 'N/A',
         },
       ]
     })
@@ -139,7 +144,7 @@ export function BuyPlanProvider({ children }: { children: ReactNode }) {
             ...item,
             quantity,
             subtotal,
-            formattedSubtotal: subtotal ? formatCurrency(subtotal) : 'N/A',
+            formattedSubtotal: subtotal ? formatCurrency(subtotal, item.currency) : 'N/A',
           }
         })
       )
@@ -173,8 +178,14 @@ export function BuyPlanProvider({ children }: { children: ReactNode }) {
 
   // Computed values
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
-  const totalEstimatedCost = items.reduce((sum, item) => sum + (item.subtotal || 0), 0)
-  const formattedTotal = formatCurrency(totalEstimatedCost)
+  const totalsByCurrency: Record<string, number> = {}
+  for (const item of items) {
+    if (item.subtotal == null) continue
+    totalsByCurrency[item.currency] = (totalsByCurrency[item.currency] ?? 0) + item.subtotal
+  }
+  const formattedTotals = Object.entries(totalsByCurrency).map(([code, total]) =>
+    formatCurrency(total, code)
+  )
 
   const value: BuyPlanContextType = {
     isActive,
@@ -190,8 +201,8 @@ export function BuyPlanProvider({ children }: { children: ReactNode }) {
     saveCart,
     resetCart,
     totalItems,
-    totalEstimatedCost,
-    formattedTotal,
+    totalsByCurrency,
+    formattedTotals,
   }
 
   return <BuyPlanContext.Provider value={value}>{children}</BuyPlanContext.Provider>
@@ -207,10 +218,3 @@ export function useBuyPlanContext(): BuyPlanContextType {
   return context
 }
 
-// Helper function to format currency
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(value)
-}

@@ -124,7 +124,7 @@ const en = {
   // Radar Page
   radar: {
     title: 'My Radar',
-    buyPlanModeBanner: '<0>Buy Plan Mode</0> \u2014 Add stocks to your buy plan cart. Click "View Cart" at the bottom to save.',
+    buyPlanModeBanner: 'Add stocks to your buy plan cart. Click "View Cart" at the bottom to save.',
     searchDisabled: 'Search is disabled in buy plan mode',
     alreadyOnRadar: 'Already on your radar',
     addToRadar: 'Add to Radar',

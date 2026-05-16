@@ -1,6 +1,29 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { holdingsApi } from '../lib/api'
-import type { HoldingsResponse } from '../types'
+import type { CurrencyTotals, Holding, HoldingsResponse } from '../types'
+
+// Recompute per-currency totals after an optimistic delete. The portfolio can
+// hold multiple currencies, so totals live in a map keyed by ISO 4217 code.
+function recomputeTotals(holdings: Holding[]): Record<string, CurrencyTotals> {
+  const totals: Record<string, { value: number; cost: number }> = {}
+  for (const h of holdings) {
+    const code = h.stock.currency
+    totals[code] ??= { value: 0, cost: 0 }
+    totals[code].value += h.marketValue
+    totals[code].cost += h.averagePrice * h.quantity
+  }
+  const result: Record<string, CurrencyTotals> = {}
+  for (const [code, { value, cost }] of Object.entries(totals)) {
+    const gainLoss = value - cost
+    result[code] = {
+      value,
+      cost,
+      gainLoss,
+      gainLossPercent: cost > 0 ? (gainLoss / cost) * 100 : 0,
+    }
+  }
+  return result
+}
 
 export function useHoldings() {
   return useQuery({
@@ -44,15 +67,10 @@ export function useDeleteHolding() {
       const previous = queryClient.getQueryData<HoldingsResponse>(['holdings'])
       if (previous) {
         const filtered = previous.holdings.filter((h) => h.id !== id)
-        const totalValue = filtered.reduce((sum, h) => sum + h.marketValue, 0)
-        const totalCost = filtered.reduce((sum, h) => sum + h.averagePrice * h.quantity, 0)
         queryClient.setQueryData<HoldingsResponse>(['holdings'], {
           ...previous,
           holdings: filtered,
-          totalValue,
-          totalCost,
-          totalGainLoss: totalValue - totalCost,
-          totalGainLossPercent: totalCost > 0 ? ((totalValue - totalCost) / totalCost) * 100 : 0,
+          totalsByCurrency: recomputeTotals(filtered),
         })
       }
       return { previous }

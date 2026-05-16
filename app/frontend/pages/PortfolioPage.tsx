@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { formatCurrency } from '../lib/currency'
 import type { Stock, StockSearchResult } from '../types'
 
 const METRICS_PREFERENCE_KEY = 'portfolio-show-metrics'
@@ -163,12 +164,16 @@ export function PortfolioPage() {
               {t('portfolio.title')}
             </CardTitle>
             {holdingsData && holdings.length > 0 && (
-              <div className="text-right text-sm">
+              <div className="text-right text-sm space-y-2">
                 <div className="text-muted-foreground">{t('portfolio.totalValue')}</div>
-                <div className="font-bold text-foreground">${holdingsData.totalValue.toFixed(2)}</div>
-                <div className={cn('text-xs font-medium', holdingsData.totalGainLoss >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400')}>
-                  {holdingsData.totalGainLoss >= 0 ? '+' : ''}${holdingsData.totalGainLoss.toFixed(2)} ({holdingsData.totalGainLossPercent.toFixed(1)}%)
-                </div>
+                {Object.entries(holdingsData.totalsByCurrency).map(([code, totals]) => (
+                  <div key={code}>
+                    <div className="font-bold text-foreground">{formatCurrency(totals.value, code)}</div>
+                    <div className={cn('text-xs font-medium', totals.gainLoss >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400')}>
+                      {totals.gainLoss >= 0 ? '+' : ''}{formatCurrency(totals.gainLoss, code)} ({totals.gainLossPercent.toFixed(1)}%)
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
