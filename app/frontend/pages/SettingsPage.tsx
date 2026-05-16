@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Loader2, Check, Activity, ExternalLink } from 'lucide-react'
+import { Loader2, Check, Activity, ExternalLink, Coins } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useProfile, useUpdateProfile } from '../hooks/useProfileQueries'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { CURRENCY_OPTIONS } from '@/lib/currency'
 
 export function SettingsPage() {
   const { t } = useTranslation()
@@ -14,8 +15,73 @@ export function SettingsPage() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
+      <DisplayCurrencySection />
       <PortfolioSharingSection />
     </div>
+  )
+}
+
+function DisplayCurrencySection() {
+  const { t } = useTranslation()
+  const { data: profile, isLoading } = useProfile()
+  const updateProfile = useUpdateProfile()
+  const [saved, setSaved] = useState(false)
+
+  if (isLoading) {
+    return <Card><CardContent className="py-8 flex justify-center"><Loader2 className="animate-spin" /></CardContent></Card>
+  }
+
+  const current = profile?.preferredCurrency ?? 'USD'
+
+  const handleChange = (value: string) => {
+    updateProfile.mutate({ preferredCurrency: value }, {
+      onSuccess: () => {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 2000)
+      },
+    })
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Coins className="size-5 text-amber-600 dark:text-amber-400" />
+          {t('settings.displayCurrency')}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          {t('settings.displayCurrencyDescription')}
+        </p>
+        <div className="space-y-2">
+          <Label htmlFor="preferred-currency">{t('settings.displayCurrency')}</Label>
+          <select
+            id="preferred-currency"
+            value={current}
+            onChange={(e) => handleChange(e.target.value)}
+            disabled={updateProfile.isPending}
+            className="flex h-9 w-full max-w-xs rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
+          >
+            {CURRENCY_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+        {updateProfile.isError && (
+          <Alert variant="destructive">
+            <AlertDescription>
+              {updateProfile.error instanceof Error ? updateProfile.error.message : t('settings.failedToUpdate')}
+            </AlertDescription>
+          </Alert>
+        )}
+        {saved && (
+          <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+            <Check className="h-4 w-4" /> {t('common.saved')}
+          </p>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -34,7 +100,7 @@ function PortfolioSharingSection() {
 
   const handleSave = () => {
     const value = slug.trim() || null
-    updateProfile.mutate(value, {
+    updateProfile.mutate({ portfolioSlug: value }, {
       onSuccess: () => {
         setSaved(true)
         setTimeout(() => setSaved(false), 2000)
@@ -44,7 +110,7 @@ function PortfolioSharingSection() {
 
   const handleClear = () => {
     setSlug('')
-    updateProfile.mutate(null, {
+    updateProfile.mutate({ portfolioSlug: null }, {
       onSuccess: () => {
         setSaved(true)
         setTimeout(() => setSaved(false), 2000)

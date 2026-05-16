@@ -53,3 +53,19 @@ export function formatCurrency(
   }
   return formatter.format(value)
 }
+
+export type CurrencyOption = { value: string; label: string }
+
+export const CURRENCY_OPTIONS: CurrencyOption[] = [
+  { value: 'USD', label: 'USD — US Dollar' },
+  { value: 'EUR', label: 'EUR — Euro' },
+  { value: 'GBP', label: 'GBP — Pound Sterling' },
+  { value: 'JPY', label: 'JPY — Japanese Yen' },
+  { value: 'CHF', label: 'CHF — Swiss Franc' },
+  { value: 'CAD', label: 'CAD — Canadian Dollar' },
+  { value: 'AUD', label: 'AUD — Australian Dollar' },
+]
+
+export function formatFxRate(rate: number, locale: string = 'en-US'): string {
+  return rate.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 4 })
+}

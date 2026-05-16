@@ -264,6 +264,8 @@ const es = {
     slugPlaceholder: 'mi-cartera',
     publicUrl: 'URL p\u00fablica:',
     failedToUpdate: 'Error al actualizar',
+    displayCurrency: 'Moneda de visualizaci\u00f3n',
+    displayCurrencyDescription: 'Elige la moneda que se usa para sumar totales multi-divisa. Los precios por acci\u00f3n se mantienen en su moneda de cotizaci\u00f3n.',
   },
 
   // Admin Page

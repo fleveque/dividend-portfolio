@@ -130,15 +130,31 @@ export interface CurrencyTotals {
   gainLossPercent: number
 }
 
+/**
+ * Single converted total in the user's preferred currency. Backend omits this
+ * (sends null) when any required FX rate is missing — frontend then falls back
+ * to per-currency rows.
+ */
+export interface DisplayTotal {
+  currency: string
+  value: number
+  cost: number
+  gainLoss: number
+  gainLossPercent: number
+  conversions: Record<string, number>
+}
+
 export interface HoldingsResponse {
   holdings: Holding[]
   totalsByCurrency: Record<string, CurrencyTotals>
+  displayTotal: DisplayTotal | null
 }
 
 export interface UserProfile {
   id: number
   emailAddress: string
   portfolioSlug: string | null
+  preferredCurrency: string
 }
 
 /**
@@ -200,11 +216,22 @@ export interface BuyPlanItem {
  * `totalsByCurrency` is keyed by ISO 4217 code; the cart can mix currencies,
  * so there's no single grand total — the UI renders one row per currency.
  */
+/**
+ * Cart display total in the user's preferred currency. Single field (no cost/gainLoss)
+ * because a buy plan only tracks intended spend.
+ */
+export interface CartDisplayTotal {
+  currency: string
+  total: number
+  conversions: Record<string, number>
+}
+
 export interface BuyPlanResponse {
   id: number | null
   items: BuyPlanItem[]
   totalItems: number
   totalsByCurrency: Record<string, number>
+  displayTotal: CartDisplayTotal | null
 }
 
 /**

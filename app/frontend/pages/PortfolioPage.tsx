@@ -16,8 +16,8 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { formatCurrency } from '../lib/currency'
-import type { Stock, StockSearchResult } from '../types'
+import { formatCurrency, formatFxRate } from '../lib/currency'
+import type { CurrencyTotals, DisplayTotal, Stock, StockSearchResult } from '../types'
 
 const METRICS_PREFERENCE_KEY = 'portfolio-show-metrics'
 const SORT_PREFERENCE_KEY = 'portfolio-sort-preference'
@@ -164,17 +164,10 @@ export function PortfolioPage() {
               {t('portfolio.title')}
             </CardTitle>
             {holdingsData && holdings.length > 0 && (
-              <div className="text-right text-sm space-y-2">
-                <div className="text-muted-foreground">{t('portfolio.totalValue')}</div>
-                {Object.entries(holdingsData.totalsByCurrency).map(([code, totals]) => (
-                  <div key={code}>
-                    <div className="font-bold text-foreground">{formatCurrency(totals.value, code)}</div>
-                    <div className={cn('text-xs font-medium', totals.gainLoss >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400')}>
-                      {totals.gainLoss >= 0 ? '+' : ''}{formatCurrency(totals.gainLoss, code)} ({totals.gainLossPercent.toFixed(1)}%)
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <PortfolioTotalsHeader
+                totalsByCurrency={holdingsData.totalsByCurrency}
+                displayTotal={holdingsData.displayTotal}
+              />
             )}
           </div>
         </CardHeader>
@@ -467,6 +460,64 @@ export function PortfolioPage() {
           </CardContent>
         </Card>
       )}
+    </div>
+  )
+}
+
+interface PortfolioTotalsHeaderProps {
+  totalsByCurrency: Record<string, CurrencyTotals>
+  displayTotal: DisplayTotal | null
+}
+
+function PortfolioTotalsHeader({ totalsByCurrency, displayTotal }: PortfolioTotalsHeaderProps) {
+  const { t } = useTranslation()
+  const entries = Object.entries(totalsByCurrency)
+  const hasDisplayTotal = displayTotal !== null
+  const isMultiCurrency = entries.length > 1
+  const showBreakdown = hasDisplayTotal && isMultiCurrency
+
+  return (
+    <div className="text-right text-sm space-y-2">
+      <div className="text-muted-foreground">{t('portfolio.totalValue')}</div>
+      {hasDisplayTotal ? (
+        <DisplayTotalBlock displayTotal={displayTotal} />
+      ) : (
+        entries.map(([code, totals]) => <CurrencyTotalRow key={code} code={code} totals={totals} />)
+      )}
+      {showBreakdown && (
+        <div className="pt-1 border-t border-border/40 text-xs text-muted-foreground space-y-0.5">
+          {entries.map(([code, totals]) => (
+            <div key={code}>
+              {formatCurrency(totals.value, code)}
+              {displayTotal.conversions[code] !== undefined && (
+                <span className="opacity-70"> @ {formatFxRate(displayTotal.conversions[code])}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DisplayTotalBlock({ displayTotal }: { displayTotal: DisplayTotal }) {
+  return (
+    <div>
+      <div className="font-bold text-foreground">{formatCurrency(displayTotal.value, displayTotal.currency)}</div>
+      <div className={cn('text-xs font-medium', displayTotal.gainLoss >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400')}>
+        {displayTotal.gainLoss >= 0 ? '+' : ''}{formatCurrency(displayTotal.gainLoss, displayTotal.currency)} ({displayTotal.gainLossPercent.toFixed(1)}%)
+      </div>
+    </div>
+  )
+}
+
+function CurrencyTotalRow({ code, totals }: { code: string; totals: CurrencyTotals }) {
+  return (
+    <div>
+      <div className="font-bold text-foreground">{formatCurrency(totals.value, code)}</div>
+      <div className={cn('text-xs font-medium', totals.gainLoss >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400')}>
+        {totals.gainLoss >= 0 ? '+' : ''}{formatCurrency(totals.gainLoss, code)} ({totals.gainLossPercent.toFixed(1)}%)
+      </div>
     </div>
   )
 }

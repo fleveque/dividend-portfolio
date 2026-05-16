@@ -283,14 +283,23 @@ export const holdingsApi = {
 // Profile API - Authenticated endpoints (user settings)
 // ============================================================================
 
+export interface ProfileUpdate {
+  portfolioSlug?: string | null
+  preferredCurrency?: string
+}
+
 export const profileApi = {
   get: () => apiFetch<UserProfile>('/profile'),
 
-  update: (portfolioSlug: string | null) =>
-    apiFetch<UserProfile>('/profile', {
+  update: (update: ProfileUpdate) => {
+    const body: Record<string, unknown> = {}
+    if ('portfolioSlug' in update) body.portfolio_slug = update.portfolioSlug
+    if ('preferredCurrency' in update) body.preferred_currency = update.preferredCurrency
+    return apiFetch<UserProfile>('/profile', {
       method: 'PATCH',
-      body: JSON.stringify({ portfolio_slug: portfolioSlug }),
-    }),
+      body: JSON.stringify(body),
+    })
+  },
 }
 
 // ============================================================================
