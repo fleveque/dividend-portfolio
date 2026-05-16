@@ -65,9 +65,18 @@ function getInitials(symbol: string): string {
 /**
  * Build logo-service URL for a stock ticker.
  * The API key is passed as a query param so it works in <img src> tags.
+ * `name` is forwarded as `company_name` so the service's LLM fallback can
+ * disambiguate exchange-suffixed tickers (REP.MC → Repsol).
  */
-function getLogoServiceUrl(symbol: string, serviceUrl: string, apiKey: string, size: string): string {
-  return `${serviceUrl}/api/v1/logos/${symbol.toUpperCase()}?size=${size}&api_key=${apiKey}`
+function getLogoServiceUrl(
+  symbol: string,
+  serviceUrl: string,
+  apiKey: string,
+  size: string,
+  name?: string,
+): string {
+  const base = `${serviceUrl}/api/v1/logos/${symbol.toUpperCase()}?size=${size}&api_key=${apiKey}`
+  return name ? `${base}&company_name=${encodeURIComponent(name)}` : base
 }
 
 /**
@@ -123,7 +132,7 @@ export function StockLogo({ symbol, name, size = 'md', className = '' }: StockLo
           {imageStatus === 'loading' && <LoadingSkeleton />}
           {imageStatus === 'error' && <InitialsFallback symbol={symbol} colorClass={colorClass} />}
           <img
-            src={getLogoServiceUrl(symbol, serviceUrl, apiKey, logoServiceSizes[size])}
+            src={getLogoServiceUrl(symbol, serviceUrl, apiKey, logoServiceSizes[size], name)}
             alt={`${name || symbol} logo`}
             className={`w-full h-full object-contain rounded-lg ${imageStatus === 'loaded' ? '' : 'hidden'}`}
             onLoad={handleLoad}
