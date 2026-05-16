@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_15_235223) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_16_120001) do
   create_table "buy_plan_items", force: :cascade do |t|
     t.integer "buy_plan_id", null: false
     t.integer "stock_id", null: false
@@ -38,6 +38,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_15_235223) do
     t.datetime "updated_at", null: false
     t.index ["stock_id"], name: "index_dividends_on_stock_id"
     t.index ["user_id"], name: "index_dividends_on_user_id"
+  end
+
+  create_table "fx_rates", force: :cascade do |t|
+    t.string "base", null: false
+    t.string "quote", null: false
+    t.decimal "rate", precision: 18, scale: 8, null: false
+    t.datetime "fetched_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["base", "quote"], name: "index_fx_rates_on_base_and_quote", unique: true
   end
 
   create_table "holdings", force: :cascade do |t|
@@ -121,6 +131,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_15_235223) do
     t.string "name"
     t.boolean "admin", default: false, null: false
     t.string "portfolio_slug"
+    t.string "preferred_currency", default: "USD", null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["portfolio_slug"], name: "index_users_on_portfolio_slug", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true

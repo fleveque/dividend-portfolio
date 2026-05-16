@@ -14,6 +14,7 @@ class User < ApplicationRecord
   validates :portfolio_slug, uniqueness: true, allow_nil: true,
     format: { with: /\A[a-z0-9][a-z0-9-]{1,38}[a-z0-9]\z/, message: "must be 3-40 lowercase alphanumeric characters or hyphens" },
     if: -> { portfolio_slug.present? }
+  validates :preferred_currency, presence: true, inclusion: { in: Stock::CURRENCY_SYMBOLS.keys }
 
   after_commit :publish_portfolio_slug_change, if: :saved_change_to_portfolio_slug?
 
@@ -33,12 +34,7 @@ class User < ApplicationRecord
 
   def publish_portfolio_slug_change
     if portfolio_slug.present?
-      NatsPublisher.publish("portfolio.opted_in", {
-        slug: portfolio_slug,
-        holdings: holdings.includes(:stock).map { |h|
-          { symbol: h.stock.symbol, quantity: h.quantity.to_f, avg_price: h.average_price.to_f, price: (h.stock.price || 0).to_f }
-        }
-      })
+      NatsPublisher.publish("portfolio.opted_in", PortfolioPayloadBuilder.call(self))
     else
       previous_slug = saved_change_to_portfolio_slug.first
       NatsPublisher.publish("portfolio.opted_out", { slug: previous_slug }) if previous_slug.present?
