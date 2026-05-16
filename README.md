@@ -44,10 +44,18 @@ AI-enhanced dividend investing platform built with Rails 8 and React. Track your
 
 ```
 Rails publishes on holding changes:
-  {env}.portfolio.updated     {slug, holdings: [{symbol, quantity, avg_price}]}
+  {env}.portfolio.updated     {version: 2, slug, base_currency,
+                               holdings: [{symbol, currency, quantity, avg_price,
+                                           price, value_in_base, value_in_usd}, ...]}
 
 Pulse consumes -> updates GenServer state -> pushes to LiveView via PubSub
 ```
+
+`value_in_base` is each holding's value pre-converted into the user's preferred
+currency (via `FxRateService`); `value_in_usd` is the cross-portfolio
+normalisation key the community dashboard sums on. The legacy `symbol/quantity/
+avg_price/price` fields are kept so an older Pulse deploy can still compute totals
+during the rollover.
 
 ## Features
 
@@ -62,6 +70,7 @@ Pulse consumes -> updates GenServer state -> pushes to LiveView via PubSub
 - **Pulse Integration**: Opt-in to share your portfolio publicly via [Pulse](https://github.com/fleveque/pulse). Set a portfolio slug in settings; holdings sync in real-time via NATS.
 - **Admin Dashboard**: Protected admin area with app stats (users, stocks, radars, portfolios, Pulse adoption), user management, and manual stock refresh.
 - **Mobile Responsive**: Full functionality on any device with hamburger menu navigation.
+- **Multi-Currency Support**: Each stock keeps its listing currency (USD, EUR, GBP, JPY, …); portfolio totals split per currency and convert to your chosen display currency via FX rates fetched from Yahoo. London-pence (`GBp`) and similar minor-unit quotes are normalised at ingest.
 
 ## Admin
 
@@ -85,10 +94,6 @@ bin/kamal app exec "bin/rails admin:grant[your@email.com]"
 - **Dashboard stats**: Users, stocks, radars, buy plans, portfolios, holdings, and Pulse adoption
 - **User management**: View all users with metadata (holdings count, Pulse slug), delete users
 - **Stock refresh**: Manually trigger a stock data refresh job
-
-## Limitations
-
-- Currently the application doesn't allow multiple currencies.
 
 ## Installation
 
