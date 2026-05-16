@@ -82,9 +82,13 @@ class StockDecorator < ApplicationDecorator
     end
   end
 
+  def currency_code
+    object.respond_to?(:currency) ? object.currency : nil
+  end
+
   def formatted_eps
     return "N/A" unless eps
-    "$#{sprintf('%.2f', eps)}"
+    format_currency(eps)
   end
 
   def formatted_pe_ratio
@@ -94,7 +98,7 @@ class StockDecorator < ApplicationDecorator
 
   def formatted_dividend
     return "N/A" unless dividend
-    "$#{sprintf('%.2f', dividend)}"
+    format_currency(dividend)
   end
 
   def formatted_dividend_yield
@@ -109,12 +113,12 @@ class StockDecorator < ApplicationDecorator
 
   def formatted_ma_50
     return "N/A" unless ma_50
-    "$#{sprintf('%.2f', ma_50)}"
+    format_currency(ma_50)
   end
 
   def formatted_ma_200
     return "N/A" unless ma_200
-    "$#{sprintf('%.2f', ma_200)}"
+    format_currency(ma_200)
   end
 
   def formatted_fifty_two_week_high
@@ -167,7 +171,7 @@ class StockDecorator < ApplicationDecorator
     value = dividend_per_payment
     return "N/A" unless value
 
-    "$#{sprintf('%.2f', value)}"
+    format_currency(value)
   end
 
   def formatted_payment_frequency
@@ -198,6 +202,15 @@ class StockDecorator < ApplicationDecorator
     when 5..7  then "Fair"
     else "Weak"
     end
+  end
+
+  # Symbol comes from the Stock (Stock::CURRENCY_SYMBOLS); unknown codes fall back to
+  # "<CODE> " so users see something and the underlying code is still visible.
+  # The optional `code` arg lets serializers format an arbitrary value with this
+  # stock's currency without having to read CURRENCY_SYMBOLS themselves.
+  def format_currency(value, code = currency_code)
+    symbol = code ? (Stock::CURRENCY_SYMBOLS[code] || "#{code} ") : "$"
+    "#{symbol}#{sprintf('%.2f', value).reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse}"
   end
 
   private
@@ -269,9 +282,5 @@ class StockDecorator < ApplicationDecorator
 
   def prices_available?
     target_price.present? && current_price.present?
-  end
-
-  def format_currency(value)
-    "$#{sprintf('%.2f', value)}"
   end
 end

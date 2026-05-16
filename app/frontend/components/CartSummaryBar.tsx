@@ -9,7 +9,7 @@ interface CartSummaryBarProps {
 
 export function CartSummaryBar({ onOpenDrawer }: CartSummaryBarProps) {
   const { t } = useTranslation()
-  const { isActive, items, totalItems, formattedTotal, isDirty } = useBuyPlanContext()
+  const { isActive, items, totalItems, formattedTotals, isDirty } = useBuyPlanContext()
 
   if (!isActive || items.length === 0) {
     return null
@@ -36,7 +36,7 @@ export function CartSummaryBar({ onOpenDrawer }: CartSummaryBarProps) {
                 {t('cart.sharesInStocks', { shares: totalItems, stocks: items.length })}
               </p>
               <p className="text-xs text-muted-foreground">
-                {t('cart.estTotal', { total: formattedTotal })}
+                {t('cart.estTotal', { total: formattedTotals.join(' + ') })}
                 {isDirty && (
                   <span className="text-amber-500 dark:text-amber-400 ml-2">
                     {t('cart.unsaved')}

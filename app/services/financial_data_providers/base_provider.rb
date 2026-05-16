@@ -2,7 +2,7 @@ module FinancialDataProviders
   class BaseProvider
     REQUIRED_FIELDS = [ :symbol, :price ].freeze
     OPTIONAL_FIELDS = [
-      :name, :eps, :pe_ratio, :dividend, :dividend_yield,
+      :name, :currency, :eps, :pe_ratio, :dividend, :dividend_yield,
       :payout_ratio, :ma_50, :ma_200, :fifty_two_week_high, :fifty_two_week_low,
       :ex_dividend_date, :payment_frequency, :payment_months, :shifted_payment_months
     ].freeze
@@ -13,6 +13,14 @@ module FinancialDataProviders
     # case-insensitively against the provider's type. MUTUALFUND is in because Spanish
     # dividend funds like Baelo Dividendo Creciente are mutual funds, not ETFs.
     SEARCHABLE_TYPES = %w[EQUITY ETF MUTUALFUND].freeze
+    # Some exchanges quote in the minor unit of the currency (London uses pence,
+    # Johannesburg uses cents, Tel Aviv uses agorot). Yahoo returns these as
+    # lowercased-suffix codes; we normalize to the major unit at ingest so the
+    # rest of the system only ever deals with whole-unit amounts.
+    MINOR_UNIT_CURRENCIES = {
+      "GBp" => [ "GBP", 100 ], "ZAc" => [ "ZAR", 100 ], "ILA" => [ "ILS", 100 ]
+    }.freeze
+    PRICE_FIELDS = %i[price eps dividend ma_50 ma_200 fifty_two_week_high fifty_two_week_low].freeze
 
     # Fetches stock data from the provider's API, stores it in the database and caches the result.
     #
@@ -113,10 +121,21 @@ module FinancialDataProviders
     end
 
     # DB rows take precedence over provider rows when symbols collide — they carry the
-    # real Stock id so the Add flow can skip the resolve call.
+    # real Stock id so the Add flow can skip the resolve call. But the DB doesn't
+    # store exchange/type, so we backfill those from the provider row when we have
+    # one (otherwise a search of any held stock loses its "London"/"NasdaqGS" badge).
     def merge_results(db_matches, provider_matches)
+      provider_by_symbol = provider_matches.each_with_object({}) do |m, h|
+        h[m[:symbol]] = m unless m[:symbol].nil?
+      end
       by_symbol = {}
-      db_matches.each { |m| by_symbol[m[:symbol]] ||= m }
+      db_matches.each do |m|
+        provider_meta = provider_by_symbol[m[:symbol]] || {}
+        by_symbol[m[:symbol]] ||= m.merge(
+          exchange: m[:exchange] || provider_meta[:exchange],
+          type: m[:type] || provider_meta[:type]
+        )
+      end
       provider_matches.each do |m|
         next if m[:symbol].nil? || by_symbol.key?(m[:symbol])
 
@@ -206,10 +225,22 @@ module FinancialDataProviders
     end
 
     def store_stock_data(data)
-      normalized_data = normalize_stock_data(data)
+      normalized_data = normalize_minor_unit_currency(normalize_stock_data(data))
       stock = Stock.find_or_initialize_by(symbol: normalized_data[:symbol])
       stock.update!(normalized_data.merge(updated_at: Time.current))
       stock
+    end
+
+    # GBp/ZAc/ILA → divide every monetary field by 100, swap to the major-unit code.
+    # Yield/payout/PE are ratios so they're left alone.
+    def normalize_minor_unit_currency(data)
+      conversion = MINOR_UNIT_CURRENCIES[data[:currency]]
+      return data unless conversion
+
+      major_code, divisor = conversion
+      PRICE_FIELDS.each { |field| data[field] = data[field] / divisor.to_f if data[field] }
+      data[:currency] = major_code
+      data
     end
   end
 end

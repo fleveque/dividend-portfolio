@@ -11,6 +11,7 @@ RSpec.describe Stock, type: :model do
   describe 'validations' do
     it { should validate_presence_of(:symbol) }
     it { should validate_uniqueness_of(:symbol) }
+    it { should validate_presence_of(:currency) }
 
     describe 'payment_frequency' do
       it { should allow_value(nil).for(:payment_frequency) }
@@ -73,6 +74,19 @@ RSpec.describe Stock, type: :model do
       decorated_stock = StockDecorator.new(stock)
       expect(decorated_stock.display_name).to eq('AAPL - Apple Inc.')
       expect(decorated_stock.formatted_price).to eq('$150.00')
+    end
+  end
+
+  describe '#currency_symbol' do
+    it 'returns the symbol for known currencies' do
+      expect(Stock.new(currency: 'USD').currency_symbol).to eq('$')
+      expect(Stock.new(currency: 'EUR').currency_symbol).to eq('€')
+      expect(Stock.new(currency: 'GBP').currency_symbol).to eq('£')
+      expect(Stock.new(currency: 'JPY').currency_symbol).to eq('¥')
+    end
+
+    it 'falls back to "<code> " for unknown currencies so the API still emits the raw code' do
+      expect(Stock.new(currency: 'SEK').currency_symbol).to eq('SEK ')
     end
   end
 end

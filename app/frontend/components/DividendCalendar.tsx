@@ -6,7 +6,28 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+import { formatCurrency } from '../lib/currency'
 import type { Stock, Holding } from '../types'
+
+// Build a per-currency × per-month sum. Used for both the per-share footer
+// (across all stocks) and the est-income footer (× holding quantity).
+function buildMonthlyTotalsByCurrency(
+  stocks: Stock[],
+  multiplier: (stock: Stock) => number,
+): Record<string, number[]> {
+  const totals: Record<string, number[]> = {}
+  for (const stock of stocks) {
+    if (!stock.dividendPerPayment) continue
+    const code = stock.currency
+    totals[code] ??= Array(12).fill(0)
+    for (let m = 0; m < 12; m += 1) {
+      const month = m + 1
+      const isPrimary = stock.paymentMonths.includes(month) && !stock.shiftedPaymentMonths.includes(month)
+      if (isPrimary) totals[code][m] += stock.dividendPerPayment * multiplier(stock)
+    }
+  }
+  return totals
+}
 
 type DividendCalendarProps =
   | { holdings: Holding[]; stocks?: never }
@@ -38,30 +59,13 @@ export function DividendCalendar(props: DividendCalendarProps) {
     )
   }
 
-  // Calculate monthly per-share totals (only primary months, not shifted)
-  const monthlyTotals = Array.from({ length: 12 }, (_, i) => {
-    const month = i + 1
-    return scheduledStocks.reduce((total, stock) => {
-      const isPrimary = stock.paymentMonths.includes(month) && !stock.shiftedPaymentMonths.includes(month)
-      if (isPrimary && stock.dividendPerPayment) {
-        return total + stock.dividendPerPayment
-      }
-      return total
-    }, 0)
-  })
-
-  // Calculate monthly estimated income (per-share × quantity)
-  const monthlyIncome = Array.from({ length: 12 }, (_, i) => {
-    const month = i + 1
-    return scheduledStocks.reduce((total, stock) => {
-      const isPrimary = stock.paymentMonths.includes(month) && !stock.shiftedPaymentMonths.includes(month)
-      if (isPrimary && stock.dividendPerPayment) {
-        const qty = quantityByStockId.get(stock.id) ?? 0
-        return total + stock.dividendPerPayment * qty
-      }
-      return total
-    }, 0)
-  })
+  // Per-currency monthly totals — mixing USD and EUR dividends into a single
+  // sum is meaningless, so each currency gets its own footer row.
+  const monthlyTotalsByCurrency = buildMonthlyTotalsByCurrency(scheduledStocks, () => 1)
+  const monthlyIncomeByCurrency = buildMonthlyTotalsByCurrency(
+    scheduledStocks,
+    (stock) => quantityByStockId.get(stock.id) ?? 0,
+  )
 
   return (
     <TooltipProvider>
@@ -95,7 +99,7 @@ export function DividendCalendar(props: DividendCalendarProps) {
                               isPrimary && 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
                               isShifted && 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400'
                             )}>
-                              {isShifted ? '~' : ''}${stock.dividendPerPayment?.toFixed(2)}
+                              {isShifted ? '~' : ''}{stock.dividendPerPayment != null ? formatCurrency(stock.dividendPerPayment, stock.currency) : '—'}
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -114,32 +118,46 @@ export function DividendCalendar(props: DividendCalendarProps) {
             ))}
           </TableBody>
           <TableFooter>
-            <TableRow>
-              <TableCell className="sticky left-0 bg-muted/50 z-10 font-bold">{hasHoldings ? t('dividendCalendar.perShare') : t('dividendCalendar.total')}</TableCell>
-              {monthlyTotals.map((total, i) => (
-                <TableCell key={i} className="text-center px-1">
-                  {total > 0 ? (
-                    <span className="text-xs font-semibold text-foreground">${total.toFixed(2)}</span>
-                  ) : (
-                    <Badge variant="destructive" className="text-[10px] px-1 py-0">{t('dividendCalendar.gap')}</Badge>
-                  )}
-                </TableCell>
-              ))}
-            </TableRow>
-            {hasHoldings && (
-              <TableRow className="bg-emerald-50/50 dark:bg-emerald-950/20">
-                <TableCell className="sticky left-0 bg-emerald-50/50 dark:bg-emerald-950/20 z-10 font-bold">{t('dividendCalendar.estIncome')}</TableCell>
-                {monthlyIncome.map((income, i) => (
-                  <TableCell key={i} className="text-center px-1">
-                    {income > 0 ? (
-                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">${income.toFixed(2)}</span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground/40">—</span>
-                    )}
+            {Object.entries(monthlyTotalsByCurrency).map(([code, totals]) => {
+              const multi = Object.keys(monthlyTotalsByCurrency).length > 1
+              return (
+                <TableRow key={`totals-${code}`}>
+                  <TableCell className="sticky left-0 bg-muted/50 z-10 font-bold">
+                    {hasHoldings ? t('dividendCalendar.perShare') : t('dividendCalendar.total')}
+                    {multi && <span className="ml-1 text-xs text-muted-foreground">({code})</span>}
                   </TableCell>
-                ))}
-              </TableRow>
-            )}
+                  {totals.map((total, i) => (
+                    <TableCell key={i} className="text-center px-1">
+                      {total > 0 ? (
+                        <span className="text-xs font-semibold text-foreground">{formatCurrency(total, code)}</span>
+                      ) : (
+                        <Badge variant="destructive" className="text-[10px] px-1 py-0">{t('dividendCalendar.gap')}</Badge>
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              )
+            })}
+            {hasHoldings && Object.entries(monthlyIncomeByCurrency).map(([code, incomes]) => {
+              const multi = Object.keys(monthlyIncomeByCurrency).length > 1
+              return (
+                <TableRow key={`income-${code}`} className="bg-emerald-50/50 dark:bg-emerald-950/20">
+                  <TableCell className="sticky left-0 bg-emerald-50/50 dark:bg-emerald-950/20 z-10 font-bold">
+                    {t('dividendCalendar.estIncome')}
+                    {multi && <span className="ml-1 text-xs text-muted-foreground">({code})</span>}
+                  </TableCell>
+                  {incomes.map((income, i) => (
+                    <TableCell key={i} className="text-center px-1">
+                      {income > 0 ? (
+                        <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">{formatCurrency(income, code)}</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground/40">—</span>
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              )
+            })}
           </TableFooter>
         </Table>
 

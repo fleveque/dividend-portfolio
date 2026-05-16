@@ -27,7 +27,7 @@ RSpec.describe "Api::V1::BuyPlans", type: :request do
           expect(json["success"]).to be true
           expect(json["data"]["items"]).to eq([])
           expect(json["data"]["totalItems"]).to eq(0)
-          expect(json["data"]["totalEstimatedCost"]).to eq(0)
+          expect(json["data"]["totalsByCurrency"]).to eq({})
         end
       end
 
@@ -43,7 +43,7 @@ RSpec.describe "Api::V1::BuyPlans", type: :request do
           json = JSON.parse(response.body)
           expect(json["data"]["items"].length).to eq(2)
           expect(json["data"]["totalItems"]).to eq(15)
-          expect(json["data"]["totalEstimatedCost"]).to eq(3500.00)
+          expect(json["data"]["totalsByCurrency"]).to eq("USD" => 3500.00)
         end
 
         it "returns correct item data" do

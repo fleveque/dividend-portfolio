@@ -56,6 +56,7 @@ module FinancialDataProviders
       {
         symbol: quote_data.symbol,
         price: quote_data.price,
+        currency: overview&.dig("Currency"),
         name: overview&.dig("Name"),
         eps: parse_decimal(overview&.dig("EPS")),
         pe_ratio: parse_decimal(overview&.dig("PERatio")),

@@ -20,6 +20,7 @@ export interface Stock {
   id: number
   symbol: string
   name: string
+  currency: string  // ISO 4217 code ("USD", "EUR", ...) used to render money fields
   price: number | null  // null when price unavailable
   formattedPrice: string  // "$123.45" or "N/A"
   // Financial metrics
@@ -117,12 +118,21 @@ export interface Holding {
   stock: Stock
 }
 
+/**
+ * Per-currency portfolio totals. Keyed by ISO 4217 code; the portfolio can
+ * hold stocks in multiple currencies, so no single grand total is meaningful
+ * until phase 2 adds FX conversion to a user-preferred display currency.
+ */
+export interface CurrencyTotals {
+  value: number
+  cost: number
+  gainLoss: number
+  gainLossPercent: number
+}
+
 export interface HoldingsResponse {
   holdings: Holding[]
-  totalValue: number
-  totalCost: number
-  totalGainLoss: number
-  totalGainLossPercent: number
+  totalsByCurrency: Record<string, CurrencyTotals>
 }
 
 export interface UserProfile {
@@ -177,6 +187,7 @@ export interface BuyPlanItem {
   stockId: number
   symbol: string
   name: string
+  currency: string
   quantity: number
   currentPrice: number | null
   formattedPrice: string
@@ -185,14 +196,15 @@ export interface BuyPlanItem {
 }
 
 /**
- * Buy Plan Response from API
+ * Buy Plan Response from API.
+ * `totalsByCurrency` is keyed by ISO 4217 code; the cart can mix currencies,
+ * so there's no single grand total — the UI renders one row per currency.
  */
 export interface BuyPlanResponse {
   id: number | null
   items: BuyPlanItem[]
   totalItems: number
-  totalEstimatedCost: number
-  formattedTotal: string
+  totalsByCurrency: Record<string, number>
 }
 
 /**

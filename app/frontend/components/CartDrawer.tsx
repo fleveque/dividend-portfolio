@@ -36,7 +36,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const {
     items,
     totalItems,
-    formattedTotal,
+    formattedTotals,
     isDirty,
     isSaving,
     updateQuantity,
@@ -177,11 +177,15 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             {items.length > 0 && (
               <>
                 <Separator />
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-start justify-between text-sm gap-3">
                   <span className="text-muted-foreground">
                     {t('cart.totalShares', { count: totalItems })}
                   </span>
-                  <span className="font-bold text-foreground text-lg">{formattedTotal}</span>
+                  <div className="text-right">
+                    {formattedTotals.map((total) => (
+                      <div key={total} className="font-bold text-foreground text-lg">{total}</div>
+                    ))}
+                  </div>
                 </div>
               </>
             )}

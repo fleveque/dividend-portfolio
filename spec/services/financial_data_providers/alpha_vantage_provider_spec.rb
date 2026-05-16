@@ -59,6 +59,7 @@ RSpec.describe FinancialDataProviders::AlphaVantageProvider, type: :model do
       let(:overview_data) do
         {
           "Name" => "Apple Inc.",
+          "Currency" => "USD",
           "EPS" => "6.57",
           "PERatio" => "28.5",
           "DividendPerShare" => "0.96",
@@ -96,6 +97,11 @@ RSpec.describe FinancialDataProviders::AlphaVantageProvider, type: :model do
             shifted_payment_months: []
           )
         )
+      end
+
+      it 'passes the overview Currency through to the stock' do
+        provider.get_stock(symbol)
+        expect(stock).to have_received(:update!).with(hash_including(currency: "USD"))
       end
     end
 

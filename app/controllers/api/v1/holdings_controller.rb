@@ -6,9 +6,9 @@ module Api
       # GET /api/v1/holdings
       def index
         holdings = Current.user.holdings.includes(:stock)
-
-        total_value = 0.0
-        total_cost = 0.0
+        # Per-currency accumulators — mixing USD and EUR into one sum produces a
+        # meaningless number, so the API returns a Hash keyed by currency code.
+        totals = Hash.new { |h, k| h[k] = { value: 0.0, cost: 0.0 } }
 
         serialized = holdings.map do |holding|
           market_value = (holding.stock.price || 0) * holding.quantity
@@ -16,18 +16,15 @@ module Api
           gain_loss = market_value - cost
           gain_loss_percent = cost > 0 ? (gain_loss / cost * 100) : 0
 
-          total_value += market_value
-          total_cost += cost
+          totals[holding.stock.currency][:value] += market_value
+          totals[holding.stock.currency][:cost] += cost
 
           serialize_holding_with_stock(holding, market_value, gain_loss, gain_loss_percent)
         end
 
         render_success({
           holdings: serialized,
-          totalValue: total_value.to_f,
-          totalCost: total_cost.to_f,
-          totalGainLoss: (total_value - total_cost).to_f,
-          totalGainLossPercent: total_cost > 0 ? ((total_value - total_cost) / total_cost * 100).to_f : 0.0
+          totalsByCurrency: totals_by_currency_payload(totals)
         })
       end
 
@@ -109,6 +106,16 @@ module Api
         @holding = Current.user.holdings.find(params[:id])
       end
 
+      def totals_by_currency_payload(totals)
+        totals.transform_values do |t|
+          value = t[:value].to_f
+          cost = t[:cost].to_f
+          gain_loss = value - cost
+          { value: value, cost: cost, gainLoss: gain_loss,
+            gainLossPercent: cost > 0 ? (gain_loss / cost * 100) : 0.0 }
+        end
+      end
+
       def holding_params
         params.require(:holding).permit(:stock_id, :quantity, :average_price)
       end
@@ -137,6 +144,7 @@ module Api
           stockId: holding.stock_id,
           symbol: holding.stock.symbol,
           name: holding.stock.name,
+          currency: holding.stock.currency,
           quantity: holding.quantity.to_f,
           averagePrice: holding.average_price.to_f,
           currentPrice: (holding.stock.price || 0).to_f,
@@ -165,6 +173,7 @@ module Api
           id: stock.id,
           symbol: stock.symbol,
           name: stock.name,
+          currency: stock.currency,
           price: stock.price,
           formattedPrice: decorated.formatted_price,
           eps: stock.eps,
@@ -206,6 +215,7 @@ module Api
         {
           symbol: stock.symbol,
           name: stock.name,
+          currency: stock.currency,
           price: stock.price&.to_f,
           dividendYield: stock.dividend_yield&.to_f,
           payoutRatio: stock.payout_ratio&.to_f,

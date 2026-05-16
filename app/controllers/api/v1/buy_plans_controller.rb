@@ -49,35 +49,33 @@ module Api
       def serialize_buy_plan(buy_plan)
         items = buy_plan.buy_plan_items.includes(:stock).map { |item| serialize_item(item) }
         total_items = items.sum { |i| i[:quantity] }
-        total_cost = items.sum { |i| i[:subtotal] || 0 }
+        totals = Hash.new(0.0)
+        items.each { |i| totals[i[:currency]] += i[:subtotal] if i[:subtotal] }
 
         {
           id: buy_plan.id,
           items: items,
           totalItems: total_items,
-          totalEstimatedCost: total_cost.to_f,
-          formattedTotal: format_currency(total_cost)
+          totalsByCurrency: totals.transform_values(&:to_f)
         }
       end
 
       def serialize_item(item)
         stock = item.stock
         subtotal = stock.price ? stock.price * item.quantity : nil
+        decorated = StockDecorator.new(stock)
 
         {
           stockId: stock.id,
           symbol: stock.symbol,
           name: stock.name,
+          currency: stock.currency,
           quantity: item.quantity,
           currentPrice: stock.price&.to_f,
-          formattedPrice: stock.price ? format_currency(stock.price) : "N/A",
+          formattedPrice: stock.price ? decorated.format_currency(stock.price) : "N/A",
           subtotal: subtotal&.to_f,
-          formattedSubtotal: subtotal ? format_currency(subtotal) : "N/A"
+          formattedSubtotal: subtotal ? decorated.format_currency(subtotal) : "N/A"
         }
-      end
-
-      def format_currency(value)
-        "$#{sprintf('%.2f', value).reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse}"
       end
     end
   end

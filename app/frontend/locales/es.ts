@@ -124,7 +124,7 @@ const es = {
   // Radar Page
   radar: {
     title: 'Mi Radar',
-    buyPlanModeBanner: '<0>Modo Plan de Compra</0> \u2014 A\u00f1ade acciones al carrito de tu plan de compra. Haz clic en "Ver Carrito" abajo para guardar.',
+    buyPlanModeBanner: 'A\u00f1ade acciones al carrito de tu plan de compra. Haz clic en "Ver Carrito" abajo para guardar.',
     searchDisabled: 'La b\u00fasqueda est\u00e1 desactivada en modo plan de compra',
     alreadyOnRadar: 'Ya est\u00e1 en tu radar',
     addToRadar: 'A\u00f1adir al Radar',

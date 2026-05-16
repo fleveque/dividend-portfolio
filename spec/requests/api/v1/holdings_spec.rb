@@ -19,7 +19,7 @@ RSpec.describe "Api::V1::Holdings", type: :request do
         expect(response).to have_http_status(:ok)
         json = JSON.parse(response.body)
         expect(json["data"]["holdings"]).to eq([])
-        expect(json["data"]["totalValue"]).to eq(0.0)
+        expect(json["data"]["totalsByCurrency"]).to eq({})
       end
 
       it "returns holdings with computed fields and stock data" do
@@ -38,13 +38,30 @@ RSpec.describe "Api::V1::Holdings", type: :request do
         stock_data = holding["stock"]
         expect(stock_data["symbol"]).to eq("AAPL")
         expect(stock_data["name"]).to eq("Apple Inc.")
+        expect(stock_data["currency"]).to eq("USD")
         expect(stock_data["formattedPrice"]).to eq("$150.00")
         expect(stock_data).to have_key("dividendScheduleAvailable")
         expect(stock_data).to have_key("paymentMonths")
 
-        expect(json["data"]["totalValue"]).to eq(1500.0)
-        expect(json["data"]["totalCost"]).to eq(1000.0)
-        expect(json["data"]["totalGainLoss"]).to eq(500.0)
+        expect(json["data"]["totalsByCurrency"]).to eq(
+          "USD" => { "value" => 1500.0, "cost" => 1000.0, "gainLoss" => 500.0, "gainLossPercent" => 50.0 }
+        )
+      end
+
+      it "splits totals by currency for mixed-currency portfolios" do
+        eur_stock = create(:stock, symbol: "IBE.MC", name: "Iberdrola", price: 14.0, currency: "EUR")
+        create(:holding, user: user, stock: stock, quantity: 10, average_price: 100.00)
+        create(:holding, user: user, stock: eur_stock, quantity: 20, average_price: 12.0)
+
+        get "/api/v1/holdings"
+
+        json = JSON.parse(response.body)
+        totals = json["data"]["totalsByCurrency"]
+        expect(totals.keys).to contain_exactly("USD", "EUR")
+        expect(totals["USD"]["value"]).to eq(1500.0)
+        expect(totals["EUR"]["value"]).to eq(280.0)
+        expect(totals["EUR"]["cost"]).to eq(240.0)
+        expect(totals["EUR"]["gainLoss"]).to eq(40.0)
       end
     end
   end

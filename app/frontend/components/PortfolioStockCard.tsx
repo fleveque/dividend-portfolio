@@ -3,6 +3,7 @@ import { Check, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateHolding } from '../hooks/useHoldingsQueries'
+import { formatCurrency } from '../lib/currency'
 import { StockLogo } from './StockLogo'
 import { DividendMonthGrid } from './DividendMonthGrid'
 import { FiftyTwoWeekRange } from './FiftyTwoWeekRange'
@@ -175,18 +176,18 @@ export function PortfolioStockCard({ holding, onRemove, isRemoving }: PortfolioS
                 className="font-semibold text-foreground cursor-pointer hover:text-muted-foreground transition-colors"
                 title={t('common.clickToEdit')}
               >
-                ${holding.averagePrice.toFixed(2)}
+                {formatCurrency(holding.averagePrice, holding.stock.currency)}
               </span>
             )}
           </div>
           <div>
             <span className="text-muted-foreground block text-xs uppercase tracking-wide">{t('stock.marketValue')}</span>
-            <span className="font-semibold text-foreground">${holding.marketValue.toFixed(2)}</span>
+            <span className="font-semibold text-foreground">{formatCurrency(holding.marketValue, holding.stock.currency)}</span>
           </div>
           <div>
             <span className="text-muted-foreground block text-xs uppercase tracking-wide">{t('stock.gainLoss')}</span>
             <span className={cn('font-semibold', isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400')}>
-              ${holding.gainLoss.toFixed(2)} ({holding.gainLossPercent.toFixed(1)}%)
+              {formatCurrency(holding.gainLoss, holding.stock.currency)} ({holding.gainLossPercent.toFixed(1)}%)
             </span>
           </div>
         </div>

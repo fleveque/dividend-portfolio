@@ -6,10 +6,21 @@ class Stock < ApplicationRecord
   has_many :radars, through: :radar_stocks
 
   PAYMENT_FREQUENCIES = %w[monthly quarterly semi_annual annual].freeze
+  # ISO 4217 code → display symbol. Unknown codes fall back to "<code> " in #currency_symbol
+  # so users still see *something* (and the API still emits the raw code).
+  CURRENCY_SYMBOLS = {
+    "USD" => "$", "EUR" => "€", "GBP" => "£", "JPY" => "¥",
+    "CHF" => "CHF ", "CAD" => "C$", "AUD" => "A$"
+  }.freeze
 
   validates :symbol, presence: true, uniqueness: true
+  validates :currency, presence: true
   validates :payment_frequency, inclusion: { in: PAYMENT_FREQUENCIES }, allow_nil: true
   validate :payment_months_format
+
+  def currency_symbol
+    CURRENCY_SYMBOLS[currency] || "#{currency} "
+  end
 
   def self.last_added(limit = 10)
     order(created_at: :desc).limit(limit)
