@@ -20,7 +20,11 @@ module FinancialDataProviders
     MINOR_UNIT_CURRENCIES = {
       "GBp" => [ "GBP", 100 ], "ZAc" => [ "ZAR", 100 ], "ILA" => [ "ILS", 100 ]
     }.freeze
-    PRICE_FIELDS = %i[price eps dividend ma_50 ma_200 fifty_two_week_high fifty_two_week_low].freeze
+    # Yahoo returns the price-family fields (regularMarketPrice and its moving averages /
+    # 52-week range) in the listing's quote unit (GBp for DGE.L, etc.), but `dividendRate`
+    # and `epsTrailingTwelveMonths` already come back in the major unit (GBP). Don't
+    # normalize them or we'd shrink a £0.81 dividend to £0.0081.
+    PRICE_FIELDS = %i[price ma_50 ma_200 fifty_two_week_high fifty_two_week_low].freeze
 
     # Fetches stock data from the provider's API, stores it in the database and caches the result.
     #

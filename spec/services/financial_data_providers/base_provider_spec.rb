@@ -218,8 +218,10 @@ RSpec.describe FinancialDataProviders::BaseProvider, type: :model do
     let(:gbp_provider) do
       Class.new(described_class) do
         def fetch_and_normalize_stock(_symbol)
+          # Yahoo emits the price-family fields in pence (GBp) for DGE.L but the
+          # dividend and EPS come back already in pounds — mirror that here.
           { symbol: 'DGE.L', price: 1529.50, currency: 'GBp',
-            eps: 80.0, dividend: 60.0, ma_50: 1500.0, ma_200: 1450.0,
+            eps: 0.80, dividend: 0.63, ma_50: 1500.0, ma_200: 1450.0,
             fifty_two_week_high: 1800.0, fifty_two_week_low: 1200.0,
             dividend_yield: 3.92, payout_ratio: 75.0, pe_ratio: 19.0 }
         end
@@ -228,17 +230,21 @@ RSpec.describe FinancialDataProviders::BaseProvider, type: :model do
 
     before { Rails.cache.clear }
 
-    it 'converts GBp prices to GBP and divides every monetary field by 100' do
+    it 'converts GBp prices to GBP and divides price-family fields by 100' do
       stock = gbp_provider.get_stock('DGE.L')
       expect(stock.currency).to eq('GBP')
       # price is stored as decimal(10, 2), so 15.295 rounds to 15.30
       expect(stock.price.to_f).to be_within(0.01).of(15.30)
-      expect(stock.eps.to_f).to eq(0.8)
-      expect(stock.dividend.to_f).to eq(0.6)
       expect(stock.ma_50.to_f).to eq(15.0)
       expect(stock.ma_200.to_f).to eq(14.5)
       expect(stock.fifty_two_week_high.to_f).to eq(18.0)
       expect(stock.fifty_two_week_low.to_f).to eq(12.0)
+    end
+
+    it 'leaves dividend and EPS alone (Yahoo returns them in the major unit)' do
+      stock = gbp_provider.get_stock('DGE.L')
+      expect(stock.dividend.to_f).to eq(0.63)
+      expect(stock.eps.to_f).to eq(0.80)
     end
 
     it 'leaves yield/payout/PE ratios untouched (they are unitless)' do
