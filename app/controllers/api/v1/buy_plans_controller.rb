@@ -51,13 +51,36 @@ module Api
         total_items = items.sum { |i| i[:quantity] }
         totals = Hash.new(0.0)
         items.each { |i| totals[i[:currency]] += i[:subtotal] if i[:subtotal] }
+        totals_by_currency = totals.transform_values(&:to_f)
 
         {
           id: buy_plan.id,
           items: items,
           totalItems: total_items,
-          totalsByCurrency: totals.transform_values(&:to_f)
+          totalsByCurrency: totals_by_currency,
+          displayTotal: cart_display_total(totals_by_currency)
         }
+      end
+
+      def cart_display_total(totals_by_currency)
+        preferred = Current.user.preferred_currency
+        conversions = {}
+        total = 0.0
+
+        totals_by_currency.each do |currency, amount|
+          if currency == preferred
+            total += amount
+            next
+          end
+
+          rate = FxRateService.rate(from: currency, to: preferred)
+          return nil unless rate
+
+          conversions[currency] = rate
+          total += amount * rate
+        end
+
+        { currency: preferred, total: total.to_f, conversions: conversions }
       end
 
       def serialize_item(item)

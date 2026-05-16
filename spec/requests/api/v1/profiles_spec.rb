@@ -19,6 +19,7 @@ RSpec.describe "Api::V1::Profiles", type: :request do
         json = JSON.parse(response.body)
         expect(json["data"]["emailAddress"]).to eq(user.email_address)
         expect(json["data"]["portfolioSlug"]).to be_nil
+        expect(json["data"]["preferredCurrency"]).to eq("USD")
       end
     end
   end
@@ -47,6 +48,21 @@ RSpec.describe "Api::V1::Profiles", type: :request do
 
       it "rejects invalid slug format" do
         patch "/api/v1/profile", params: { portfolio_slug: "AB" }
+
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "updates the preferred currency" do
+        patch "/api/v1/profile", params: { preferred_currency: "EUR" }
+
+        expect(response).to have_http_status(:ok)
+        json = JSON.parse(response.body)
+        expect(json["data"]["preferredCurrency"]).to eq("EUR")
+        expect(user.reload.preferred_currency).to eq("EUR")
+      end
+
+      it "rejects an unsupported currency" do
+        patch "/api/v1/profile", params: { preferred_currency: "XYZ" }
 
         expect(response).to have_http_status(:unprocessable_entity)
       end
