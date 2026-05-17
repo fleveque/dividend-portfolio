@@ -142,7 +142,15 @@ VITE_LOGO_SERVICE_API_KEY=your_logo_service_api_key
 
 Without these, the app shows colored initials as fallback — no functionality is lost.
 
-### 4. Configure AI insights (optional):
+### 4. Configure Pulse sharing link (optional):
+
+[Pulse](https://pulse.quantic.es) is the sibling community app where users can share their portfolios. The base URL is baked in at build time, defaulting to production — only set this if you're pointing a beta build at a different Pulse host:
+
+```sh
+VITE_PULSE_URL=https://beta-pulse.quantic.es
+```
+
+### 5. Configure AI insights (optional):
 
 Get a free API key from [Google AI Studio](https://aistudio.google.com/apikey) and add it to your `.env`:
 
@@ -152,13 +160,13 @@ GEMINI_API_KEY=your_gemini_api_key
 
 Without this key, the app works normally but AI insight features will be unavailable.
 
-### 5. Install dependencies:
+### 6. Install dependencies:
 
     ```
     bundle install
     ```
 
-### 6. Set up the database:
+### 7. Set up the database:
 
     ```sh
     rails db:create
@@ -166,13 +174,13 @@ Without this key, the app works normally but AI insight features will be unavail
     rails db:seed
     ```
 
-### 7. Start the Rails server:
+### 8. Start the Rails server:
     ```sh
     bin/dev
     ```
 You will need foreman gem if it's not installed.
 
-### 8. Visit the application:
+### 9. Visit the application:
 
 Open your web browser and go to http://localhost:3000.
 

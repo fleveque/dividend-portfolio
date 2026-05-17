@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Loader2, Check, Activity, ExternalLink, Coins } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router-dom'
 import { useProfile, useUpdateProfile } from '../hooks/useProfileQueries'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -8,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CURRENCY_OPTIONS } from '@/lib/currency'
+import { pulsePortfolioUrl, pulsePortfolioDisplayUrl } from '../lib/pulse'
 
 export function SettingsPage() {
   const { t } = useTranslation()
@@ -91,12 +93,23 @@ function PortfolioSharingSection() {
   const updateProfile = useUpdateProfile()
   const [slug, setSlug] = useState('')
   const [saved, setSaved] = useState(false)
+  const { hash } = useLocation()
 
   useEffect(() => {
     if (profile?.portfolioSlug) {
       setSlug(profile.portfolioSlug)
     }
   }, [profile])
+
+  // React Router doesn't auto-scroll on hash links — handle #portfolio-sharing
+  // so the "Opt in from Settings" CTA on the home banner lands on this section.
+  useEffect(() => {
+    if (hash === '#portfolio-sharing') {
+      document
+        .getElementById('portfolio-sharing')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [hash])
 
   const handleSave = () => {
     const value = slug.trim() || null
@@ -123,7 +136,7 @@ function PortfolioSharingSection() {
   }
 
   return (
-    <Card>
+    <Card id="portfolio-sharing" className="scroll-mt-8">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Activity className="size-5 text-purple-600 dark:text-purple-400" />
@@ -157,12 +170,12 @@ function PortfolioSharingSection() {
             <p className="text-xs text-muted-foreground">
               {t('settings.publicUrl')}{' '}
               <a
-                href={`https://pulse.quantic.es/p/${slug}`}
+                href={pulsePortfolioUrl(slug)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-mono inline-flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:underline"
               >
-                pulse.quantic.es/p/{slug}
+                {pulsePortfolioDisplayUrl(slug)}
                 <ExternalLink className="size-3" />
               </a>
             </p>

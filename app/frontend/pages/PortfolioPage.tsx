@@ -8,6 +8,7 @@ import { SearchResultCard } from '../components/SearchResultCard'
 import { DividendCalendar } from '../components/DividendCalendar'
 import { PortfolioInsights } from '../components/PortfolioInsights'
 import { PortfolioStatsCard } from '../components/PortfolioStatsCard'
+import { PulseShareButton } from '../components/PulseShareButton'
 import { useHoldings, useCreateHolding, useDeleteHolding } from '../hooks/useHoldingsQueries'
 import { useStockSearch, useResolveStock } from '../hooks/useStockQueries'
 import { useViewPreference } from '../contexts/ViewPreferenceContext'
@@ -159,11 +160,14 @@ export function PortfolioPage() {
     <div className="container mx-auto px-4 py-8">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between gap-2">
-            <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2">
-              <span className="w-1 h-8 bg-foreground rounded-full"></span>
-              {t('portfolio.title')}
-            </CardTitle>
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-2 min-w-0">
+              <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2">
+                <span className="w-1 h-8 bg-foreground rounded-full"></span>
+                {t('portfolio.title')}
+              </CardTitle>
+              {holdings.length > 0 && <PulseShareButton />}
+            </div>
             {holdingsData && holdings.length > 0 && (
               <PortfolioTotalsHeader
                 totalsByCurrency={holdingsData.totalsByCurrency}
