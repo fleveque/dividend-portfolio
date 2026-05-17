@@ -52,21 +52,37 @@ function ActiveUsersTrend({ buckets }: { buckets: ActiveUsersTrendBucket[] }) {
   const { t, i18n } = useTranslation()
   const max = Math.max(1, ...buckets.map((b) => b.count))
 
+  const formatLabel = (weekStart: string) =>
+    new Date(weekStart).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
+
   return (
     <Card>
       <CardContent className="p-4">
         <p className="text-muted-foreground text-sm mb-3">{t('admin.activity.activeUsersTrend')}</p>
+        {/* Bar row + label row share the same flex/gap structure so columns line up.
+            The bars live in a fixed-height parent so `height: %` resolves correctly. */}
         <div className="flex items-end gap-1 h-24">
           {buckets.map((b) => {
             const pct = Math.max(2, Math.round((b.count / max) * 100))
-            const dateLabel = new Date(b.weekStart).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
             return (
-              <div key={b.weekStart} className="flex-1 flex flex-col items-center gap-1" title={`${dateLabel}: ${b.count}`}>
-                <div className="w-full bg-blue-500 rounded-sm" style={{ height: `${pct}%` }} />
-                <span className="text-[10px] text-muted-foreground font-mono">{dateLabel}</span>
-              </div>
+              <div
+                key={b.weekStart}
+                className="flex-1 bg-blue-500 rounded-sm"
+                style={{ height: `${pct}%` }}
+                title={`${formatLabel(b.weekStart)}: ${b.count}`}
+              />
             )
           })}
+        </div>
+        <div className="flex gap-1 mt-1">
+          {buckets.map((b) => (
+            <span
+              key={b.weekStart}
+              className="flex-1 text-[10px] text-muted-foreground font-mono text-center"
+            >
+              {formatLabel(b.weekStart)}
+            </span>
+          ))}
         </div>
       </CardContent>
     </Card>
