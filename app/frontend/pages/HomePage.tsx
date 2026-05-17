@@ -9,6 +9,7 @@ import { useLastAddedStocks, useMostAddedStocks, useMostHeldStocks } from '../ho
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import pulsePreviewImg from '@/assets/screenshots/pulse-portfolio.png'
+import { PULSE_URL } from '../lib/pulse'
 
 export function HomePage() {
   const { t } = useTranslation()
@@ -86,7 +87,7 @@ export function HomePage() {
                   <Settings className="size-3.5" /> {t('home.pulseOpenSettings')}
                 </Link>
                 <a
-                  href="https://pulse.quantic.es"
+                  href={PULSE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-sm font-medium text-purple-700 dark:text-purple-300 hover:underline"
@@ -97,7 +98,7 @@ export function HomePage() {
             </div>
             <div className="flex justify-center md:justify-end">
               <a
-                href="https://pulse.quantic.es"
+                href={PULSE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block max-w-sm rounded-lg overflow-hidden shadow-lg ring-1 ring-purple-200 dark:ring-purple-800 transition-transform hover:scale-[1.02]"

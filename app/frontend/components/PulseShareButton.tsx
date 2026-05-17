@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { useProfile } from '../hooks/useProfileQueries'
 import { Button } from '@/components/ui/button'
+import { pulsePortfolioUrl } from '../lib/pulse'
 
 export function PulseShareButton() {
   const { t } = useTranslation()
@@ -25,7 +26,7 @@ export function PulseShareButton() {
     )
   }
 
-  const url = `https://pulse.quantic.es/p/${slug}`
+  const url = pulsePortfolioUrl(slug)
 
   const handleCopy = async () => {
     try {

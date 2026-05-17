@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CURRENCY_OPTIONS } from '@/lib/currency'
+import { pulsePortfolioUrl, pulsePortfolioDisplayUrl } from '../lib/pulse'
 
 export function SettingsPage() {
   const { t } = useTranslation()
@@ -169,12 +170,12 @@ function PortfolioSharingSection() {
             <p className="text-xs text-muted-foreground">
               {t('settings.publicUrl')}{' '}
               <a
-                href={`https://pulse.quantic.es/p/${slug}`}
+                href={pulsePortfolioUrl(slug)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-mono inline-flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:underline"
               >
-                pulse.quantic.es/p/{slug}
+                {pulsePortfolioDisplayUrl(slug)}
                 <ExternalLink className="size-3" />
               </a>
             </p>
