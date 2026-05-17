@@ -65,9 +65,11 @@ const es = {
   home: {
     heroTitle: 'Cartera y Radar de Acciones con Dividendos',
     heroSubtitle: 'Inversi\u00f3n en dividendos potenciada por IA. Gestiona tu cartera, fija precios objetivo en tu radar, planifica compras y obt\u00e9n an\u00e1lisis inteligentes \u2014 todo en un solo lugar.',
-    pulseTitle: 'Pulse \u2014 Panel de cartera en tiempo real',
-    pulseDescription: 'Actualizaciones de precios en vivo, sincronizaci\u00f3n de cartera y alertas basadas en eventos.',
-    tryPulse: 'Probar Pulse',
+    pulseTitle: 'Pulse \u2014 Comparte tu cartera con la comunidad',
+    pulseDescription: 'Publica una vista en vivo de tu cartera: rendimiento, sectores y qu\u00e9 acciones tienes. Insp\u00edrate viendo c\u00f3mo otros inversores estructuran las suyas.',
+    pulseOpenSettings: 'Activar en Ajustes',
+    pulseSeeCommunity: 'Ver qu\u00e9 comparte la comunidad \u2192',
+    pulsePreviewAlt: 'Ejemplo de cartera compartida en Pulse',
     mostAddedToRadar: 'M\u00e1s a\u00f1adidos al Radar',
     mostHeldInPortfolios: 'M\u00e1s mantenidos en Carteras',
     recentlyUpdated: 'Actualizados recientemente',
@@ -161,6 +163,10 @@ const es = {
     failedToLoadPortfolio: 'Error al cargar la cartera',
     failedToRemoveHolding: 'Error al eliminar posici\u00f3n',
     dividendCalendar: 'Calendario de Dividendos',
+    copyShareLink: 'Copiar enlace',
+    shareLinkCopied: '\u00a1Copiado!',
+    viewOnPulse: 'Ver en Pulse \u2197',
+    shareOnPulseHint: 'Comparte tu cartera en Pulse \u2014 act\u00edvalo en Ajustes',
     stats: {
       title: 'M\u00e9tricas de cartera',
       yieldOnCost: 'YoC (yield sobre coste)',
@@ -265,9 +271,9 @@ const es = {
   // Settings Page
   settings: {
     title: 'Ajustes',
-    portfolioSharing: 'Compartir Cartera',
-    sharingDescription: 'Establece un slug p\u00fablico para compartir tu cartera en Pulse. D\u00e9jalo vac\u00edo para no participar.',
-    portfolioSlug: 'Slug de Cartera',
+    portfolioSharing: 'Compartir en Pulse',
+    sharingDescription: 'Pulse es la comunidad de Quantic para compartir carteras. Elige un nombre p\u00fablico para participar \u2014 d\u00e9jalo vac\u00edo para no participar.',
+    portfolioSlug: 'Nombre p\u00fablico',
     slugPlaceholder: 'mi-cartera',
     publicUrl: 'URL p\u00fablica:',
     failedToUpdate: 'Error al actualizar',

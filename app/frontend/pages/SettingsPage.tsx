@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Loader2, Check, Activity, ExternalLink, Coins } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router-dom'
 import { useProfile, useUpdateProfile } from '../hooks/useProfileQueries'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -91,12 +92,23 @@ function PortfolioSharingSection() {
   const updateProfile = useUpdateProfile()
   const [slug, setSlug] = useState('')
   const [saved, setSaved] = useState(false)
+  const { hash } = useLocation()
 
   useEffect(() => {
     if (profile?.portfolioSlug) {
       setSlug(profile.portfolioSlug)
     }
   }, [profile])
+
+  // React Router doesn't auto-scroll on hash links — handle #portfolio-sharing
+  // so the "Opt in from Settings" CTA on the home banner lands on this section.
+  useEffect(() => {
+    if (hash === '#portfolio-sharing') {
+      document
+        .getElementById('portfolio-sharing')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [hash])
 
   const handleSave = () => {
     const value = slug.trim() || null
@@ -123,7 +135,7 @@ function PortfolioSharingSection() {
   }
 
   return (
-    <Card>
+    <Card id="portfolio-sharing" className="scroll-mt-8">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Activity className="size-5 text-purple-600 dark:text-purple-400" />

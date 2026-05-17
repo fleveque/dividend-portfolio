@@ -65,9 +65,11 @@ const en = {
   home: {
     heroTitle: 'Dividend Stocks Portfolio & Radar',
     heroSubtitle: 'AI-enhanced dividend investing. Track your portfolio, set target prices on your radar, plan purchases, and get intelligent insights \u2014 all in one place.',
-    pulseTitle: 'Pulse \u2014 Real-time portfolio dashboard',
-    pulseDescription: 'Live price updates, portfolio sync, and event-driven alerts.',
-    tryPulse: 'Try Pulse',
+    pulseTitle: 'Pulse \u2014 Share your portfolio with the community',
+    pulseDescription: 'Publish a live view of your portfolio: dividend yield, sector breakdown, and what you hold. See how other investors structure theirs.',
+    pulseOpenSettings: 'Opt in from Settings',
+    pulseSeeCommunity: 'See what others are sharing \u2192',
+    pulsePreviewAlt: 'Example shared portfolio on Pulse',
     mostAddedToRadar: 'Most Added to Radar',
     mostHeldInPortfolios: 'Most Held in Portfolios',
     recentlyUpdated: 'Recently Updated',
@@ -161,6 +163,10 @@ const en = {
     failedToLoadPortfolio: 'Failed to load portfolio',
     failedToRemoveHolding: 'Failed to remove holding',
     dividendCalendar: 'Dividend Calendar',
+    copyShareLink: 'Copy share link',
+    shareLinkCopied: 'Copied!',
+    viewOnPulse: 'View on Pulse ↗',
+    shareOnPulseHint: 'Share your portfolio on Pulse — opt in from Settings',
     stats: {
       title: 'Portfolio stats',
       yieldOnCost: 'Yield on Cost',
@@ -266,9 +272,9 @@ const en = {
   // Settings Page
   settings: {
     title: 'Settings',
-    portfolioSharing: 'Portfolio Sharing',
-    sharingDescription: 'Set a public slug to share your portfolio on Pulse. Leave empty to opt out.',
-    portfolioSlug: 'Portfolio Slug',
+    portfolioSharing: 'Share on Pulse',
+    sharingDescription: 'Pulse is the Quantic community for sharing portfolios. Pick a public name to opt in — leave it empty to stay private.',
+    portfolioSlug: 'Public name',
     slugPlaceholder: 'my-portfolio',
     publicUrl: 'Public URL:',
     failedToUpdate: 'Failed to update',
