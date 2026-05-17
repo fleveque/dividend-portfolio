@@ -4,7 +4,6 @@ RSpec.describe Stock, type: :model do
   describe 'associations' do
     it { should have_many(:radar_stocks).dependent(:destroy) }
     it { should have_many(:radars).through(:radar_stocks) }
-    it { should have_many(:transactions) }
     it { should have_many(:dividends) }
   end
 

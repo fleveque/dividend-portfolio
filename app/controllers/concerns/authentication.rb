@@ -23,10 +23,24 @@ module Authentication
 
     def resume_session
       Current.session ||= find_session_by_cookie
+      touch_session_activity
+      Current.session
     end
 
     def find_session_by_cookie
       Session.find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
+    end
+
+    # Bump updated_at so admin "active users" telemetry reflects real usage,
+    # not just sign-ins. Throttled — at most once per minute per session — so
+    # we don't write on every static asset hit.
+    SESSION_ACTIVITY_THROTTLE = 1.minute
+
+    def touch_session_activity
+      return unless Current.session
+      return if Current.session.updated_at > SESSION_ACTIVITY_THROTTLE.ago
+
+      Current.session.touch
     end
 
     def request_authentication

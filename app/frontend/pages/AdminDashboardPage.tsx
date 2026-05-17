@@ -43,30 +43,46 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
   )
 }
 
-interface SessionTrendBucket {
+interface ActiveUsersTrendBucket {
   weekStart: string
   count: number
 }
 
-function SessionTrend({ buckets }: { buckets: SessionTrendBucket[] }) {
+function ActiveUsersTrend({ buckets }: { buckets: ActiveUsersTrendBucket[] }) {
   const { t, i18n } = useTranslation()
   const max = Math.max(1, ...buckets.map((b) => b.count))
+
+  const formatLabel = (weekStart: string) =>
+    new Date(weekStart).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
 
   return (
     <Card>
       <CardContent className="p-4">
-        <p className="text-muted-foreground text-sm mb-3">{t('admin.activity.sessionTrend')}</p>
+        <p className="text-muted-foreground text-sm mb-3">{t('admin.activity.activeUsersTrend')}</p>
+        {/* Bar row + label row share the same flex/gap structure so columns line up.
+            The bars live in a fixed-height parent so `height: %` resolves correctly. */}
         <div className="flex items-end gap-1 h-24">
           {buckets.map((b) => {
             const pct = Math.max(2, Math.round((b.count / max) * 100))
-            const dateLabel = new Date(b.weekStart).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
             return (
-              <div key={b.weekStart} className="flex-1 flex flex-col items-center gap-1" title={`${dateLabel}: ${b.count}`}>
-                <div className="w-full bg-blue-500 rounded-sm" style={{ height: `${pct}%` }} />
-                <span className="text-[10px] text-muted-foreground font-mono">{dateLabel}</span>
-              </div>
+              <div
+                key={b.weekStart}
+                className="flex-1 bg-blue-500 rounded-sm"
+                style={{ height: `${pct}%` }}
+                title={`${formatLabel(b.weekStart)}: ${b.count}`}
+              />
             )
           })}
+        </div>
+        <div className="flex gap-1 mt-1">
+          {buckets.map((b) => (
+            <span
+              key={b.weekStart}
+              className="flex-1 text-[10px] text-muted-foreground font-mono text-center"
+            >
+              {formatLabel(b.weekStart)}
+            </span>
+          ))}
         </div>
       </CardContent>
     </Card>
@@ -100,7 +116,6 @@ function UserRow({
         <TableCell className="text-muted-foreground">{user.provider || t('admin.emailProvider')}</TableCell>
         <TableCell className="text-muted-foreground text-center">{user.radarStocksCount}</TableCell>
         <TableCell className="text-muted-foreground text-center">{user.holdingsCount}</TableCell>
-        <TableCell className="text-muted-foreground text-center">{user.transactionsCount}</TableCell>
         <TableCell className="text-muted-foreground">
           {user.portfolioSlug ? (
             <Badge variant="success">{user.portfolioSlug}</Badge>
@@ -203,7 +218,6 @@ export function AdminDashboardPage() {
             <StatCard label={t('admin.stocksTracked')} value={stats.radars.totalStocksTracked} />
             <StatCard label={t('admin.avgStocksPerRadar')} value={stats.radars.avgStocksPerRadar} />
             <StatCard label={t('admin.buyPlans')} value={stats.buyPlans.total} />
-            <StatCard label={t('admin.transactions')} value={stats.transactions.total} />
             <StatCard label={t('admin.totalPortfolios')} value={stats.holdings.usersWithHoldings} />
             <StatCard label={t('admin.totalHoldings')} value={stats.holdings.totalHoldings} />
             <StatCard label={t('admin.avgHoldingsPerUser')} value={stats.holdings.avgHoldingsPerUser} />
@@ -224,7 +238,7 @@ export function AdminDashboardPage() {
             <StatCard label={t('admin.activity.holdingChanges30d')} value={stats.activity.holdingChanges30d} />
             <StatCard label={t('admin.activity.usersTouchingHoldings7d')} value={stats.activity.usersTouchingHoldings7d} />
           </div>
-          <SessionTrend buckets={stats.activity.sessionTrend} />
+          <ActiveUsersTrend buckets={stats.activity.activeUsersTrend} />
         </section>
       )}
 
@@ -277,7 +291,6 @@ export function AdminDashboardPage() {
                     <TableHead>{t('admin.provider')}</TableHead>
                     <TableHead className="text-center">{t('admin.radarStocks')}</TableHead>
                     <TableHead className="text-center">{t('admin.holdings')}</TableHead>
-                    <TableHead className="text-center">{t('admin.transactions')}</TableHead>
                     <TableHead>{t('admin.pulseSlug')}</TableHead>
                     <TableHead>{t('admin.joined')}</TableHead>
                     <TableHead>{t('admin.actions')}</TableHead>

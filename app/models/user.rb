@@ -1,11 +1,9 @@
 class User < ApplicationRecord
   has_secure_password validations: false
   has_many :sessions, dependent: :destroy
-  has_many :transactions, dependent: :delete_all
   has_many :dividends, dependent: :delete_all
   has_one :radar, dependent: :destroy
   has_one :buy_plan, dependent: :destroy
-  has_many :stocks, through: :transactions
   has_many :holdings, dependent: :delete_all
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }

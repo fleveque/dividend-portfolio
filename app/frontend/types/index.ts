@@ -300,9 +300,6 @@ export interface AdminDashboardStats {
     total: number
     totalItems: number
   }
-  transactions: {
-    total: number
-  }
   holdings: {
     totalHoldings: number
     usersWithHoldings: number
@@ -318,7 +315,7 @@ export interface AdminDashboardStats {
     holdingChanges7d: number
     holdingChanges30d: number
     usersTouchingHoldings7d: number
-    sessionTrend: { weekStart: string; count: number }[]
+    activeUsersTrend: { weekStart: string; count: number }[]
   }
 }
 
@@ -334,7 +331,6 @@ export interface AdminUser {
   provider: string | null
   createdAt: string
   radarStocksCount: number
-  transactionsCount: number
   holdingsCount: number
   portfolioSlug: string | null
 }

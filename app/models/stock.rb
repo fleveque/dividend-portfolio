@@ -1,5 +1,4 @@
 class Stock < ApplicationRecord
-  has_many :transactions
   has_many :dividends
   has_many :holdings
   has_many :radar_stocks, dependent: :destroy
