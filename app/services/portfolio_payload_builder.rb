@@ -13,7 +13,22 @@ module PortfolioPayloadBuilder
       version: PAYLOAD_VERSION,
       slug: user.portfolio_slug,
       base_currency: base_currency,
-      holdings: user.holdings.includes(:stock).map { |h| serialize_holding(h, base_currency) }
+      holdings: user.holdings.includes(:stock).map { |h| serialize_holding(h, base_currency) },
+      stats: stats_for(user)
+    }
+  end
+
+  # Pre-aggregated stats so Pulse doesn't have to redo the per-currency / FX
+  # math in Elixir. nil when the portfolio is empty (PortfolioStatsService
+  # short-circuits in that case).
+  def stats_for(user)
+    stats = PortfolioStatsService.call(user)
+    return nil if stats.nil?
+
+    {
+      yoc: stats[:displayYoc],
+      currentYield: stats[:displayCurrentYield],
+      sectors: stats[:sectors]
     }
   end
 
