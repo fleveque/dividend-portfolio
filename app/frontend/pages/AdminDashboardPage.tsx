@@ -43,6 +43,36 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
   )
 }
 
+interface SessionTrendBucket {
+  weekStart: string
+  count: number
+}
+
+function SessionTrend({ buckets }: { buckets: SessionTrendBucket[] }) {
+  const { t, i18n } = useTranslation()
+  const max = Math.max(1, ...buckets.map((b) => b.count))
+
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <p className="text-muted-foreground text-sm mb-3">{t('admin.activity.sessionTrend')}</p>
+        <div className="flex items-end gap-1 h-24">
+          {buckets.map((b) => {
+            const pct = Math.max(2, Math.round((b.count / max) * 100))
+            const dateLabel = new Date(b.weekStart).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
+            return (
+              <div key={b.weekStart} className="flex-1 flex flex-col items-center gap-1" title={`${dateLabel}: ${b.count}`}>
+                <div className="w-full bg-blue-500 rounded-sm" style={{ height: `${pct}%` }} />
+                <span className="text-[10px] text-muted-foreground font-mono">{dateLabel}</span>
+              </div>
+            )
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 function UserRow({
   user,
   onDelete,
@@ -182,6 +212,21 @@ export function AdminDashboardPage() {
           </div>
         )}
       </section>
+
+      {/* Activity Section */}
+      {stats?.activity && (
+        <section className="mb-10">
+          <h2 className="text-xl font-semibold text-foreground mb-4">{t('admin.activity.title')}</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+            <StatCard label={t('admin.activity.activeUsers7d')} value={stats.activity.activeUsers7d} />
+            <StatCard label={t('admin.activity.activeUsers30d')} value={stats.activity.activeUsers30d} />
+            <StatCard label={t('admin.activity.holdingChanges7d')} value={stats.activity.holdingChanges7d} />
+            <StatCard label={t('admin.activity.holdingChanges30d')} value={stats.activity.holdingChanges30d} />
+            <StatCard label={t('admin.activity.usersTouchingHoldings7d')} value={stats.activity.usersTouchingHoldings7d} />
+          </div>
+          <SessionTrend buckets={stats.activity.sessionTrend} />
+        </section>
+      )}
 
       {/* Stock Refresh Section */}
       <section className="mb-10">

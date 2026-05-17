@@ -63,6 +63,36 @@ RSpec.describe "Api::V1::Admin::Dashboard", type: :request do
         expect(data["pulse"]["usersWithSlug"]).to eq(1)
         expect(data["pulse"]["adoptionRate"]).to be > 0
       end
+
+      describe "activity section" do
+        it "exposes active-user, holding-change, and session-trend metrics" do
+          # Sessions: one recent (last 7d), one older (between 7-30d), one stale.
+          fresh   = create(:user)
+          warm    = create(:user)
+          old     = create(:user)
+          create(:session, user: fresh, created_at: 2.days.ago, updated_at: 2.days.ago)
+          create(:session, user: warm,  created_at: 15.days.ago, updated_at: 15.days.ago)
+          create(:session, user: old,   created_at: 90.days.ago, updated_at: 90.days.ago)
+
+          # Holding changes: one recent, one older.
+          stock = create(:stock, symbol: "AAPL", price: 150.00)
+          create(:holding, user: fresh, stock: stock, quantity: 1, average_price: 100, created_at: 1.day.ago, updated_at: 1.day.ago)
+
+          get "/api/v1/admin/dashboard"
+
+          act = JSON.parse(response.body)["data"]["activity"]
+          # Admin's own sign_in creates a fresh session, so 7d active count includes admin + fresh user.
+          expect(act["activeUsers7d"]).to be >= 2
+          expect(act["activeUsers30d"]).to be >= 3
+          expect(act["holdingChanges7d"]).to be >= 1
+          expect(act["usersTouchingHoldings7d"]).to eq(1)
+          expect(act["sessionTrend"]).to be_an(Array)
+          expect(act["sessionTrend"].size).to eq(8)
+          act["sessionTrend"].each do |bucket|
+            expect(bucket).to include("weekStart", "count")
+          end
+        end
+      end
     end
   end
 end
