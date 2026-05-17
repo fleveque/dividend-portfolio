@@ -163,9 +163,7 @@ const es = {
     failedToLoadPortfolio: 'Error al cargar la cartera',
     failedToRemoveHolding: 'Error al eliminar posici\u00f3n',
     dividendCalendar: 'Calendario de Dividendos',
-    copyShareLink: 'Copiar enlace',
-    shareLinkCopied: '\u00a1Copiado!',
-    viewOnPulse: 'Ver en Pulse \u2197',
+    shareOnPulse: 'Compartir en Pulse',
     shareOnPulseHint: 'Comparte tu cartera en Pulse \u2014 act\u00edvalo en Ajustes',
     stats: {
       title: 'M\u00e9tricas de cartera',
