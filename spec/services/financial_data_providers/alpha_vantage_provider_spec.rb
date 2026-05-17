@@ -103,6 +103,35 @@ RSpec.describe FinancialDataProviders::AlphaVantageProvider, type: :model do
         provider.get_stock(symbol)
         expect(stock).to have_received(:update!).with(hash_including(currency: "USD"))
       end
+
+      context 'when overview includes Sector and Industry' do
+        let(:overview_data) do
+          {
+            "Name" => "Apple Inc.",
+            "Currency" => "USD",
+            "Sector" => "TECHNOLOGY",
+            "Industry" => "ELECTRONIC COMPUTERS",
+            "ExDividendDate" => "2024-03-14"
+          }
+        end
+
+        it 'persists sector and industry' do
+          provider.get_stock(symbol)
+          expect(stock).to have_received(:update!).with(
+            hash_including(sector: "TECHNOLOGY", industry: "ELECTRONIC COMPUTERS")
+          )
+        end
+      end
+
+      context 'when overview has empty Sector / Industry strings' do
+        let(:overview_data) { { "Name" => "X", "Sector" => "", "Industry" => "" } }
+
+        it 'does not persist them (blank strings dropped via .presence)' do
+          provider.get_stock(symbol)
+          expect(stock).not_to have_received(:update!).with(hash_including(:sector))
+          expect(stock).not_to have_received(:update!).with(hash_including(:industry))
+        end
+      end
     end
 
     context 'when overview has no dividend data' do

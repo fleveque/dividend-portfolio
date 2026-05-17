@@ -7,7 +7,8 @@ module FinancialDataProviders
       normalized = normalize_yahoo_data(data)
       return nil unless normalized
 
-      enrich_with_dividend_schedule(normalized, symbol)
+      enriched = enrich_with_dividend_schedule(normalized, symbol)
+      enrich_with_quote_summary(enriched, symbol)
     rescue StandardError => e
       Rails.logger.error "Yahoo Finance API error: #{e.message}"
       nil
@@ -26,7 +27,8 @@ module FinancialDataProviders
         normalized = normalize_yahoo_data(quotes[symbol])
         next nil unless normalized
 
-        enrich_with_dividend_schedule(normalized, symbol)
+        enriched = enrich_with_dividend_schedule(normalized, symbol)
+        enrich_with_quote_summary(enriched, symbol)
       end
     rescue StandardError => e
       Rails.logger.error "Yahoo Finance bulk API error: #{e.message}"
@@ -72,6 +74,21 @@ module FinancialDataProviders
     rescue StandardError => e
       Rails.logger.warn "Yahoo Finance dividend history error for #{symbol}: #{e.message}"
       []
+    end
+
+    # Sector/industry barely change. Only call the extra endpoint when we don't
+    # already have the data — saves an HTTP roundtrip on every refresh.
+    def enrich_with_quote_summary(data, symbol)
+      existing = Stock.find_by(symbol: symbol.upcase.strip)
+      return data if existing&.sector.present?
+
+      profile = YahooFinanceClient::Stock.get_quote_summary(symbol)
+      return data unless profile
+
+      data.merge(sector: profile[:sector], industry: profile[:industry])
+    rescue StandardError => e
+      Rails.logger.warn "Yahoo Finance quoteSummary error for #{symbol}: #{e.message}"
+      data
     end
   end
 end

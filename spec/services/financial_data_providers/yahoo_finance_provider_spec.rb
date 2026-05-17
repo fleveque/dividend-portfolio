@@ -23,6 +23,7 @@ RSpec.describe FinancialDataProviders::YahooFinanceProvider, type: :model do
     before do
       allow(YahooFinanceClient::Stock).to receive(:get_quote).with(symbol).and_return(raw_data)
       allow(YahooFinanceClient::Stock).to receive(:get_dividend_history).with(symbol).and_return(dividend_history)
+      allow(YahooFinanceClient::Stock).to receive(:get_quote_summary).and_return(nil)
       allow(Stock).to receive(:find_or_initialize_by).and_return(stock)
       allow(stock).to receive(:update!).and_return(true)
 
@@ -45,6 +46,37 @@ RSpec.describe FinancialDataProviders::YahooFinanceProvider, type: :model do
           shifted_payment_months: []
         )
       )
+    end
+
+    context 'when the existing row has no sector and the quote-summary call returns one' do
+      let(:stock) { build(:stock, symbol: symbol, price: 150.00, sector: nil) }
+
+      before do
+        allow(Stock).to receive(:find_by).with(symbol: symbol.upcase.strip).and_return(stock)
+        allow(YahooFinanceClient::Stock).to receive(:get_quote_summary).with(symbol).and_return(
+          { sector: "Technology", industry: "Consumer Electronics" }
+        )
+      end
+
+      it 'persists the sector + industry' do
+        provider.get_stock(symbol)
+        expect(stock).to have_received(:update!).with(
+          hash_including(sector: "Technology", industry: "Consumer Electronics")
+        )
+      end
+    end
+
+    context 'when the existing row already has a sector' do
+      let(:stock) { build(:stock, symbol: symbol, price: 150.00, sector: "Energy") }
+
+      before do
+        allow(Stock).to receive(:find_by).with(symbol: symbol.upcase.strip).and_return(stock)
+      end
+
+      it 'skips the quote-summary call' do
+        provider.get_stock(symbol)
+        expect(YahooFinanceClient::Stock).not_to have_received(:get_quote_summary)
+      end
     end
   end
 
