@@ -49,10 +49,12 @@ module AiProviders
     # Generate a social-media post for X and LinkedIn from a content topic.
     # Topic shape: { category:, topic_key:, inputs: {…} }. No caching: every
     # button click should produce a fresh draft, not return a stale one.
+    # Bumped max_output_tokens because the LinkedIn body (≤1500 chars) plus
+    # X text plus headline plus JSON overhead overflows the default 1024.
     def social_post(topic, locale: nil)
       lang = normalized_locale(locale)
       prompt = build_social_post_prompt(topic, lang)
-      response = call_gemini(prompt, social_post_response_schema)
+      response = call_gemini(prompt, social_post_response_schema, max_output_tokens: 2048)
       parse_response(response)
     end
 
@@ -75,7 +77,7 @@ module AiProviders
       ENV["GEMINI_API_KEY"]
     end
 
-    def call_gemini(prompt, schema)
+    def call_gemini(prompt, schema, max_output_tokens: 1024)
       raise AiError, "GEMINI_API_KEY is not configured" if api_key.blank?
 
       uri = URI("#{GEMINI_API_URL}?key=#{api_key}")
@@ -87,7 +89,7 @@ module AiProviders
           responseMimeType: "application/json",
           responseSchema: schema,
           temperature: 0.7,
-          maxOutputTokens: 1024
+          maxOutputTokens: max_output_tokens
         }
       }
 
@@ -115,6 +117,10 @@ module AiProviders
 
       parsed = JSON.parse(text)
       parsed.deep_symbolize_keys
+    rescue JSON::ParserError => e
+      # Most common cause: maxOutputTokens cut the response off mid-JSON.
+      # Bubble up as AiError so callers' rescue clauses handle it.
+      raise AiError, "Gemini response was not valid JSON (likely truncated): #{e.message}"
     end
 
     def build_radar_prompt(stocks_data, lang = "en", preferred_currency = "USD")

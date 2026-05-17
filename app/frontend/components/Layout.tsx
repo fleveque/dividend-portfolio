@@ -60,10 +60,7 @@ export function Layout() {
               )}
 
               {isAuthenticated && user?.admin && (
-                <>
-                  <NavLink to="/admin" className={navLinkClass}>{t('nav.admin')}</NavLink>
-                  <NavLink to="/admin/content-drafts" className={navLinkClass}>{t('nav.contentDrafts')}</NavLink>
-                </>
+                <NavLink to="/admin" className={navLinkClass}>{t('nav.admin')}</NavLink>
               )}
 
               <Separator orientation="vertical" className="h-6 mx-1" />
@@ -121,10 +118,7 @@ export function Layout() {
             )}
 
             {isAuthenticated && user?.admin && (
-              <>
-                <NavLink to="/admin" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.admin')}</NavLink>
-                <NavLink to="/admin/content-drafts" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.contentDrafts')}</NavLink>
-              </>
+              <NavLink to="/admin" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.admin')}</NavLink>
             )}
 
             <Separator className="my-2" />
