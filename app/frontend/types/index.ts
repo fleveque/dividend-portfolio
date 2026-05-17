@@ -144,10 +144,30 @@ export interface DisplayTotal {
   conversions: Record<string, number>
 }
 
+export interface CurrencyYield {
+  yoc: number
+  currentYield: number
+}
+
+export interface SectorBreakdown {
+  sector: string
+  value: number
+  percent: number
+}
+
+export interface PortfolioStats {
+  byCurrency: Record<string, CurrencyYield>
+  displayCurrency: string
+  displayYoc: number | null
+  displayCurrentYield: number | null
+  sectors: SectorBreakdown[]
+}
+
 export interface HoldingsResponse {
   holdings: Holding[]
   totalsByCurrency: Record<string, CurrencyTotals>
   displayTotal: DisplayTotal | null
+  portfolioStats: PortfolioStats | null
 }
 
 export interface UserProfile {
@@ -291,6 +311,14 @@ export interface AdminDashboardStats {
   pulse: {
     usersWithSlug: number
     adoptionRate: number
+  }
+  activity: {
+    activeUsers7d: number
+    activeUsers30d: number
+    holdingChanges7d: number
+    holdingChanges30d: number
+    usersTouchingHoldings7d: number
+    sessionTrend: { weekStart: string; count: number }[]
   }
 }
 

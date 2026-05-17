@@ -104,6 +104,27 @@ RSpec.describe "Api::V1::Holdings", type: :request do
           expect(json["data"]["displayTotal"]).to be_nil
         end
       end
+
+      describe "portfolioStats" do
+        it "returns nil for an empty portfolio" do
+          get "/api/v1/holdings"
+          expect(JSON.parse(response.body)["data"]["portfolioStats"]).to be_nil
+        end
+
+        it "returns YoC, current yield, and sectors for a non-empty portfolio" do
+          dividend_stock = create(:stock, symbol: "DIV", currency: "USD", price: 100.0, dividend: 5.0, sector: "Energy")
+          create(:holding, user: user, stock: dividend_stock, quantity: 10, average_price: 80.0)
+
+          get "/api/v1/holdings"
+          stats = JSON.parse(response.body)["data"]["portfolioStats"]
+
+          expect(stats["byCurrency"]["USD"]["yoc"]).to be_within(0.01).of(6.25)            # 50 / 800
+          expect(stats["byCurrency"]["USD"]["currentYield"]).to be_within(0.01).of(5.0)    # 50 / 1000
+          expect(stats["displayYoc"]).to be_within(0.01).of(6.25)
+          expect(stats["sectors"].first["sector"]).to eq("Energy")
+          expect(stats["sectors"].first["percent"]).to eq(100.0)
+        end
+      end
     end
   end
 

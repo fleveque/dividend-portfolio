@@ -58,6 +58,8 @@ module FinancialDataProviders
         price: quote_data.price,
         currency: overview&.dig("Currency"),
         name: overview&.dig("Name"),
+        sector: overview&.dig("Sector").presence,
+        industry: overview&.dig("Industry").presence,
         eps: parse_decimal(overview&.dig("EPS")),
         pe_ratio: parse_decimal(overview&.dig("PERatio")),
         dividend: parse_decimal(overview&.dig("DividendPerShare")),

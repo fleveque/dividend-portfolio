@@ -161,6 +161,13 @@ const en = {
     failedToLoadPortfolio: 'Failed to load portfolio',
     failedToRemoveHolding: 'Failed to remove holding',
     dividendCalendar: 'Dividend Calendar',
+    stats: {
+      title: 'Portfolio stats',
+      yieldOnCost: 'Yield on Cost',
+      currentYield: 'Current Yield',
+      sectors: 'Sectors',
+      perCurrencyFallback: 'Converted total unavailable — showing per-currency values.',
+    },
   },
 
   // Stock metrics (shared across card types)
@@ -276,6 +283,15 @@ const en = {
     stockData: 'Stock Data',
     tools: 'Tools',
     openContentDrafts: 'Social-media drafts',
+    activity: {
+      title: 'Activity',
+      activeUsers7d: 'Active users (7d)',
+      activeUsers30d: 'Active users (30d)',
+      holdingChanges7d: 'Holding changes (7d)',
+      holdingChanges30d: 'Holding changes (30d)',
+      usersTouchingHoldings7d: 'Users editing (7d)',
+      sessionTrend: 'New sessions per week (last 8 weeks)',
+    },
     users: 'Users',
     totalUsers: 'Total Users',
     admins: 'Admins',

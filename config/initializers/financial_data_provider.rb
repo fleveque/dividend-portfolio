@@ -6,12 +6,16 @@ module FinancialDataProvider
         Alphavantage.configure do |c|
           c.api_key = ENV["ALPHAVANTAGE_API_KEY"]
         end
+        # Use AV's CURRENCY_EXCHANGE_RATE endpoint for FX so the whole stack
+        # speaks the same provider when AV is the active stock source.
+        config.fx_rate_provider = FinancialDataProviders::AlphaVantageFxProvider
       }
     },
     yahoo_finance: {
       gem: "yahoo_finance_client",
       config: ->(config) {
-        # Add Yahoo Finance specific configuration if needed
+        # FxRateService falls back to YahooFinanceClient::Stock when no
+        # `fx_rate_provider` is configured — nothing to set here.
       }
     }
   }.freeze

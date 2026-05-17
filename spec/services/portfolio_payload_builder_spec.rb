@@ -86,5 +86,24 @@ RSpec.describe PortfolioPayloadBuilder do
         expect(holding[:value_in_usd]).to be_nil
       end
     end
+
+    describe 'stats block' do
+      it 'includes pre-aggregated yields + sectors so pulse renders directly' do
+        bob = create(:user, portfolio_slug: "bob")
+        div_stock = create(:stock, symbol: "DIV", currency: "USD", price: 100.0, dividend: 5.0, sector: "Energy")
+        create(:holding, user: bob, stock: div_stock, quantity: 10, average_price: 80.0)
+
+        stats = described_class.call(bob)[:stats]
+        expect(stats[:yoc]).to be_within(0.01).of(6.25)            # 50 / 800
+        expect(stats[:currentYield]).to be_within(0.01).of(5.0)    # 50 / 1000
+        expect(stats[:sectors].first[:sector]).to eq("Energy")
+        expect(stats[:sectors].first[:percent]).to eq(100.0)
+      end
+
+      it 'is nil when the user has no holdings' do
+        no_holdings_user = create(:user, portfolio_slug: "empty-#{SecureRandom.hex(4)}")
+        expect(described_class.call(no_holdings_user)[:stats]).to be_nil
+      end
+    end
   end
 end
