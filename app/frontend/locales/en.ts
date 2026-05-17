@@ -163,9 +163,7 @@ const en = {
     failedToLoadPortfolio: 'Failed to load portfolio',
     failedToRemoveHolding: 'Failed to remove holding',
     dividendCalendar: 'Dividend Calendar',
-    copyShareLink: 'Copy share link',
-    shareLinkCopied: 'Copied!',
-    viewOnPulse: 'View on Pulse ↗',
+    shareOnPulse: 'Share on Pulse',
     shareOnPulseHint: 'Share your portfolio on Pulse — opt in from Settings',
     stats: {
       title: 'Portfolio stats',
