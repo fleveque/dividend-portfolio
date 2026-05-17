@@ -5,12 +5,10 @@ module Api
         # GET /api/v1/admin/users
         def index
           users = User.left_joins(:radar)
-                      .left_joins(:transactions)
                       .left_joins(:holdings)
                       .select(
                         "users.*",
                         "COUNT(DISTINCT radar_stocks.stock_id) AS radar_stocks_count",
-                        "COUNT(DISTINCT transactions.id) AS transactions_count",
                         "COUNT(DISTINCT holdings.id) AS holdings_count"
                       )
                       .left_joins(radar: :radar_stocks)
@@ -43,7 +41,6 @@ module Api
             provider: user.provider,
             createdAt: user.created_at.iso8601,
             radarStocksCount: user.radar_stocks_count.to_i,
-            transactionsCount: user.transactions_count.to_i,
             holdingsCount: user.holdings_count.to_i,
             portfolioSlug: user.portfolio_slug
           }

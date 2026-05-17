@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_17_150000) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_18_005135) do
   create_table "buy_plan_items", force: :cascade do |t|
     t.integer "buy_plan_id", null: false
     t.integer "stock_id", null: false
@@ -124,18 +124,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_17_150000) do
     t.index ["symbol"], name: "index_stocks_on_symbol", unique: true
   end
 
-  create_table "transactions", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.integer "stock_id", null: false
-    t.string "transaction_type"
-    t.integer "quantity"
-    t.decimal "price"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["stock_id"], name: "index_transactions_on_stock_id"
-    t.index ["user_id"], name: "index_transactions_on_user_id"
-  end
-
   create_table "users", force: :cascade do |t|
     t.string "email_address", null: false
     t.string "password_digest"
@@ -163,6 +151,4 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_17_150000) do
   add_foreign_key "radar_stocks", "stocks", on_delete: :cascade
   add_foreign_key "radars", "users"
   add_foreign_key "sessions", "users"
-  add_foreign_key "transactions", "stocks"
-  add_foreign_key "transactions", "users"
 end

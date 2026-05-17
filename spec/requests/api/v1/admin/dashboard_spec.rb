@@ -52,7 +52,7 @@ RSpec.describe "Api::V1::Admin::Dashboard", type: :request do
         expect(data["stocks"]["withoutPrice"]).to eq(1)
         expect(data["radars"]).to be_present
         expect(data["buyPlans"]).to be_present
-        expect(data["transactions"]).to be_present
+        expect(data).not_to have_key("transactions")
 
         # Holdings stats
         expect(data["holdings"]["totalHoldings"]).to eq(1)
@@ -65,7 +65,7 @@ RSpec.describe "Api::V1::Admin::Dashboard", type: :request do
       end
 
       describe "activity section" do
-        it "exposes active-user, holding-change, and session-trend metrics" do
+        it "exposes active-user, holding-change, and weekly-active-users metrics" do
           # Sessions: one recent (last 7d), one older (between 7-30d), one stale.
           fresh   = create(:user)
           warm    = create(:user)
@@ -86,11 +86,17 @@ RSpec.describe "Api::V1::Admin::Dashboard", type: :request do
           expect(act["activeUsers30d"]).to be >= 3
           expect(act["holdingChanges7d"]).to be >= 1
           expect(act["usersTouchingHoldings7d"]).to eq(1)
-          expect(act["sessionTrend"]).to be_an(Array)
-          expect(act["sessionTrend"].size).to eq(8)
-          act["sessionTrend"].each do |bucket|
+          expect(act["activeUsersTrend"]).to be_an(Array)
+          expect(act["activeUsersTrend"].size).to eq(8)
+          act["activeUsersTrend"].each do |bucket|
             expect(bucket).to include("weekStart", "count")
           end
+
+          # Buckets contain *distinct user counts*, not session counts.
+          # The most recent bucket (this week) should include at least the
+          # fresh user touched 2 days ago plus admin's own sign_in.
+          this_week = act["activeUsersTrend"].last
+          expect(this_week["count"]).to be >= 2
         end
       end
     end

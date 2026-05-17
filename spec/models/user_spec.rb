@@ -1,10 +1,8 @@
 RSpec.describe User, type: :model do
   describe 'associations' do
     it { should have_many(:sessions).dependent(:destroy) }
-    it { should have_many(:transactions) }
     it { should have_many(:dividends) }
     it { should have_one(:radar) }
-    it { should have_many(:stocks).through(:transactions) }
     it { should have_many(:holdings).dependent(:delete_all) }
   end
 

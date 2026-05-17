@@ -2,7 +2,7 @@ module Api
   module V1
     module Admin
       class DashboardController < BaseController
-        SESSION_TREND_WEEKS = 8
+        ACTIVITY_TREND_WEEKS = 8
 
         # GET /api/v1/admin/dashboard
         def show
@@ -30,9 +30,6 @@ module Api
               total: BuyPlan.count,
               totalItems: BuyPlanItem.count
             },
-            transactions: {
-              total: Transaction.count
-            },
             holdings: {
               totalHoldings: total_holdings,
               usersWithHoldings: users_with_holdings,
@@ -55,7 +52,7 @@ module Api
             holdingChanges7d: holding_changes_in(7),
             holdingChanges30d: holding_changes_in(30),
             usersTouchingHoldings7d: users_touching_holdings_in(7),
-            sessionTrend: session_trend
+            activeUsersTrend: active_users_trend
           }
         end
 
@@ -71,18 +68,21 @@ module Api
           Holding.where("updated_at > ? OR created_at > ?", days.days.ago, days.days.ago).distinct.count(:user_id)
         end
 
-        # Weekly buckets of session creations for the last N weeks. Returns an
-        # ordered array of { weekStart: "2026-05-11", count: Integer } — week
-        # starts on Monday (ISO week convention).
-        def session_trend
-          window_start = SESSION_TREND_WEEKS.weeks.ago.beginning_of_week
-          counts = Session.where("created_at >= ?", window_start)
-                          .group_by { |s| s.created_at.to_date.beginning_of_week }
-                          .transform_values(&:size)
+        # Weekly buckets of *distinct active users* — sessions whose updated_at
+        # falls in each week. Rails 8 cookie sessions persist for weeks, so
+        # `created_at` is near-zero by design; touching `updated_at` is the
+        # real heartbeat. Returns the last N weeks ending with the current
+        # week (Monday-based, ISO week convention).
+        def active_users_trend
+          first_week_start = Date.current.beginning_of_week - (ACTIVITY_TREND_WEEKS - 1).weeks
 
-          (0...SESSION_TREND_WEEKS).map do |i|
-            week_start = (window_start + i.weeks).to_date
-            { weekStart: week_start.iso8601, count: counts[week_start] || 0 }
+          weekly = Session.where("updated_at >= ?", first_week_start)
+                          .group_by { |s| s.updated_at.to_date.beginning_of_week }
+                          .transform_values { |sessions| sessions.map(&:user_id).uniq.size }
+
+          (0...ACTIVITY_TREND_WEEKS).map do |i|
+            week_start = first_week_start + i.weeks
+            { weekStart: week_start.iso8601, count: weekly[week_start] || 0 }
           end
         end
       end
