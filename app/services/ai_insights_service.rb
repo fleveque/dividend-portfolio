@@ -12,6 +12,10 @@ class AiInsightsService
       provider.stock_summary(stock_data, locale: locale, preferred_currency: preferred_currency)
     end
 
+    def social_post(topic, locale: nil)
+      provider.social_post(topic, locale: locale)
+    end
+
     private
 
     def provider

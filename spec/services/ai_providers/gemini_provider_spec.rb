@@ -113,6 +113,53 @@ RSpec.describe AiProviders::GeminiProvider, type: :service do
     end
   end
 
+  describe "#social_post" do
+    let(:topic) do
+      {
+        category: "stock_of_the_day",
+        topic_key: "AAPL",
+        inputs: { symbol: "AAPL", dividend_yield: 0.6, dividend_score: 7 }
+      }
+    end
+
+    let(:gemini_social_response) do
+      {
+        headline: "AAPL is paying its dividend",
+        x: { text: "AAPL just paid its dividend — 0.6% yield isn't huge but the track record is rock solid. #dividends $AAPL" },
+        linkedin: { text: "A short professional LinkedIn post about AAPL with some context and a closing thought." },
+        hashtags: %w[dividends AAPL]
+      }.to_json
+    end
+
+    it "returns the parsed payload from Gemini" do
+      stub_gemini_request(gemini_social_response)
+
+      result = provider.social_post(topic)
+
+      expect(result[:headline]).to eq("AAPL is paying its dividend")
+      expect(result[:x][:text]).to include("AAPL")
+      expect(result[:linkedin][:text]).to include("LinkedIn")
+      expect(result[:hashtags]).to include("dividends")
+    end
+
+    it "does NOT cache — each call hits Gemini fresh" do
+      http = stub_gemini_request(gemini_social_response)
+
+      provider.social_post(topic)
+      provider.social_post(topic)
+
+      expect(http).to have_received(:request).twice
+    end
+
+    it "raises AiError on a 500 from Gemini" do
+      stub_gemini_error(500, "Internal Server Error")
+
+      expect { provider.social_post(topic) }.to raise_error(
+        AiProviders::BaseProvider::AiError, /Gemini API error/
+      )
+    end
+  end
+
   private
 
   def stub_gemini_request(response_body)
