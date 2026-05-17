@@ -25,7 +25,8 @@ module Api
         render_success({
           holdings: serialized,
           totalsByCurrency: totals_by_currency_payload(totals),
-          displayTotal: display_total_payload(totals)
+          displayTotal: display_total_payload(totals),
+          portfolioStats: PortfolioStatsService.call(Current.user)
         })
       end
 

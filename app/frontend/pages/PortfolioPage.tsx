@@ -7,6 +7,7 @@ import { ViewToggle } from '../components/ViewToggle'
 import { SearchResultCard } from '../components/SearchResultCard'
 import { DividendCalendar } from '../components/DividendCalendar'
 import { PortfolioInsights } from '../components/PortfolioInsights'
+import { PortfolioStatsCard } from '../components/PortfolioStatsCard'
 import { useHoldings, useCreateHolding, useDeleteHolding } from '../hooks/useHoldingsQueries'
 import { useStockSearch, useResolveStock } from '../hooks/useStockQueries'
 import { useViewPreference } from '../contexts/ViewPreferenceContext'
@@ -440,6 +441,13 @@ export function PortfolioPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Portfolio Stats */}
+      {holdings.length > 0 && holdingsData?.portfolioStats && (
+        <div className="mt-6">
+          <PortfolioStatsCard stats={holdingsData.portfolioStats} />
+        </div>
+      )}
 
       {/* AI Portfolio Insights */}
       {holdings.length > 0 && (

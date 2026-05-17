@@ -161,6 +161,13 @@ const es = {
     failedToLoadPortfolio: 'Error al cargar la cartera',
     failedToRemoveHolding: 'Error al eliminar posici\u00f3n',
     dividendCalendar: 'Calendario de Dividendos',
+    stats: {
+      title: 'M\u00e9tricas de cartera',
+      yieldOnCost: 'YoC (yield sobre coste)',
+      currentYield: 'Yield actual',
+      sectors: 'Sectores',
+      perCurrencyFallback: 'Total convertido no disponible \u2014 mostrando valores por divisa.',
+    },
   },
 
   // Stock metrics
@@ -275,6 +282,15 @@ const es = {
     stockData: 'Datos de Acciones',
     tools: 'Herramientas',
     openContentDrafts: 'Borradores para redes',
+    activity: {
+      title: 'Actividad',
+      activeUsers7d: 'Usuarios activos (7d)',
+      activeUsers30d: 'Usuarios activos (30d)',
+      holdingChanges7d: 'Cambios en cartera (7d)',
+      holdingChanges30d: 'Cambios en cartera (30d)',
+      usersTouchingHoldings7d: 'Usuarios editando (7d)',
+      sessionTrend: 'Nuevas sesiones por semana (últimas 8 semanas)',
+    },
     users: 'Usuarios',
     totalUsers: 'Usuarios Totales',
     admins: 'Administradores',
