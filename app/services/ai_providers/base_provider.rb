@@ -29,6 +29,15 @@ module AiProviders
       raise NotImplementedError, "Subclasses must implement stock_summary"
     end
 
+    # Generate a social-media post for X and LinkedIn from a content topic.
+    #
+    # @param topic [Hash] { category:, topic_key:, inputs: {…} }
+    # @param locale [String, nil] language locale (e.g., "en", "es")
+    # @return [Hash] { headline:, x: { text: }, linkedin: { text: }, hashtags: [...] }
+    def social_post(topic, locale: nil)
+      raise NotImplementedError, "Subclasses must implement social_post"
+    end
+
     private
 
     def cache_fetch(key, expires_in: 6.hours, &block)

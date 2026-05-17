@@ -24,6 +24,7 @@ import LoginPage from '../pages/LoginPage'
 import SignUpPage from '../pages/SignUpPage'
 import RadarPage from '../pages/RadarPage'
 import AdminDashboardPage from '../pages/AdminDashboardPage'
+import AdminContentDraftsPage from '../pages/AdminContentDraftsPage'
 import PortfolioPage from '../pages/PortfolioPage'
 import SettingsPage from '../pages/SettingsPage'
 
@@ -74,6 +75,7 @@ function App() {
                     </Route>
                     <Route element={<AdminRoute />}>
                       <Route path="/admin" element={<AdminDashboardPage />} />
+                      <Route path="/admin/content-drafts" element={<AdminContentDraftsPage />} />
                     </Route>
                   </Route>
                 </Routes>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Loader2 } from 'lucide-react'
+import { Loader2, FileText } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   useAdminDashboard,
@@ -184,14 +185,19 @@ export function AdminDashboardPage() {
 
       {/* Stock Refresh Section */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold text-foreground mb-4">{t('admin.stockData')}</h2>
-        <div className="flex items-center gap-4">
+        <h2 className="text-xl font-semibold text-foreground mb-4">{t('admin.tools')}</h2>
+        <div className="flex flex-wrap items-center gap-3">
           <Button onClick={handleRefresh} disabled={refreshStocks.isPending}>
             {refreshStocks.isPending ? (
               <><Loader2 className="size-4 animate-spin" /> {t('common.refreshing')}</>
             ) : (
               t('admin.refreshAllStocks')
             )}
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/admin/content-drafts">
+              <FileText className="size-4 mr-1" /> {t('admin.openContentDrafts')}
+            </Link>
           </Button>
           {refreshMessage && (
             <p className={`text-sm ${refreshMessage.startsWith('Error') ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400'}`}>

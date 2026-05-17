@@ -68,6 +68,7 @@ Rails.application.routes.draw do
         resource :dashboard, only: [ :show ], controller: "dashboard"
         resources :users, only: [ :index, :destroy ]
         post "stocks/refresh", to: "stocks#refresh"
+        resources :content_drafts, only: [ :index, :create, :update ]
       end
     end
   end

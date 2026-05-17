@@ -46,6 +46,18 @@ module AiProviders
       end
     end
 
+    # Generate a social-media post for X and LinkedIn from a content topic.
+    # Topic shape: { category:, topic_key:, inputs: {…} }. No caching: every
+    # button click should produce a fresh draft, not return a stale one.
+    # Bumped max_output_tokens because the LinkedIn body (≤1500 chars) plus
+    # X text plus headline plus JSON overhead overflows the default 1024.
+    def social_post(topic, locale: nil)
+      lang = normalized_locale(locale)
+      prompt = build_social_post_prompt(topic, lang)
+      response = call_gemini(prompt, social_post_response_schema, max_output_tokens: 2048)
+      parse_response(response)
+    end
+
     private
 
     SUPPORTED_LOCALES = %w[en es].freeze
@@ -65,7 +77,7 @@ module AiProviders
       ENV["GEMINI_API_KEY"]
     end
 
-    def call_gemini(prompt, schema)
+    def call_gemini(prompt, schema, max_output_tokens: 1024)
       raise AiError, "GEMINI_API_KEY is not configured" if api_key.blank?
 
       uri = URI("#{GEMINI_API_URL}?key=#{api_key}")
@@ -77,7 +89,7 @@ module AiProviders
           responseMimeType: "application/json",
           responseSchema: schema,
           temperature: 0.7,
-          maxOutputTokens: 1024
+          maxOutputTokens: max_output_tokens
         }
       }
 
@@ -105,6 +117,10 @@ module AiProviders
 
       parsed = JSON.parse(text)
       parsed.deep_symbolize_keys
+    rescue JSON::ParserError => e
+      # Most common cause: maxOutputTokens cut the response off mid-JSON.
+      # Bubble up as AiError so callers' rescue clauses handle it.
+      raise AiError, "Gemini response was not valid JSON (likely truncated): #{e.message}"
     end
 
     def build_radar_prompt(stocks_data, lang = "en", preferred_currency = "USD")
@@ -250,6 +266,96 @@ module AiProviders
         summary: "No data available for analysis.",
         verdict: "hold",
         keyPoints: []
+      }
+    end
+
+    # Voice rules baked into the system prompt — applied uniformly across
+    # categories so every draft sounds like Quantic.
+    SOCIAL_VOICE_RULES = <<~RULES.freeze
+      Brand: Quantic — practical dividend-investing tools, EU-friendly, multi-currency aware. Slightly nerdy, never preachy.
+      Educational framing only. Never give buy/sell advice or imply Quantic recommends an action.
+      Always include a concrete number (yield, %, count, date). No vague claims.
+      X: single hook, max 280 chars including hashtags. One stat or one question. 0–2 hashtags (e.g. #dividends, $TICKER).
+      LinkedIn: 600–1500 chars. One paragraph of setup, optional 3-bullet list, one paragraph close. Professional but warm. 1–3 hashtags at the end.
+      No emojis on LinkedIn. At most one tasteful emoji on X.
+      Never name a Quantic user, never paste a portfolio slug or URL.
+    RULES
+
+    def build_social_post_prompt(topic, lang = "en")
+      category = topic[:category] || topic["category"]
+      inputs   = topic[:inputs]   || topic["inputs"] || {}
+
+      framing = social_post_framing_for(category.to_s)
+
+      {
+        system: <<~SYSTEM,
+          You write short social-media posts for Quantic's accounts on X and LinkedIn.
+          #{SOCIAL_VOICE_RULES}#{language_instruction(lang)}
+        SYSTEM
+        user: <<~USER
+          Topic category: #{category}
+          Framing for this category: #{framing}
+
+          Use ONLY the data below. Do not invent figures.
+
+          ```
+          #{JSON.pretty_generate(inputs)}
+          ```
+
+          Output the post via the structured response.
+        USER
+      }
+    end
+
+    def social_post_framing_for(category)
+      case category
+      when "stock_of_the_day"
+        "Spotlight on a single dividend stock. Lead with one specific number from the data (yield, score, payment frequency, ex-div date). Don't recommend buying."
+      when "dividend_calendar"
+        "This-week-in-dividends roundup. Mention 2–4 specific tickers and their ex-div dates from the data. Frame as a date to watch, not a trade idea."
+      when "pulse_aggregates"
+        "Anonymised community observation. Lead with the cohort count or the top-held ticker. Never name a specific user. Frame as 'what the Quantic community is tracking'."
+      when "feature_announcement"
+        "New-feature announcement. Lead with the benefit, not the implementation. X teases; LinkedIn explains the problem the feature solves and who it helps."
+      else
+        "Write a short post tied to the data below."
+      end
+    end
+
+    def social_post_response_schema
+      {
+        type: "OBJECT",
+        properties: {
+          headline: { type: "STRING" },
+          x: {
+            type: "OBJECT",
+            properties: {
+              text: { type: "STRING", maxLength: 280 }
+            },
+            required: %w[text]
+          },
+          linkedin: {
+            type: "OBJECT",
+            properties: {
+              text: { type: "STRING" }
+            },
+            required: %w[text]
+          },
+          hashtags: {
+            type: "ARRAY",
+            items: { type: "STRING" }
+          }
+        },
+        required: %w[headline x linkedin hashtags]
+      }
+    end
+
+    def empty_social_post
+      {
+        headline: "",
+        x: { text: "" },
+        linkedin: { text: "" },
+        hashtags: []
       }
     end
   end

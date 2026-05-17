@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_16_120001) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_17_100000) do
   create_table "buy_plan_items", force: :cascade do |t|
     t.integer "buy_plan_id", null: false
     t.integer "stock_id", null: false
@@ -27,6 +27,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_16_120001) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_buy_plans_on_user_id", unique: true
+  end
+
+  create_table "content_drafts", force: :cascade do |t|
+    t.string "topic_type", null: false
+    t.string "topic_key", null: false
+    t.json "payload", null: false
+    t.json "inputs"
+    t.datetime "generated_at", null: false
+    t.datetime "copied_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["generated_at"], name: "index_content_drafts_on_generated_at"
+    t.index ["topic_type", "topic_key"], name: "index_content_drafts_on_topic_type_and_topic_key"
   end
 
   create_table "dividends", force: :cascade do |t|
