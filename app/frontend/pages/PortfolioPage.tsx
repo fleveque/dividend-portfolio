@@ -160,11 +160,14 @@ export function PortfolioPage() {
     <div className="container mx-auto px-4 py-8">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between gap-2">
-            <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2">
-              <span className="w-1 h-8 bg-foreground rounded-full"></span>
-              {t('portfolio.title')}
-            </CardTitle>
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-2 min-w-0">
+              <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2">
+                <span className="w-1 h-8 bg-foreground rounded-full"></span>
+                {t('portfolio.title')}
+              </CardTitle>
+              {holdings.length > 0 && <PulseShareButton />}
+            </div>
             {holdingsData && holdings.length > 0 && (
               <PortfolioTotalsHeader
                 totalsByCurrency={holdingsData.totalsByCurrency}
@@ -174,13 +177,6 @@ export function PortfolioPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {/* Pulse share — only when user has holdings worth sharing */}
-          {holdings.length > 0 && (
-            <div className="mb-6 flex justify-end">
-              <PulseShareButton />
-            </div>
-          )}
-
           {/* Search Form */}
           <div className="mb-8">
             <form onSubmit={handleSearch} className="flex gap-3">
