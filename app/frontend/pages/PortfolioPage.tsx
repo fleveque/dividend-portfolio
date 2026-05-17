@@ -8,6 +8,7 @@ import { SearchResultCard } from '../components/SearchResultCard'
 import { DividendCalendar } from '../components/DividendCalendar'
 import { PortfolioInsights } from '../components/PortfolioInsights'
 import { PortfolioStatsCard } from '../components/PortfolioStatsCard'
+import { PulseShareButton } from '../components/PulseShareButton'
 import { useHoldings, useCreateHolding, useDeleteHolding } from '../hooks/useHoldingsQueries'
 import { useStockSearch, useResolveStock } from '../hooks/useStockQueries'
 import { useViewPreference } from '../contexts/ViewPreferenceContext'
@@ -173,6 +174,13 @@ export function PortfolioPage() {
           </div>
         </CardHeader>
         <CardContent>
+          {/* Pulse share — only when user has holdings worth sharing */}
+          {holdings.length > 0 && (
+            <div className="mb-6 flex justify-end">
+              <PulseShareButton />
+            </div>
+          )}
+
           {/* Search Form */}
           <div className="mb-8">
             <form onSubmit={handleSearch} className="flex gap-3">
