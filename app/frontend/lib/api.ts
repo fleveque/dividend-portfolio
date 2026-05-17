@@ -306,6 +306,26 @@ export const profileApi = {
 // Admin API - Admin-only endpoints
 // ============================================================================
 
+export interface ContentDraft {
+  id: number
+  topicType: 'stock_of_the_day' | 'dividend_calendar' | 'pulse_aggregates' | 'feature_announcement'
+  topicKey: string
+  headline: string
+  x: { text: string; length: number; truncated: boolean }
+  linkedin: { text: string; length: number; truncated: boolean }
+  hashtags: string[]
+  inputs: Record<string, unknown>
+  generatedAt: string
+  copiedAt: string | null
+}
+
+export interface GenerateContentDraftParams {
+  category?: 'stock_of_the_day' | 'dividend_calendar' | 'pulse_aggregates' | 'feature_announcement'
+  featureName?: string
+  description?: string
+  audience?: string
+}
+
 export const adminApi = {
   getDashboard: () => apiFetch<AdminDashboardStats>('/admin/dashboard'),
 
@@ -320,4 +340,26 @@ export const adminApi = {
     apiFetch<{ enqueued: boolean }>('/admin/stocks/refresh', {
       method: 'POST',
     }),
+
+  contentDrafts: {
+    list: () => apiFetch<{ drafts: ContentDraft[] }>('/admin/content_drafts'),
+
+    generate: (params: GenerateContentDraftParams) => {
+      const body: Record<string, unknown> = {}
+      if (params.category) body.category = params.category
+      if (params.featureName) body.feature_name = params.featureName
+      if (params.description) body.description = params.description
+      if (params.audience) body.audience = params.audience
+      return apiFetch<ContentDraft>('/admin/content_drafts', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      })
+    },
+
+    markCopied: (id: number, copied: boolean) =>
+      apiFetch<ContentDraft>(`/admin/content_drafts/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ copied }),
+      }),
+  },
 }
