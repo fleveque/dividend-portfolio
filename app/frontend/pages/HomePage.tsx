@@ -8,7 +8,7 @@ import { CompactStockRow } from '../components/CompactStockRow'
 import { useLastAddedStocks, useMostAddedStocks, useMostHeldStocks } from '../hooks/useStockQueries'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import pulsePreviewImg from '@/assets/screenshots/pulse-portfolio.png'
+import pulsePreviewImg from '@/assets/screenshots/pulse-portfolio.webp'
 import { PULSE_URL } from '../lib/pulse'
 
 export function HomePage() {
@@ -101,13 +101,15 @@ export function HomePage() {
                 href={PULSE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block max-w-sm rounded-lg overflow-hidden shadow-lg ring-1 ring-purple-200 dark:ring-purple-800 transition-transform hover:scale-[1.02]"
+                className="block w-full max-w-[240px] rounded-lg overflow-hidden shadow-lg ring-1 ring-purple-200 dark:ring-purple-800 transition-transform hover:scale-[1.02]"
                 aria-label={t('home.pulsePreviewAlt')}
               >
                 <img
                   src={pulsePreviewImg}
                   alt={t('home.pulsePreviewAlt')}
                   loading="lazy"
+                  width="800"
+                  height="981"
                   className="block w-full h-auto"
                 />
               </a>
