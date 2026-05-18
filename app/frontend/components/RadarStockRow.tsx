@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, X, ChevronDown, ArrowDown, ArrowUp, Minus as MinusIcon } from 'lucide-react'
+import { Check, Pencil, X, ChevronDown, ArrowDown, ArrowUp, Minus as MinusIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateTargetPrice } from '../hooks/useRadarQueries'
@@ -120,10 +120,11 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
             ) : (
               <span
                 onClick={startEdit}
-                className="text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground cursor-pointer group hover:text-foreground transition-colors"
                 title={t('common.clickToEdit')}
               >
                 {stock.formattedTargetPrice}
+                <Pencil className="size-3 text-muted-foreground/60 group-hover:text-foreground" />
               </span>
             )}
           </div>
@@ -211,9 +212,11 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                 ) : (
                   <button
                     onClick={startEdit}
-                    className="text-sm text-foreground font-medium cursor-pointer"
+                    className="inline-flex items-center gap-1 text-sm text-foreground font-medium cursor-pointer"
+                    title={t('common.clickToEdit')}
                   >
-                    {stock.formattedTargetPrice} ({t('common.clickToEdit')})
+                    {stock.formattedTargetPrice}
+                    <Pencil className="size-3 text-muted-foreground" />
                   </button>
                 )}
               </div>

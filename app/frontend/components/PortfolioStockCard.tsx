@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { Check, X } from 'lucide-react'
+import { Check, Pencil, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateHolding } from '../hooks/useHoldingsQueries'
@@ -141,10 +141,11 @@ export function PortfolioStockCard({ holding, onRemove, isRemoving }: PortfolioS
             ) : (
               <span
                 onClick={startQtyEdit}
-                className="font-semibold text-foreground cursor-pointer hover:text-muted-foreground transition-colors"
+                className="inline-flex items-center gap-1 font-semibold text-foreground cursor-pointer group hover:text-muted-foreground transition-colors"
                 title={t('common.clickToEdit')}
               >
                 {holding.quantity}
+                <Pencil className="size-3 text-muted-foreground/60 group-hover:text-muted-foreground" />
               </span>
             )}
           </div>
@@ -173,10 +174,11 @@ export function PortfolioStockCard({ holding, onRemove, isRemoving }: PortfolioS
             ) : (
               <span
                 onClick={startAvgEdit}
-                className="font-semibold text-foreground cursor-pointer hover:text-muted-foreground transition-colors"
+                className="inline-flex items-center gap-1 font-semibold text-foreground cursor-pointer group hover:text-muted-foreground transition-colors"
                 title={t('common.clickToEdit')}
               >
                 {formatCurrency(holding.averagePrice, holding.stock.currency)}
+                <Pencil className="size-3 text-muted-foreground/60 group-hover:text-muted-foreground" />
               </span>
             )}
           </div>
