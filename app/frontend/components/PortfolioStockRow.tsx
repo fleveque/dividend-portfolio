@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { Check, X, ChevronDown } from 'lucide-react'
+import { Check, Pencil, X, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateHolding } from '../hooks/useHoldingsQueries'
@@ -131,10 +131,11 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
             ) : (
               <span
                 onClick={startQtyEdit}
-                className="text-sm text-foreground cursor-pointer hover:text-muted-foreground transition-colors"
+                className="inline-flex items-center gap-1 text-sm text-foreground cursor-pointer group hover:text-muted-foreground transition-colors"
                 title={t('common.clickToEdit')}
               >
                 {holding.quantity}
+                <Pencil className="size-3 text-muted-foreground/60 group-hover:text-muted-foreground" />
               </span>
             )}
           </div>
@@ -164,10 +165,11 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
             ) : (
               <span
                 onClick={startAvgEdit}
-                className="text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground cursor-pointer group hover:text-foreground transition-colors"
                 title={t('common.clickToEdit')}
               >
                 {formatCurrency(holding.averagePrice, holding.stock.currency)}
+                <Pencil className="size-3 text-muted-foreground/60 group-hover:text-foreground" />
               </span>
             )}
           </div>
@@ -255,8 +257,13 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
                       </Button>
                     </span>
                   ) : (
-                    <button onClick={startQtyEdit} className="text-foreground font-medium cursor-pointer">
-                      {holding.quantity} ({t('common.clickToEdit')})
+                    <button
+                      onClick={startQtyEdit}
+                      className="inline-flex items-center gap-1 text-foreground font-medium cursor-pointer"
+                      title={t('common.clickToEdit')}
+                    >
+                      {holding.quantity}
+                      <Pencil className="size-3 text-muted-foreground" />
                     </button>
                   )}
                 </div>
@@ -283,8 +290,13 @@ export function PortfolioStockRow({ holding, onRemove, isRemoving, showMetrics =
                       </Button>
                     </span>
                   ) : (
-                    <button onClick={startAvgEdit} className="text-foreground font-medium cursor-pointer">
-                      {formatCurrency(holding.averagePrice, holding.stock.currency)} ({t('common.clickToEdit')})
+                    <button
+                      onClick={startAvgEdit}
+                      className="inline-flex items-center gap-1 text-foreground font-medium cursor-pointer"
+                      title={t('common.clickToEdit')}
+                    >
+                      {formatCurrency(holding.averagePrice, holding.stock.currency)}
+                      <Pencil className="size-3 text-muted-foreground" />
                     </button>
                   )}
                 </div>

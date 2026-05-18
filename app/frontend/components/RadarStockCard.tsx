@@ -1,4 +1,4 @@
-import { Check, X } from 'lucide-react'
+import { Check, Pencil, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateTargetPrice } from '../hooks/useRadarQueries'
@@ -116,10 +116,11 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
             ) : (
               <span
                 onClick={startEdit}
-                className="font-semibold text-foreground cursor-pointer hover:text-muted-foreground transition-colors"
+                className="inline-flex items-center gap-1 font-semibold text-foreground cursor-pointer group hover:text-muted-foreground transition-colors"
                 title={t('common.clickToEdit')}
               >
                 {stock.formattedTargetPrice}
+                <Pencil className="size-3 text-muted-foreground/60 group-hover:text-muted-foreground" />
               </span>
             )}
           </div>
