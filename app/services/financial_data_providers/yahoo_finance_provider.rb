@@ -52,7 +52,11 @@ module FinancialDataProviders
         ma_200: data[:ma200],
         fifty_two_week_high: data[:fifty_two_week_high],
         fifty_two_week_low: data[:fifty_two_week_low],
-        ex_dividend_date: data[:ex_dividend_date] || data[:dividend_date]
+        # IMPORTANT: don't fall back to `dividend_date` — that's Yahoo's
+        # *payment* date, not the ex-dividend date. They differ by ~2 weeks,
+        # so substituting payment date as ex-div produced wrong info in the
+        # UI and in AI-generated social drafts. Leave nil when missing.
+        ex_dividend_date: data[:ex_dividend_date]
       }
     end
 
