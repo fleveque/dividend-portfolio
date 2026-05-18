@@ -26,6 +26,7 @@ import RadarPage from '../pages/RadarPage'
 import AdminDashboardPage from '../pages/AdminDashboardPage'
 import AdminContentDraftsPage from '../pages/AdminContentDraftsPage'
 import PortfolioPage from '../pages/PortfolioPage'
+import DividendsPage from '../pages/DividendsPage'
 import SettingsPage from '../pages/SettingsPage'
 
 /**
@@ -71,6 +72,7 @@ function App() {
                     <Route element={<ProtectedRoute />}>
                       <Route path="/radar" element={<RadarPage />} />
                       <Route path="/portfolio" element={<PortfolioPage />} />
+                      <Route path="/dividends" element={<DividendsPage />} />
                       <Route path="/settings" element={<SettingsPage />} />
                     </Route>
                     <Route element={<AdminRoute />}>

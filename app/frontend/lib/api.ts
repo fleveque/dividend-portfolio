@@ -280,6 +280,147 @@ export const holdingsApi = {
 }
 
 // ============================================================================
+// Dividends API
+// ============================================================================
+
+export interface Dividend {
+  id: number
+  stockId: number
+  symbol: string
+  name: string
+  date: string
+  perShareAmount: number | null
+  quantity: number | null
+  amount: number
+  currency: string
+  withholdingTax: number
+  netAmount: number
+  source: 'manual' | 'ibkr'
+}
+
+export interface DividendCreatePayload {
+  stockId: number
+  date: string
+  perShareAmount?: number | null
+  quantity?: number | null
+  amount: number
+  currency: string
+  withholdingTax?: number
+}
+
+export interface DividendUpdatePayload {
+  date?: string
+  perShareAmount?: number | null
+  quantity?: number | null
+  amount?: number
+  currency?: string
+  withholdingTax?: number
+}
+
+export interface DividendImportRow {
+  ticker: string
+  isin: string | null
+  currency: string
+  date: string
+  per_share_amount: number
+  amount: number
+  quantity: number
+  withholding_tax: number
+  stock_id?: number | null
+  stock_symbol?: string
+  stock_name?: string
+  reason?: string
+}
+
+export interface DividendImportPreview {
+  language: 'es' | 'en' | null
+  resolved: DividendImportRow[]
+  unmatched: DividendImportRow[]
+  skipped: { reason: string; row: string }[]
+}
+
+export interface DividendImportResult {
+  created: number
+  updated: number
+  skipped: number
+}
+
+export interface DividendChartBucket {
+  month: string
+  actual: number | null
+  projected: number | null
+}
+
+export interface DividendChartData {
+  byCurrency: Record<string, DividendChartBucket[]>
+  months: string[]
+}
+
+export const dividendsApi = {
+  list: () => apiFetch<Dividend[]>('/dividends'),
+
+  chartData: (range?: 'full') =>
+    apiFetch<DividendChartData>(`/dividends/chart_data${range ? `?range=${range}` : ''}`),
+
+  create: (payload: DividendCreatePayload) =>
+    apiFetch<Dividend>('/dividends', {
+      method: 'POST',
+      body: JSON.stringify({
+        dividend: {
+          stock_id: payload.stockId,
+          date: payload.date,
+          per_share_amount: payload.perShareAmount,
+          quantity: payload.quantity,
+          amount: payload.amount,
+          currency: payload.currency,
+          withholding_tax: payload.withholdingTax ?? 0,
+        },
+      }),
+    }),
+
+  update: (id: number, payload: DividendUpdatePayload) => {
+    const dividend: Record<string, unknown> = {}
+    if ('date' in payload) dividend.date = payload.date
+    if ('perShareAmount' in payload) dividend.per_share_amount = payload.perShareAmount
+    if ('quantity' in payload) dividend.quantity = payload.quantity
+    if ('amount' in payload) dividend.amount = payload.amount
+    if ('currency' in payload) dividend.currency = payload.currency
+    if ('withholdingTax' in payload) dividend.withholding_tax = payload.withholdingTax
+    return apiFetch<Dividend>(`/dividends/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ dividend }),
+    })
+  },
+
+  delete: (id: number) =>
+    apiFetch<{ deleted: boolean }>(`/dividends/${id}`, {
+      method: 'DELETE',
+    }),
+
+  importPreview: (file: File) => {
+    const body = new FormData()
+    body.append('file', file)
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? ''
+    return fetch(`${API_BASE}/dividends/import_preview`, {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': token, Accept: 'application/json' },
+      credentials: 'same-origin',
+      body,
+    }).then(async (res) => {
+      const json = (await res.json()) as ApiResponse<DividendImportPreview>
+      if (!res.ok || !json.success) throw new Error(json.error || 'Import preview failed')
+      return json.data as DividendImportPreview
+    })
+  },
+
+  importApply: (rows: DividendImportRow[], mapping: Record<string, number> = {}) =>
+    apiFetch<DividendImportResult>('/dividends/import_apply', {
+      method: 'POST',
+      body: JSON.stringify({ rows, mapping }),
+    }),
+}
+
+// ============================================================================
 // Profile API - Authenticated endpoints (user settings)
 // ============================================================================
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_18_005135) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_18_165219) do
   create_table "buy_plan_items", force: :cascade do |t|
     t.integer "buy_plan_id", null: false
     t.integer "stock_id", null: false
@@ -49,7 +49,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_18_005135) do
     t.date "date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "quantity"
+    t.decimal "per_share_amount", precision: 12, scale: 6
+    t.string "currency", default: "USD", null: false
+    t.decimal "withholding_tax", precision: 12, scale: 4, default: "0.0", null: false
+    t.string "source", default: "manual", null: false
     t.index ["stock_id"], name: "index_dividends_on_stock_id"
+    t.index ["user_id", "stock_id", "date", "per_share_amount", "source"], name: "index_dividends_on_dedup_key", unique: true, where: "per_share_amount IS NOT NULL"
     t.index ["user_id"], name: "index_dividends_on_user_id"
   end
 
@@ -121,6 +127,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_18_005135) do
     t.string "currency", default: "USD", null: false
     t.string "sector"
     t.string "industry"
+    t.string "isin"
+    t.index ["isin"], name: "index_stocks_on_isin", unique: true, where: "isin IS NOT NULL"
     t.index ["symbol"], name: "index_stocks_on_symbol", unique: true
   end
 

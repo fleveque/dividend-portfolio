@@ -55,6 +55,7 @@ export function Layout() {
                 <>
                   <NavLink to="/radar" className={navLinkClass}>{t('nav.radar')}</NavLink>
                   <NavLink to="/portfolio" className={navLinkClass}>{t('nav.portfolio')}</NavLink>
+                  <NavLink to="/dividends" className={navLinkClass}>{t('nav.dividends')}</NavLink>
                   <NavLink to="/settings" className={navLinkClass}>{t('nav.settings')}</NavLink>
                 </>
               )}
@@ -113,6 +114,7 @@ export function Layout() {
               <>
                 <NavLink to="/radar" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.radar')}</NavLink>
                 <NavLink to="/portfolio" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.portfolio')}</NavLink>
+                <NavLink to="/dividends" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.dividends')}</NavLink>
                 <NavLink to="/settings" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.settings')}</NavLink>
               </>
             )}
