@@ -123,4 +123,31 @@ RSpec.describe "Api::V1::Admin::ContentDrafts", type: :request do
       expect(draft.reload.copied_at).to be_nil
     end
   end
+
+  describe "DELETE /api/v1/admin/content_drafts/:id" do
+    let!(:draft) { create(:content_draft) }
+
+    context "as a non-admin" do
+      before { sign_in regular_user }
+
+      it "returns 403 and does not delete" do
+        delete "/api/v1/admin/content_drafts/#{draft.id}"
+        expect(response).to have_http_status(:forbidden)
+        expect(ContentDraft.exists?(draft.id)).to be true
+      end
+    end
+
+    context "as an admin" do
+      before { sign_in admin }
+
+      it "hard-deletes the draft so its topic becomes eligible for regeneration" do
+        expect {
+          delete "/api/v1/admin/content_drafts/#{draft.id}"
+        }.to change(ContentDraft, :count).by(-1)
+
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)["data"]).to eq("deleted" => true)
+      end
+    end
+  end
 end

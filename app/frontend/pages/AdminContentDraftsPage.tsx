@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Loader2, Copy, Check, AlertCircle, ChevronDown, ChevronRight } from 'lucide-react'
+import { Loader2, Copy, Check, AlertCircle, ChevronDown, ChevronRight, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import {
   useAdminContentDrafts,
   useGenerateContentDraft,
   useMarkContentDraftCopied,
+  useDiscardContentDraft,
 } from '../hooks/useAdminContentDrafts'
 import type { ContentDraft, GenerateContentDraftParams } from '../lib/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,6 +14,16 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 const CATEGORIES = [
   'stock_of_the_day',
@@ -153,7 +164,9 @@ function GeneratePanel({ onGenerate, isGenerating, error }: GeneratePanelProps) 
 function DraftCard({ draft }: { draft: ContentDraft }) {
   const { t, i18n } = useTranslation()
   const markCopied = useMarkContentDraftCopied()
+  const discard = useDiscardContentDraft()
   const [showInputs, setShowInputs] = useState(false)
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const generatedAt = new Date(draft.generatedAt).toLocaleString(i18n.language, {
     month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
   })
@@ -176,16 +189,51 @@ function DraftCard({ draft }: { draft: ContentDraft }) {
               )}
             </div>
           </div>
-          <Button
-            variant={draft.copiedAt ? 'outline' : 'default'}
-            size="sm"
-            onClick={() => markCopied.mutate({ id: draft.id, copied: !draft.copiedAt })}
-            disabled={markCopied.isPending}
-          >
-            {draft.copiedAt ? t('admin.contentDrafts.unmark') : t('admin.contentDrafts.markAsPosted')}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant={draft.copiedAt ? 'outline' : 'default'}
+              size="sm"
+              onClick={() => markCopied.mutate({ id: draft.id, copied: !draft.copiedAt })}
+              disabled={markCopied.isPending}
+            >
+              {draft.copiedAt ? t('admin.contentDrafts.unmark') : t('admin.contentDrafts.markAsPosted')}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDiscardConfirm(true)}
+              disabled={discard.isPending}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              aria-label={t('admin.contentDrafts.discard')}
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
+
+      <AlertDialog open={showDiscardConfirm} onOpenChange={setShowDiscardConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('admin.contentDrafts.discardTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('admin.contentDrafts.discardConfirm')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                discard.mutate(draft.id)
+                setShowDiscardConfirm(false)
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t('admin.contentDrafts.discard')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

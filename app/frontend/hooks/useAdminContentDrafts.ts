@@ -31,3 +31,13 @@ export function useMarkContentDraftCopied() {
     },
   })
 }
+
+export function useDiscardContentDraft() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => adminApi.contentDrafts.discard(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: KEY })
+    },
+  })
+}
