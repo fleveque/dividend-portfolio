@@ -80,7 +80,7 @@ export function DividendsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {(Object.keys(totalsByCurrency).length > 0 || chartData) && (
+          {dividends && dividends.length > 0 && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-6">
               {Object.keys(totalsByCurrency).length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
