@@ -90,6 +90,18 @@ RSpec.describe FinancialDataProviders::YahooFinanceProvider, type: :model do
       expect(result[:ex_dividend_date]).to eq(Date.new(2024, 3, 14))
     end
 
+    # Regression: `dividend_date` is Yahoo's *payment* date, not the ex-div
+    # date. We must NOT fall back to it — they're typically ~2 weeks apart.
+    it 'does not substitute dividend_date (payment date) for a missing ex_dividend_date' do
+      data = {
+        symbol: 'TXN', price: 150.00, dividend: 1.36,
+        ex_dividend_date: nil,
+        dividend_date: Date.new(2026, 5, 19) # payment date — must not leak through
+      }
+      result = provider.send(:normalize_yahoo_data, data)
+      expect(result[:ex_dividend_date]).to be_nil
+    end
+
     it 'passes through currency from the gem' do
       data = { symbol: 'IBE.MC', price: 14.5, currency: 'EUR' }
       result = provider.send(:normalize_yahoo_data, data)
