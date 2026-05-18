@@ -66,17 +66,20 @@ RSpec.describe "Api::V1::Admin::Dashboard", type: :request do
 
       describe "activity section" do
         it "exposes active-user, holding-change, and weekly-active-users metrics" do
-          # Sessions: one recent (last 7d), one older (between 7-30d), one stale.
+          # Sessions: one in *this* week (anchored to current week's Monday so
+          # the test doesn't drift across week boundaries on different weekdays),
+          # one older (between 7-30d), one stale.
           fresh   = create(:user)
           warm    = create(:user)
           old     = create(:user)
-          create(:session, user: fresh, created_at: 2.days.ago, updated_at: 2.days.ago)
+          this_week_time = Time.current.beginning_of_week + 1.minute
+          create(:session, user: fresh, created_at: this_week_time, updated_at: this_week_time)
           create(:session, user: warm,  created_at: 15.days.ago, updated_at: 15.days.ago)
           create(:session, user: old,   created_at: 90.days.ago, updated_at: 90.days.ago)
 
-          # Holding changes: one recent, one older.
+          # Holding changes: one recent.
           stock = create(:stock, symbol: "AAPL", price: 150.00)
-          create(:holding, user: fresh, stock: stock, quantity: 1, average_price: 100, created_at: 1.day.ago, updated_at: 1.day.ago)
+          create(:holding, user: fresh, stock: stock, quantity: 1, average_price: 100, created_at: 1.hour.ago, updated_at: 1.hour.ago)
 
           get "/api/v1/admin/dashboard"
 
@@ -93,8 +96,8 @@ RSpec.describe "Api::V1::Admin::Dashboard", type: :request do
           end
 
           # Buckets contain *distinct user counts*, not session counts.
-          # The most recent bucket (this week) should include at least the
-          # fresh user touched 2 days ago plus admin's own sign_in.
+          # This week's bucket should include the fresh user we placed there
+          # plus admin's own sign_in.
           this_week = act["activeUsersTrend"].last
           expect(this_week["count"]).to be >= 2
         end
