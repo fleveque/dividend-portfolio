@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Loader2, Upload, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Loader2, Upload, AlertCircle, CheckCircle2, Info, ShieldCheck } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter,
@@ -77,6 +77,21 @@ export function DividendImportDialog({ open, onOpenChange }: Props) {
 
         {stage === 'pick' && (
           <div className="p-6 space-y-4">
+            <div className="rounded-md border border-blue-200 dark:border-blue-900 bg-blue-50/60 dark:bg-blue-950/30 p-3 space-y-2">
+              <div className="flex items-start gap-2">
+                <Info className="size-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                <div className="text-xs space-y-1">
+                  <p className="font-medium">{t('dividends.importIbkrPathLabel')}</p>
+                  <p className="font-mono text-muted-foreground">{t('dividends.importIbkrPathEn')}</p>
+                  <p className="font-mono text-muted-foreground">{t('dividends.importIbkrPathEs')}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 pt-2 border-t border-blue-200/50 dark:border-blue-900/50">
+                <ShieldCheck className="size-4 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
+                <p className="text-xs text-muted-foreground">{t('dividends.importPrivacyHint')}</p>
+              </div>
+            </div>
+
             <label className="block border-2 border-dashed border-input rounded-lg p-8 text-center cursor-pointer hover:border-foreground/40">
               <input
                 type="file"
