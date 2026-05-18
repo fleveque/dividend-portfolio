@@ -209,7 +209,7 @@ const es = {
     importIbkrPathLabel: 'Dónde encontrarlo en IBKR:',
     importIbkrPathEn: 'EN: Performance & Reports → Statements → Activity',
     importIbkrPathEs: 'ES: Rendimientos e informes → Extractos → Informe de actividad',
-    importPrivacyHint: 'Antes de subir, puedes eliminar sin problema las filas de cabecera (nombre, cuenta, dirección) — sólo se procesan las secciones de Dividendos y Retención de impuestos.',
+    importPrivacyHint: 'Sólo se procesan las secciones de Dividendos y Retención de impuestos — puedes eliminar primero las filas de cabecera (nombre, cuenta, dirección) sin problema. El archivo subido se elimina del servidor en cuanto termina el procesado.',
     importParsing: 'Procesando…',
     importMatched: 'Auto-emparejados',
     importUnmatched: 'Necesitan tu input',

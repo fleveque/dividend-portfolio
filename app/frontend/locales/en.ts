@@ -209,7 +209,7 @@ const en = {
     importIbkrPathLabel: 'Where to find this in IBKR:',
     importIbkrPathEn: 'EN: Performance & Reports → Statements → Activity',
     importIbkrPathEs: 'ES: Rendimientos e informes → Extractos → Informe de actividad',
-    importPrivacyHint: 'Before uploading you can safely strip the header rows (name, account, address) — only the Dividends and Withholding Tax sections are parsed.',
+    importPrivacyHint: 'Only the Dividends and Withholding Tax sections are parsed — you can safely strip the header rows (name, account, address) first. The uploaded file is deleted from the server as soon as parsing finishes.',
     importParsing: 'Parsing…',
     importMatched: 'Auto-matched',
     importUnmatched: 'Need your input',
