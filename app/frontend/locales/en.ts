@@ -90,6 +90,8 @@ const en = {
     buyPlanModeDesc: 'Plan purchases with a shopping cart \u2014 set quantities and see estimated costs.',
     portfolioTracker: 'Portfolio Tracker',
     portfolioTrackerDesc: 'Manage your holdings with real-time gain/loss tracking, weighted average prices, and market value calculations.',
+    dividends: 'Dividend Import & Tracking',
+    dividendsDesc: 'Import dividend payments straight from your broker (IBKR CSV — more coming), or add them manually. Per-currency totals, smoothed history line, and a 12-month projection from your current holdings.',
     aiInsights: 'AI-Powered Insights',
     aiInsightsDesc: 'Get AI-driven analysis with buying opportunities, risk flags, and per-stock summaries for both your radar and portfolio.',
     mobileReady: 'Mobile Ready',

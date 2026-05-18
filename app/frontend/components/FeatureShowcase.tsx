@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Radar, CalendarDays, ShoppingCart, Sparkles, Smartphone, Briefcase } from 'lucide-react'
+import { Radar, CalendarDays, ShoppingCart, Sparkles, Smartphone, Briefcase, Coins } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import {
   Carousel,
@@ -15,6 +15,9 @@ import buyPlanModeImg from '@/assets/screenshots/buy-plan-mode.png'
 import aiInsightsImg from '@/assets/screenshots/ai-insights.png'
 import mobileRadarImg from '@/assets/screenshots/mobile-radar.png'
 import portfolioImg from '@/assets/screenshots/portfolio.png'
+// Placeholder: same image as portfolioImg until the real Dividends page
+// screenshot is captured (the file ships as a copy of portfolio.png).
+import dividendsImg from '@/assets/screenshots/dividends.png'
 
 const AUTO_ADVANCE_MS = 6000
 
@@ -52,6 +55,13 @@ export function FeatureShowcase() {
       title: t('features.portfolioTracker'),
       description: t('features.portfolioTrackerDesc'),
       image: portfolioImg,
+      mobile: false,
+    },
+    {
+      icon: Coins,
+      title: t('features.dividends'),
+      description: t('features.dividendsDesc'),
+      image: dividendsImg,
       mobile: false,
     },
     {

@@ -61,6 +61,7 @@ during the rollover.
 
 - **Stock Radar**: Track stocks with target prices, financial metrics (P/E, EPS, yield, payout ratio), and price status indicators. Card and compact list views.
 - **Portfolio Management**: Manage holdings with quantity, average price, real-time gain/loss tracking, and weighted average price merging. Import directly from buy plan cart.
+- **Dividend Import & Tracking** *(Beta)*: Import dividend payments from broker CSVs (IBKR Activity Statement, Spanish + English) or add them manually. Per-currency totals, smoothed historical line per currency, and a 12-month projection built from your current holdings × known payment schedules. Re-import is idempotent and never overwrites manual entries.
 - **Dividend Calendar**: Visualize dividend payment schedules across all your stocks. Spot income gaps by month.
 - **Buy Plan Mode**: Plan purchases with a shopping cart — set quantities, see estimated costs, and move to portfolio when ready.
 - **AI-Powered Insights**: Google Gemini analysis for both radar and portfolio — buying opportunities, dividend coverage gaps, risk flags, and per-stock summaries.
