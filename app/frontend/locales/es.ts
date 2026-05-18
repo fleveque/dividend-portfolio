@@ -90,6 +90,8 @@ const es = {
     buyPlanModeDesc: 'Planifica compras con un carrito \u2014 establece cantidades y consulta costes estimados.',
     portfolioTracker: 'Seguimiento de Cartera',
     portfolioTrackerDesc: 'Gestiona tus posiciones con seguimiento de ganancias/p\u00e9rdidas en tiempo real, precios medios ponderados y c\u00e1lculos de valor de mercado.',
+    dividends: 'Importar y seguir dividendos',
+    dividendsDesc: 'Importa pagos de dividendos directamente del br\u00f3ker (CSV de IBKR \u2014 m\u00e1s en camino) o a\u00f1\u00e1delos manualmente. Totales por divisa, gr\u00e1fico hist\u00f3rico suavizado y proyecci\u00f3n a 12 meses basada en tu cartera actual.',
     aiInsights: 'An\u00e1lisis con IA',
     aiInsightsDesc: 'Obt\u00e9n an\u00e1lisis impulsado por IA con oportunidades de compra, alertas de riesgo y res\u00famenes por acci\u00f3n tanto para tu radar como para tu cartera.',
     mobileReady: 'Listo para M\u00f3vil',
