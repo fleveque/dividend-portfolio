@@ -52,12 +52,22 @@ module Api
         file = params[:file]
         return render_error("Missing file", status: :unprocessable_entity) if file.blank?
 
-        parsed = DividendImporters::Ibkr.parse(file.to_io)
-        preview = DividendImports::Preview.call(parsed: parsed, user: Current.user)
-        render_success(preview)
-      rescue StandardError => e
-        Rails.logger.error "Dividend import preview failed: #{e.class}: #{e.message}"
-        render_error("Could not parse the file: #{e.message}", status: :unprocessable_entity)
+        tempfile = file.tempfile
+        begin
+          parsed = DividendImporters::Ibkr.parse(tempfile)
+          preview = DividendImports::Preview.call(parsed: parsed, user: Current.user)
+          render_success(preview)
+        rescue StandardError => e
+          Rails.logger.error "Dividend import preview failed: #{e.class}: #{e.message}"
+          render_error("Could not parse the file: #{e.message}", status: :unprocessable_entity)
+        ensure
+          # Belt-and-suspenders: Rack/Tempfile's finalizer would unlink this
+          # eventually, but we delete it the moment parsing finishes so the
+          # CSV — which contains the user's positions and amounts — never
+          # lingers on the filesystem.
+          tempfile&.close
+          tempfile&.unlink if tempfile.respond_to?(:unlink)
+        end
       end
 
       # POST /api/v1/dividends/import_apply   body: { rows: [...], mapping: { ticker => stock_id } }
