@@ -54,6 +54,14 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :dividends, only: [ :index, :create, :update, :destroy ] do
+        collection do
+          get :chart_data
+          post :import_preview
+          post :import_apply
+        end
+      end
+
       # Profile endpoint - authenticated (user settings)
       resource :profile, only: [ :show, :update ]
 
