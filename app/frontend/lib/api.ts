@@ -361,5 +361,10 @@ export const adminApi = {
         method: 'PATCH',
         body: JSON.stringify({ copied }),
       }),
+
+    discard: (id: number) =>
+      apiFetch<{ deleted: boolean }>(`/admin/content_drafts/${id}`, {
+        method: 'DELETE',
+      }),
   },
 }

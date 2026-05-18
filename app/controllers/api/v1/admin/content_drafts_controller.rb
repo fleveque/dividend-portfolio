@@ -53,6 +53,16 @@ module Api
           render_success(serialize(draft))
         end
 
+        # DELETE /api/v1/admin/content_drafts/:id
+        # Hard delete on purpose: discarding a bad draft should re-open its
+        # topic_key for regeneration (TopicSelector dedupes against surviving
+        # rows). Soft-delete would keep the ban and waste AI tokens.
+        def destroy
+          draft = ContentDraft.find(params[:id])
+          draft.destroy!
+          render_success({ deleted: true })
+        end
+
         private
 
         def serialize(draft)
