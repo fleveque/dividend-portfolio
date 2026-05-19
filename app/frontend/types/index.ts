@@ -313,6 +313,15 @@ export interface AdminDashboardStats {
     usersWithHoldings: number
     avgHoldingsPerUser: number
   }
+  dividends: {
+    usersWithAny: number
+    usersImporting: number
+    usersManualOnly: number
+    adoptionRate: number
+    totalRecords: number
+    importedRecords: number
+    manualRecords: number
+  }
   pulse: {
     usersWithSlug: number
     adoptionRate: number
