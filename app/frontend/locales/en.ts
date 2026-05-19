@@ -145,6 +145,20 @@ const en = {
     switchToCardView: 'Switch to card view',
     switchToCompactView: 'Switch to compact view',
     addToCart: 'Add to Cart',
+    suggestTarget: 'Suggest a target',
+    clearTargetHint: 'Empty the field to clear the target',
+    errors: {
+      targetPriceMustBePositive: 'Target price must be greater than 0 (leave empty to clear it)',
+    },
+    anchors: {
+      community: 'Community average',
+      communityCount: 'across {{count}} users',
+      communityBelow: 'Need ≥ {{threshold}} community targets · currently {{count}}',
+      fiftyTwoWeekMidpoint: '52-week midpoint',
+      ma200: '200-day MA',
+      ma50: '50-day MA',
+      unavailable: 'Not available yet',
+    },
   },
 
   // Portfolio Page

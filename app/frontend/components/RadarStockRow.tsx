@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Check, Pencil, X, ChevronDown, ArrowDown, ArrowUp, Minus as MinusIcon } from 'lucide-react'
+import { TargetPriceAnchorsMenu } from './TargetPriceAnchorsMenu'
 import { useTranslation } from 'react-i18next'
 import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateTargetPrice } from '../hooks/useRadarQueries'
@@ -41,8 +42,15 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
   } = useInlineEdit({
     initialValue: stock.targetPrice?.toString() ?? '',
     onSave: async (newValue) => {
-      const price = newValue === '' ? 0 : parseFloat(newValue)
-      await updateTargetPrice.mutateAsync({ stockId: stock.id, price })
+      const trimmed = newValue.trim()
+      const price = trimmed === '' ? null : parseFloat(trimmed)
+      try {
+        await updateTargetPrice.mutateAsync({ stockId: stock.id, price })
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : ''
+        if (/greater than 0/i.test(msg)) throw new Error(t('radar.errors.targetPriceMustBePositive'))
+        throw err
+      }
     },
   })
 
@@ -109,6 +117,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                   disabled={isSaving}
                   className="w-16 h-7 px-2 text-sm"
                   placeholder="0.00"
+                  title={t('radar.clearTargetHint')}
                 />
                 <Button size="icon-xs" onClick={save} disabled={isSaving}>
                   {isSaving ? '...' : <Check className="size-3" />}
@@ -118,13 +127,20 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                 </Button>
               </span>
             ) : (
-              <span
-                onClick={startEdit}
-                className="inline-flex items-center gap-1 text-sm text-muted-foreground cursor-pointer group hover:text-foreground transition-colors"
-                title={t('common.clickToEdit')}
-              >
-                {stock.formattedTargetPrice}
-                <Pencil className="size-3 text-muted-foreground/60 group-hover:text-foreground" />
+              <span className="inline-flex items-center gap-1">
+                <span
+                  onClick={startEdit}
+                  className="inline-flex items-center gap-1 text-sm text-muted-foreground cursor-pointer group hover:text-foreground transition-colors"
+                  title={t('common.clickToEdit')}
+                >
+                  {stock.formattedTargetPrice}
+                  <Pencil className="size-3 text-muted-foreground/60 group-hover:text-foreground" />
+                </span>
+                <TargetPriceAnchorsMenu
+                  stockId={stock.id}
+                  currency={stock.currency}
+                  anchors={stock.targetAnchors}
+                />
               </span>
             )}
           </div>
@@ -201,6 +217,7 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                       disabled={isSaving}
                       className="w-20 h-7 px-2 text-sm"
                       placeholder="0.00"
+                      title={t('radar.clearTargetHint')}
                     />
                     <Button size="icon-xs" onClick={save} disabled={isSaving}>
                       {isSaving ? '...' : <Check className="size-3" />}
@@ -210,14 +227,21 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
                     </Button>
                   </span>
                 ) : (
-                  <button
-                    onClick={startEdit}
-                    className="inline-flex items-center gap-1 text-sm text-foreground font-medium cursor-pointer"
-                    title={t('common.clickToEdit')}
-                  >
-                    {stock.formattedTargetPrice}
-                    <Pencil className="size-3 text-muted-foreground" />
-                  </button>
+                  <span className="inline-flex items-center gap-1">
+                    <button
+                      onClick={startEdit}
+                      className="inline-flex items-center gap-1 text-sm text-foreground font-medium cursor-pointer"
+                      title={t('common.clickToEdit')}
+                    >
+                      {stock.formattedTargetPrice}
+                      <Pencil className="size-3 text-muted-foreground" />
+                    </button>
+                    <TargetPriceAnchorsMenu
+                      stockId={stock.id}
+                      currency={stock.currency}
+                      anchors={stock.targetAnchors}
+                    />
+                  </span>
                 )}
               </div>
 

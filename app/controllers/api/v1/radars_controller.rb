@@ -10,6 +10,10 @@ module Api
       # Returns the user's radar with all stocks and their target prices
       def show
         stocks = @radar.sorted_stocks || []
+        @community_targets = Stocks::CommunityTargetPrice.call(
+          stock_ids: stocks.map(&:id),
+          exclude_radar_id: @radar.id
+        )
         render_success({
           id: @radar.id,
           stocks: stocks.map { |s| serialize_radar_stock(s) }
@@ -90,6 +94,7 @@ module Api
           aboveTarget: decorated.above_target?,
           belowTarget: decorated.below_target?,
           atTarget: decorated.at_target?,
+          targetAnchors: target_anchors(stock),
           **serialize_stock_metrics(stock, decorated)
         }
       end
@@ -114,6 +119,24 @@ module Api
           atTarget: decorated.at_target?,
           **serialize_stock_metrics(stock, decorated)
         }
+      end
+
+      # Anchor values the user can apply with one click as their target price.
+      # Community is suppressed below the cohort threshold by the service.
+      # 52-week midpoint requires both high and low to be present.
+      def target_anchors(stock)
+        community = @community_targets&.dig(stock.id) || { count: 0, average: nil }
+        {
+          community: { value: community[:average], count: community[:count] },
+          fiftyTwoWeekMidpoint: midpoint_or_nil(stock),
+          ma200: stock.ma_200&.to_f,
+          ma50: stock.ma_50&.to_f
+        }
+      end
+
+      def midpoint_or_nil(stock)
+        return nil if stock.fifty_two_week_high.blank? || stock.fifty_two_week_low.blank?
+        ((stock.fifty_two_week_high.to_f + stock.fifty_two_week_low.to_f) / 2.0).round(2)
       end
 
       # Serialize stock data for AI analysis (compact, numeric-only)
