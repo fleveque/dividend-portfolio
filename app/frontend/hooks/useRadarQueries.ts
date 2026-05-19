@@ -90,7 +90,7 @@ export function useUpdateTargetPrice() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ stockId, price }: { stockId: number; price: number }) =>
+    mutationFn: ({ stockId, price }: { stockId: number; price: number | null }) =>
       radarApi.updateTargetPrice(stockId, price),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['radar'] })

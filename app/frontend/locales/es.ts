@@ -145,6 +145,20 @@ const es = {
     switchToCardView: 'Cambiar a vista de tarjetas',
     switchToCompactView: 'Cambiar a vista compacta',
     addToCart: 'A\u00f1adir al Carrito',
+    suggestTarget: 'Sugerir un objetivo',
+    clearTargetHint: 'Deja el campo vacío para borrar el objetivo',
+    errors: {
+      targetPriceMustBePositive: 'El precio objetivo debe ser mayor que 0 (déjalo vacío para borrarlo)',
+    },
+    anchors: {
+      community: 'Promedio de la comunidad',
+      communityCount: 'en {{count}} usuarios',
+      communityBelow: 'Se necesitan \u2265 {{threshold}} objetivos \u00b7 actualmente {{count}}',
+      fiftyTwoWeekMidpoint: 'Punto medio 52 semanas',
+      ma200: 'Media m\u00f3vil 200 d\u00edas',
+      ma50: 'Media m\u00f3vil 50 d\u00edas',
+      unavailable: 'A\u00fan no disponible',
+    },
   },
 
   // Portfolio Page

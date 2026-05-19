@@ -82,6 +82,13 @@ export interface StockSearchResult {
  * `extends Stock` means RadarStock has ALL Stock properties
  * plus the additional ones defined here
  */
+export interface TargetAnchors {
+  community: { value: number | null; count: number }
+  fiftyTwoWeekMidpoint: number | null
+  ma200: number | null
+  ma50: number | null
+}
+
 export interface RadarStock extends Stock {
   targetPrice: number | null
   formattedTargetPrice: string
@@ -90,6 +97,7 @@ export interface RadarStock extends Stock {
   aboveTarget: boolean
   belowTarget: boolean
   atTarget: boolean
+  targetAnchors: TargetAnchors
 }
 
 /**

@@ -90,6 +90,57 @@ RSpec.describe "Api::V1::Radars", type: :request do
           expect(stock_data["dividendScoreLabel"]).to be_a(String)
         end
       end
+
+      context "targetAnchors" do
+        let!(:radar) { create(:radar, user: user) }
+        let!(:anchored_stock) do
+          create(:stock,
+            symbol: "ANCH", name: "Anchor Co.", price: 100.0,
+            ma_50: 95.0, ma_200: 90.0,
+            fifty_two_week_high: 120.0, fifty_two_week_low: 80.0)
+        end
+        let!(:radar_stock) { RadarStock.create!(radar: radar, stock: anchored_stock, target_price: 100) }
+
+        it "exposes the MA + 52-week midpoint anchors" do
+          get "/api/v1/radar"
+          stock_data = JSON.parse(response.body)["data"]["stocks"].first
+
+          expect(stock_data["targetAnchors"]).to include(
+            "fiftyTwoWeekMidpoint" => 100.0,
+            "ma200" => 90.0,
+            "ma50" => 95.0
+          )
+        end
+
+        it "leaves community.average nil when fewer than 3 other users have a target" do
+          get "/api/v1/radar"
+          community = JSON.parse(response.body)["data"]["stocks"].first["targetAnchors"]["community"]
+
+          expect(community).to eq("value" => nil, "count" => 0)
+        end
+
+        it "surfaces community.average once the threshold is met" do
+          3.times do |i|
+            other = create(:user)
+            other_radar = other.radar || create(:radar, user: other)
+            RadarStock.create!(radar: other_radar, stock: anchored_stock, target_price: 150 + i)
+          end
+
+          get "/api/v1/radar"
+          community = JSON.parse(response.body)["data"]["stocks"].first["targetAnchors"]["community"]
+
+          expect(community["count"]).to eq(3)
+          expect(community["value"]).to eq(151.0)
+        end
+
+        it "leaves fiftyTwoWeekMidpoint nil when either bound is missing" do
+          anchored_stock.update!(fifty_two_week_high: nil)
+          get "/api/v1/radar"
+          stock_data = JSON.parse(response.body)["data"]["stocks"].first
+
+          expect(stock_data["targetAnchors"]["fiftyTwoWeekMidpoint"]).to be_nil
+        end
+      end
     end
   end
 

@@ -1,4 +1,5 @@
 import { Check, Pencil, X } from 'lucide-react'
+import { TargetPriceAnchorsMenu } from './TargetPriceAnchorsMenu'
 import { useTranslation } from 'react-i18next'
 import { useInlineEdit } from '../hooks/useInlineEdit'
 import { useUpdateTargetPrice } from '../hooks/useRadarQueries'
@@ -39,8 +40,15 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
   } = useInlineEdit({
     initialValue: stock.targetPrice?.toString() ?? '',
     onSave: async (newValue) => {
-      const price = newValue === '' ? 0 : parseFloat(newValue)
-      await updateTargetPrice.mutateAsync({ stockId: stock.id, price })
+      const trimmed = newValue.trim()
+      const price = trimmed === '' ? null : parseFloat(trimmed)
+      try {
+        await updateTargetPrice.mutateAsync({ stockId: stock.id, price })
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : ''
+        if (/greater than 0/i.test(msg)) throw new Error(t('radar.errors.targetPriceMustBePositive'))
+        throw err
+      }
     },
   })
 
@@ -105,6 +113,7 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
                   disabled={isSaving}
                   className="w-20 h-7 px-2 text-sm"
                   placeholder="0.00"
+                  title={t('radar.clearTargetHint')}
                 />
                 <Button size="icon-xs" onClick={save} disabled={isSaving}>
                   {isSaving ? '...' : <Check className="size-3" />}
@@ -114,13 +123,20 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
                 </Button>
               </span>
             ) : (
-              <span
-                onClick={startEdit}
-                className="inline-flex items-center gap-1 font-semibold text-foreground cursor-pointer group hover:text-muted-foreground transition-colors"
-                title={t('common.clickToEdit')}
-              >
-                {stock.formattedTargetPrice}
-                <Pencil className="size-3 text-muted-foreground/60 group-hover:text-muted-foreground" />
+              <span className="inline-flex items-center gap-1">
+                <span
+                  onClick={startEdit}
+                  className="inline-flex items-center gap-1 font-semibold text-foreground cursor-pointer group hover:text-muted-foreground transition-colors"
+                  title={t('common.clickToEdit')}
+                >
+                  {stock.formattedTargetPrice}
+                  <Pencil className="size-3 text-muted-foreground/60 group-hover:text-muted-foreground" />
+                </span>
+                <TargetPriceAnchorsMenu
+                  stockId={stock.id}
+                  currency={stock.currency}
+                  anchors={stock.targetAnchors}
+                />
               </span>
             )}
           </div>
