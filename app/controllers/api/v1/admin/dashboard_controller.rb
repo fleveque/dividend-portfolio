@@ -35,6 +35,7 @@ module Api
               usersWithHoldings: users_with_holdings,
               avgHoldingsPerUser: users_with_holdings.positive? ? (total_holdings.to_f / users_with_holdings).round(1) : 0
             },
+            dividends: dividends_payload,
             pulse: {
               usersWithSlug: users_with_slug,
               adoptionRate: User.count.positive? ? (users_with_slug.to_f / User.count * 100).round(1) : 0
@@ -44,6 +45,24 @@ module Api
         end
 
         private
+
+        # Adoption signals for the Dividends feature — distinct user counts
+        # tell us whether anyone is using it; row counts how heavily.
+        def dividends_payload
+          total_users = User.count
+          users_with_any = Dividend.distinct.count(:user_id)
+          users_importing = Dividend.imported.distinct.count(:user_id)
+
+          {
+            usersWithAny: users_with_any,
+            usersImporting: users_importing,
+            usersManualOnly: users_with_any - users_importing,
+            adoptionRate: total_users.positive? ? (users_with_any.to_f / total_users * 100).round(1) : 0,
+            totalRecords: Dividend.count,
+            importedRecords: Dividend.imported.count,
+            manualRecords: Dividend.manual.count
+          }
+        end
 
         def activity_payload
           {

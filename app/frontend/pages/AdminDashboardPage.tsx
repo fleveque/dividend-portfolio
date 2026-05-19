@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { Loader2, FileText } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
+import { Loader2, FileText, Users, Database, Briefcase, Coins, Share2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -32,12 +33,34 @@ import {
 } from '@/components/ui/table'
 import type { AdminUser } from '../types'
 
-function StatCard({ label, value }: { label: string; value: string | number }) {
+// Stable accent palette per section. Each entry pairs a border/bg used on the
+// hero card with a subtle background for the section's icon chip.
+const ACCENTS = {
+  emerald: { hero: 'border-emerald-500/30 bg-emerald-500/[0.04]', chip: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400' },
+  blue: { hero: 'border-blue-500/30 bg-blue-500/[0.04]', chip: 'bg-blue-500/15 text-blue-700 dark:text-blue-400' },
+  amber: { hero: 'border-amber-500/30 bg-amber-500/[0.04]', chip: 'bg-amber-500/15 text-amber-700 dark:text-amber-400' },
+  orange: { hero: 'border-orange-500/30 bg-orange-500/[0.04]', chip: 'bg-orange-500/15 text-orange-700 dark:text-orange-400' },
+  purple: { hero: 'border-purple-500/30 bg-purple-500/[0.04]', chip: 'bg-purple-500/15 text-purple-700 dark:text-purple-400' },
+} as const
+type Accent = keyof typeof ACCENTS
+
+function SectionHeader({ icon: Icon, title, accent }: { icon: typeof Users; title: string; accent: Accent }) {
   return (
-    <Card>
-      <CardContent className="p-4">
-        <p className="text-muted-foreground text-sm">{label}</p>
-        <p className="text-2xl font-bold text-foreground">{value}</p>
+    <div className="flex items-center gap-2 mb-3">
+      <span className={cn('inline-flex items-center justify-center size-7 rounded-md', ACCENTS[accent].chip)}>
+        <Icon className="size-4" />
+      </span>
+      <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{title}</h3>
+    </div>
+  )
+}
+
+function StatCard({ label, value, accent, hero }: { label: string; value: string | number | ReactNode; accent?: Accent; hero?: boolean }) {
+  return (
+    <Card className={hero && accent ? cn('border', ACCENTS[accent].hero) : undefined}>
+      <CardContent className={cn(hero ? 'p-4' : 'p-3')}>
+        <p className={cn('text-muted-foreground', hero ? 'text-xs uppercase tracking-wide' : 'text-xs')}>{label}</p>
+        <p className={cn('font-bold text-foreground tabular-nums', hero ? 'text-3xl mt-1' : 'text-xl mt-0.5')}>{value}</p>
       </CardContent>
     </Card>
   )
@@ -208,21 +231,70 @@ export function AdminDashboardPage() {
           </Alert>
         )}
         {stats && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            <StatCard label={t('admin.totalUsers')} value={stats.users.total} />
-            <StatCard label={t('admin.admins')} value={stats.users.admins} />
-            <StatCard label={t('admin.recentSignups')} value={stats.users.recentSignups} />
-            <StatCard label={t('admin.totalStocks')} value={stats.stocks.total} />
-            <StatCard label={t('admin.stocksWithPrice')} value={stats.stocks.withPrice} />
-            <StatCard label={t('admin.totalRadars')} value={stats.radars.total} />
-            <StatCard label={t('admin.stocksTracked')} value={stats.radars.totalStocksTracked} />
-            <StatCard label={t('admin.avgStocksPerRadar')} value={stats.radars.avgStocksPerRadar} />
-            <StatCard label={t('admin.buyPlans')} value={stats.buyPlans.total} />
-            <StatCard label={t('admin.totalPortfolios')} value={stats.holdings.usersWithHoldings} />
-            <StatCard label={t('admin.totalHoldings')} value={stats.holdings.totalHoldings} />
-            <StatCard label={t('admin.avgHoldingsPerUser')} value={stats.holdings.avgHoldingsPerUser} />
-            <StatCard label={t('admin.pulseUsers')} value={stats.pulse.usersWithSlug} />
-            <StatCard label={t('admin.pulseAdoption')} value={`${stats.pulse.adoptionRate}%`} />
+          <div className="space-y-6">
+            {/* Users — emerald */}
+            <div>
+              <SectionHeader icon={Users} title={t('admin.sections.users')} accent="emerald" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                <StatCard label={t('admin.totalUsers')} value={stats.users.total} accent="emerald" hero />
+                <StatCard label={t('admin.recentSignups')} value={stats.users.recentSignups} accent="emerald" hero />
+                <StatCard label={t('admin.admins')} value={stats.users.admins} />
+              </div>
+            </div>
+
+            {/* Catalog — blue */}
+            <div>
+              <SectionHeader icon={Database} title={t('admin.sections.catalog')} accent="blue" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <StatCard label={t('admin.totalStocks')} value={stats.stocks.total} accent="blue" hero />
+                <StatCard label={t('admin.stocksWithPrice')} value={stats.stocks.withPrice} accent="blue" hero />
+                <StatCard label={t('admin.totalRadars')} value={stats.radars.total} />
+                <StatCard label={t('admin.stocksTracked')} value={stats.radars.totalStocksTracked} />
+                <StatCard label={t('admin.avgStocksPerRadar')} value={stats.radars.avgStocksPerRadar} />
+                <StatCard label={t('admin.buyPlans')} value={stats.buyPlans.total} />
+              </div>
+            </div>
+
+            {/* Portfolios — amber */}
+            <div>
+              <SectionHeader icon={Briefcase} title={t('admin.sections.portfolios')} accent="amber" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                <StatCard label={t('admin.totalPortfolios')} value={stats.holdings.usersWithHoldings} accent="amber" hero />
+                <StatCard label={t('admin.totalHoldings')} value={stats.holdings.totalHoldings} accent="amber" hero />
+                <StatCard label={t('admin.avgHoldingsPerUser')} value={stats.holdings.avgHoldingsPerUser} />
+              </div>
+            </div>
+
+            {/* Dividends adoption — orange */}
+            <div>
+              <SectionHeader icon={Coins} title={t('admin.sections.dividends')} accent="orange" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                <StatCard label={t('admin.dividendUsers')} value={stats.dividends.usersWithAny} accent="orange" hero />
+                <StatCard label={t('admin.dividendAdoption')} value={`${stats.dividends.adoptionRate}%`} accent="orange" hero />
+                <StatCard label={t('admin.dividendImporters')} value={stats.dividends.usersImporting} />
+                <StatCard label={t('admin.dividendManualOnly')} value={stats.dividends.usersManualOnly} />
+                <StatCard
+                  label={t('admin.dividendRecords')}
+                  value={(
+                    <span>
+                      {stats.dividends.totalRecords}
+                      <span className="ml-1 text-xs font-medium text-muted-foreground">
+                        ({stats.dividends.importedRecords}{t('admin.dividendImportedShort')} · {stats.dividends.manualRecords}{t('admin.dividendManualShort')})
+                      </span>
+                    </span>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Pulse adoption — purple */}
+            <div>
+              <SectionHeader icon={Share2} title={t('admin.sections.pulse')} accent="purple" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                <StatCard label={t('admin.pulseUsers')} value={stats.pulse.usersWithSlug} accent="purple" hero />
+                <StatCard label={t('admin.pulseAdoption')} value={`${stats.pulse.adoptionRate}%`} accent="purple" hero />
+              </div>
+            </div>
           </div>
         )}
       </section>

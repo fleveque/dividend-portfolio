@@ -64,6 +64,30 @@ RSpec.describe "Api::V1::Admin::Dashboard", type: :request do
         expect(data["pulse"]["adoptionRate"]).to be > 0
       end
 
+      describe "dividends block" do
+        let!(:manual_user) { create(:user) }
+        let!(:importer) { create(:user) }
+
+        before do
+          create(:dividend, user: manual_user, source: "manual")
+          create(:dividend, :ibkr, user: importer)
+          create(:dividend, :ibkr, user: importer) # second imported row for same user
+        end
+
+        it "exposes dividend adoption + record counts" do
+          get "/api/v1/admin/dashboard"
+          dividends = JSON.parse(response.body)["data"]["dividends"]
+
+          expect(dividends["usersWithAny"]).to eq(2)
+          expect(dividends["usersImporting"]).to eq(1)
+          expect(dividends["usersManualOnly"]).to eq(1)
+          expect(dividends["totalRecords"]).to eq(3)
+          expect(dividends["importedRecords"]).to eq(2)
+          expect(dividends["manualRecords"]).to eq(1)
+          expect(dividends["adoptionRate"]).to be > 0
+        end
+      end
+
       describe "activity section" do
         it "exposes active-user, holding-change, and weekly-active-users metrics" do
           # Sessions: one in *this* week (anchored to current week's Monday so
