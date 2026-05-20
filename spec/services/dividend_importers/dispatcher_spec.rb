@@ -36,6 +36,5 @@ RSpec.describe DividendImporters::Dispatcher do
         expect(result[:dividends].size).to eq(1)
       end
     end
-
   end
 end
