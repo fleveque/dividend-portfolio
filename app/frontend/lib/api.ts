@@ -334,6 +334,7 @@ export interface DividendImportRow {
 
 export interface DividendImportPreview {
   language: 'es' | 'en' | null
+  source: 'ibkr' | 'myinvestor'
   resolved: DividendImportRow[]
   unmatched: DividendImportRow[]
   skipped: { reason: string; row: string }[]
@@ -413,10 +414,10 @@ export const dividendsApi = {
     })
   },
 
-  importApply: (rows: DividendImportRow[], mapping: Record<string, number> = {}) =>
+  importApply: (rows: DividendImportRow[], mapping: Record<string, number> = {}, source?: string) =>
     apiFetch<DividendImportResult>('/dividends/import_apply', {
       method: 'POST',
-      body: JSON.stringify({ rows, mapping }),
+      body: JSON.stringify({ rows, mapping, source }),
     }),
 }
 

@@ -58,8 +58,8 @@ export function useDividendImportPreview() {
 export function useDividendImportApply() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ rows, mapping }: { rows: DividendImportRow[]; mapping: Record<string, number> }) =>
-      dividendsApi.importApply(rows, mapping),
+    mutationFn: ({ rows, mapping, source }: { rows: DividendImportRow[]; mapping: Record<string, number>; source?: string }) =>
+      dividendsApi.importApply(rows, mapping, source),
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   })
 }
