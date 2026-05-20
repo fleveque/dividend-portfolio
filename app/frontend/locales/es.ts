@@ -221,7 +221,7 @@ const es = {
     deleteConfirm: 'Eliminar permanentemente {{symbol}} del {{date}}. Los dividendos importados están protegidos y deben reimportarse para eliminarse.',
     importTitle: 'Importar dividendos',
     importDescription: 'Sube un Estado de actividad de IBKR (CSV) o una exportación de operaciones de MyInvestor (XLS). El bróker se detecta automáticamente. Reimportar es seguro: los existentes se actualizan, los manuales no se tocan.',
-    importPickFile: 'Elige un archivo CSV',
+    importPickFile: 'Elige un archivo (CSV o XLS)',
     importHint: 'Estado de actividad de IBKR (CSV) o exportación de operaciones de MyInvestor (XLS).',
     importIbkrPathLabel: 'Dónde encontrarlo en IBKR:',
     importIbkrPathEn: 'EN: Performance & Reports → Statements → Activity',
