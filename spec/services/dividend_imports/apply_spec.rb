@@ -56,5 +56,24 @@ RSpec.describe DividendImports::Apply do
       result = described_class.call(user: user, rows: [ row ])
       expect(result).to eq(created: 0, updated: 0, skipped: 1)
     end
+
+    describe "source: parameter" do
+      it "persists rows with the supplied source key" do
+        described_class.call(user: user, rows: [ row ], source: "myinvestor")
+        expect(Dividend.last.source).to eq("myinvestor")
+      end
+
+      it "defaults to 'ibkr' when source is not provided" do
+        described_class.call(user: user, rows: [ row ])
+        expect(Dividend.last.source).to eq("ibkr")
+      end
+
+      it "does not collide with a same-natural-key row from a different source" do
+        # Same (user, stock, date, per_share) but different source → both rows survive.
+        described_class.call(user: user, rows: [ row ], source: "ibkr")
+        described_class.call(user: user, rows: [ row ], source: "myinvestor")
+        expect(Dividend.where(stock: stock, date: row[:date]).pluck(:source)).to contain_exactly("ibkr", "myinvestor")
+      end
+    end
   end
 end

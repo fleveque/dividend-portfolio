@@ -1,5 +1,5 @@
 class Dividend < ApplicationRecord
-  SOURCES = %w[manual ibkr].freeze
+  SOURCES = %w[manual ibkr myinvestor].freeze
 
   belongs_to :user
   belongs_to :stock

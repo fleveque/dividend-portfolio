@@ -57,7 +57,7 @@ export function DividendImportDialog({ open, onOpenChange }: Props) {
       .map((r) => ({ ...r, stock_id: mapping[r.ticker] }))
 
     applyMutation.mutate(
-      { rows: [ ...preview.resolved, ...mappedUnmatched ], mapping },
+      { rows: [ ...preview.resolved, ...mappedUnmatched ], mapping, source: preview.source },
       {
         onSuccess: (r) => {
           setResult(r)
@@ -77,7 +77,7 @@ export function DividendImportDialog({ open, onOpenChange }: Props) {
 
         {stage === 'pick' && (
           <div className="p-6 space-y-4">
-            <div className="rounded-md border border-blue-200 dark:border-blue-900 bg-blue-50/60 dark:bg-blue-950/30 p-3 space-y-2">
+            <div className="rounded-md border border-blue-200 dark:border-blue-900 bg-blue-50/60 dark:bg-blue-950/30 p-3 space-y-3">
               <div className="flex items-start gap-2">
                 <Info className="size-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
                 <div className="text-xs space-y-1">
@@ -86,7 +86,14 @@ export function DividendImportDialog({ open, onOpenChange }: Props) {
                   <p className="font-mono text-muted-foreground">{t('dividends.importIbkrPathEs')}</p>
                 </div>
               </div>
-              <div className="flex items-start gap-2 pt-2 border-t border-blue-200/50 dark:border-blue-900/50">
+              <div className="flex items-start gap-2 pt-3 border-t border-blue-200/50 dark:border-blue-900/50">
+                <Info className="size-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                <div className="text-xs space-y-1">
+                  <p className="font-medium">{t('dividends.importMyinvestorPathLabel')}</p>
+                  <p className="font-mono text-muted-foreground">{t('dividends.importMyinvestorPath')}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 pt-3 border-t border-blue-200/50 dark:border-blue-900/50">
                 <ShieldCheck className="size-4 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
                 <p className="text-xs text-muted-foreground">{t('dividends.importPrivacyHint')}</p>
               </div>
@@ -95,7 +102,7 @@ export function DividendImportDialog({ open, onOpenChange }: Props) {
             <label className="block border-2 border-dashed border-input rounded-lg p-8 text-center cursor-pointer hover:border-foreground/40">
               <input
                 type="file"
-                accept=".csv,text/csv"
+                accept=".csv,text/csv,.xls,application/vnd.ms-excel,text/html,.html"
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0]

@@ -6,16 +6,17 @@ module DividendImports
   # rows (source='manual') are never touched even if their natural key matches.
   # `created`/`updated`/`skipped` counts go back to the UI summary.
   class Apply
-    SOURCE = "ibkr".freeze
+    DEFAULT_SOURCE = "ibkr".freeze
 
-    def self.call(user:, rows:, manual_mapping: {})
-      new(user: user, rows: rows, manual_mapping: manual_mapping).call
+    def self.call(user:, rows:, manual_mapping: {}, source: DEFAULT_SOURCE)
+      new(user: user, rows: rows, manual_mapping: manual_mapping, source: source).call
     end
 
-    def initialize(user:, rows:, manual_mapping:)
+    def initialize(user:, rows:, manual_mapping:, source:)
       @user = user
       @rows = rows
       @manual_mapping = manual_mapping # { "TICKER" => stock_id, ... }
+      @source = source
     end
 
     def call
@@ -43,7 +44,7 @@ module DividendImports
           stock_id: stock_id,
           date: row[:date],
           per_share_amount: row[:per_share_amount],
-          source: SOURCE
+          source: @source
         )
 
         if existing
@@ -54,7 +55,7 @@ module DividendImports
             user_id: @user.id,
             stock_id: stock_id,
             date: row[:date],
-            source: SOURCE
+            source: @source
           ))
           created += 1
         end
