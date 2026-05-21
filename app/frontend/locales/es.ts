@@ -246,6 +246,7 @@ const es = {
     chartActual: 'Recibidos',
     chartProjected: 'Estimados',
     upcomingExDivs: 'Próximos ex-dividend · {{count}} días',
+    upcomingRadarTag: 'Radar',
   },
 
   // Stock metrics

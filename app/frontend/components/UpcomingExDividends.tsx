@@ -3,24 +3,29 @@ import { CalendarClock } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { StockLogo } from './StockLogo'
 import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import type { Holding } from '../types'
+import type { Holding, RadarStock, Stock } from '../types'
 
 interface Props {
   holdings: Holding[]
+  radarStocks?: RadarStock[]
   daysAhead?: number
 }
 
 interface UpcomingItem {
-  holding: Holding
+  stock: Stock | RadarStock
+  source: 'holding' | 'radar'
   daysUntil: number
   exDivDate: Date
+  key: string
 }
 
-// Compact card listing the user's holdings whose ex-dividend date falls within
-// the next `daysAhead` days, sorted soonest-first. Hides itself when there
-// are no upcoming ex-divs so the page doesn't show empty noise.
-export function UpcomingExDividends({ holdings, daysAhead = 14 }: Props) {
+// Compact card listing the user's stocks (held + watching) whose ex-dividend
+// date falls within the next `daysAhead` days, sorted soonest-first. Holdings
+// take precedence — a stock that's both held and on radar appears once,
+// untagged. Radar-only stocks get a small "Radar" tag.
+export function UpcomingExDividends({ holdings, radarStocks = [], daysAhead = 14 }: Props) {
   const { t, i18n } = useTranslation()
 
   const upcoming = useMemo<UpcomingItem[]>(() => {
@@ -29,18 +34,30 @@ export function UpcomingExDividends({ holdings, daysAhead = 14 }: Props) {
     const horizon = new Date(startOfToday)
     horizon.setDate(horizon.getDate() + daysAhead)
 
-    return holdings
-      .map((h) => {
-        if (!h.stock.exDividendDate) return null
-        const exDivDate = new Date(h.stock.exDividendDate)
-        if (isNaN(exDivDate.getTime())) return null
-        if (exDivDate < startOfToday || exDivDate > horizon) return null
-        const daysUntil = Math.round((exDivDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24))
-        return { holding: h, daysUntil, exDivDate }
-      })
-      .filter((x): x is UpcomingItem => x !== null)
-      .sort((a, b) => a.daysUntil - b.daysUntil)
-  }, [holdings, daysAhead])
+    const heldStockIds = new Set(holdings.map((h) => h.stock.id))
+    const items: UpcomingItem[] = []
+
+    const inWindow = (stock: Stock): { exDivDate: Date; daysUntil: number } | null => {
+      if (!stock.exDividendDate) return null
+      const exDivDate = new Date(stock.exDividendDate)
+      if (isNaN(exDivDate.getTime())) return null
+      if (exDivDate < startOfToday || exDivDate > horizon) return null
+      const daysUntil = Math.round((exDivDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24))
+      return { exDivDate, daysUntil }
+    }
+
+    for (const h of holdings) {
+      const w = inWindow(h.stock)
+      if (w) items.push({ stock: h.stock, source: 'holding', key: `h-${h.id}`, ...w })
+    }
+    for (const rs of radarStocks) {
+      if (heldStockIds.has(rs.id)) continue // already covered by holding
+      const w = inWindow(rs)
+      if (w) items.push({ stock: rs, source: 'radar', key: `r-${rs.id}`, ...w })
+    }
+
+    return items.sort((a, b) => a.daysUntil - b.daysUntil)
+  }, [holdings, radarStocks, daysAhead])
 
   if (upcoming.length === 0) return null
 
@@ -58,17 +75,24 @@ export function UpcomingExDividends({ holdings, daysAhead = 14 }: Props) {
           <span className="text-xs text-muted-foreground tabular-nums">{upcoming.length}</span>
         </div>
         <ul className="space-y-1.5">
-          {upcoming.map(({ holding, daysUntil, exDivDate }) => {
+          {upcoming.map(({ stock, source, daysUntil, exDivDate, key }) => {
             const urgent = daysUntil <= 3
             return (
               <li
-                key={holding.id}
+                key={key}
                 className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/40"
               >
-                <StockLogo symbol={holding.stock.symbol} name={holding.stock.name} size="sm" />
+                <StockLogo symbol={stock.symbol} name={stock.name} size="sm" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold leading-tight">{holding.stock.symbol}</p>
-                  <p className="text-[11px] text-muted-foreground truncate">{holding.stock.name}</p>
+                  <p className="text-sm font-semibold leading-tight flex items-center gap-1.5">
+                    {stock.symbol}
+                    {source === 'radar' && (
+                      <Badge variant="outline" className="text-[9px] px-1 py-0 uppercase tracking-wide">
+                        {t('dividends.upcomingRadarTag')}
+                      </Badge>
+                    )}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground truncate">{stock.name}</p>
                 </div>
                 <span className="text-xs font-mono text-muted-foreground tabular-nums whitespace-nowrap">
                   {formatDate(exDivDate)}
