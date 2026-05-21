@@ -13,7 +13,6 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { ScoreBadge } from './ScoreBadge'
-import { ExDividendBadge } from './ExDividendBadge'
 import type { RadarStock } from '../types'
 
 interface RadarStockRowProps {
@@ -102,9 +101,6 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
           <div className="w-16 shrink-0">
             <ScoreBadge score={stock.dividendScore} label={stock.dividendScoreLabel} />
           </div>
-          <div className="shrink-0">
-            <ExDividendBadge exDividendDate={stock.exDividendDate} />
-          </div>
           <span className="font-semibold text-foreground w-20 text-right shrink-0">{stock.formattedPrice}</span>
 
           {/* Target Price - Inline Editable */}
@@ -189,10 +185,9 @@ export function RadarStockRow({ stock, onRemove, isRemoving, showMetrics = false
               <StockLogo symbol={stock.symbol} name={stock.name} size="sm" />
             </div>
             <div className="flex-1 min-w-0 overflow-hidden">
-              <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex items-center gap-1.5">
                 <span className="font-bold text-foreground text-sm">{stock.symbol}</span>
                 <ScoreBadge score={stock.dividendScore} label={stock.dividendScoreLabel} />
-                <ExDividendBadge exDividendDate={stock.exDividendDate} />
               </div>
               <p className="text-xs text-muted-foreground truncate" title={stock.name}>{stock.name}</p>
             </div>

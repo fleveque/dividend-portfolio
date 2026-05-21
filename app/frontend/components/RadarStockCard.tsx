@@ -70,10 +70,9 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
           <div className="flex-1 min-w-0 overflow-hidden">
             <div className="flex justify-between items-start gap-2">
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
                   <h3 className="text-lg font-bold text-foreground">{stock.symbol}</h3>
                   <ScoreBadge score={stock.dividendScore} label={stock.dividendScoreLabel} />
-                  <ExDividendBadge exDividendDate={stock.exDividendDate} />
                 </div>
                 <p className="text-sm text-muted-foreground truncate" title={stock.name}>
                   {stock.name}
@@ -185,10 +184,22 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
         {stock.dividendScheduleAvailable && (
           <>
             <Separator className="my-3" />
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">{t('stock.dividends')}</span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground uppercase tracking-wide">{t('stock.dividends')}</span>
+                {/* Desktop: badge sits inline with the label */}
+                <span className="hidden md:inline-flex">
+                  <ExDividendBadge exDividendDate={stock.exDividendDate} />
+                </span>
+              </div>
               <DividendMonthGrid paymentMonths={stock.paymentMonths} shiftedPaymentMonths={stock.shiftedPaymentMonths} size="md" />
             </div>
+            {/* Mobile: badge stacked below so it doesn't crowd the row */}
+            {stock.exDividendDate && (
+              <div className="md:hidden mt-1.5 flex justify-end">
+                <ExDividendBadge exDividendDate={stock.exDividendDate} />
+              </div>
+            )}
           </>
         )}
 
