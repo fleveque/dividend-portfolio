@@ -246,6 +246,7 @@ const en = {
     chartActual: 'Received',
     chartProjected: 'Projected',
     upcomingExDivs: 'Upcoming ex-dividends · next {{count}} days',
+    upcomingRadarTag: 'Radar',
   },
 
   // Stock metrics (shared across card types)

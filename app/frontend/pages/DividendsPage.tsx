@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Loader2, Plus, Upload, Trash2, Pencil, Coins } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useHoldings } from '../hooks/useHoldingsQueries'
+import { useRadar } from '../hooks/useRadarQueries'
 import { useDividends, useDeleteDividend, useDividendChartData } from '../hooks/useDividendsQueries'
 import { DividendFormDialog } from '../components/DividendFormDialog'
 import { DividendImportDialog } from '../components/DividendImportDialog'
@@ -29,6 +30,7 @@ export function DividendsPage() {
   const { data: chartData } = useDividendChartData()
   const { data: chartDataFull } = useDividendChartData('full')
   const { data: holdingsData } = useHoldings()
+  const { data: radarData } = useRadar()
   const deleteMutation = useDeleteDividend()
 
   const [formOpen, setFormOpen] = useState(false)
@@ -119,9 +121,12 @@ export function DividendsPage() {
             </div>
           )}
 
-          {holdingsData?.holdings && holdingsData.holdings.length > 0 && (
+          {((holdingsData?.holdings?.length ?? 0) > 0 || (radarData?.stocks?.length ?? 0) > 0) && (
             <div className="mb-6">
-              <UpcomingExDividends holdings={holdingsData.holdings} />
+              <UpcomingExDividends
+                holdings={holdingsData?.holdings ?? []}
+                radarStocks={radarData?.stocks ?? []}
+              />
             </div>
           )}
 
