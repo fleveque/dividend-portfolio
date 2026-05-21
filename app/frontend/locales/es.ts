@@ -245,6 +245,7 @@ const es = {
     chartTitleFull: 'Histórico · próximos 12',
     chartActual: 'Recibidos',
     chartProjected: 'Estimados',
+    upcomingExDivs: 'Próximos ex-dividend · {{count}} días',
   },
 
   // Stock metrics
@@ -274,6 +275,9 @@ const es = {
     strong: 'Fuerte',
     fair: 'Regular',
     weak: 'Débil',
+    exDivToday: 'Ex-div hoy',
+    exDivTomorrow: 'Ex-div mañana',
+    exDivInDays: 'Ex-div en {{count}}d',
     // Dividend month grid
     noSchedule: 'Sin calendario',
     paysIn: 'Paga en {{months}}',

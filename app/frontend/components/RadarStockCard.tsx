@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { ScoreBadge } from './ScoreBadge'
+import { ExDividendBadge } from './ExDividendBadge'
 import { StockAiSummary } from './StockAiSummary'
 import type { RadarStock } from '../types'
 
@@ -183,10 +184,22 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
         {stock.dividendScheduleAvailable && (
           <>
             <Separator className="my-3" />
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">{t('stock.dividends')}</span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground uppercase tracking-wide">{t('stock.dividends')}</span>
+                {/* Desktop: badge sits inline with the label */}
+                <span className="hidden md:inline-flex">
+                  <ExDividendBadge exDividendDate={stock.exDividendDate} />
+                </span>
+              </div>
               <DividendMonthGrid paymentMonths={stock.paymentMonths} shiftedPaymentMonths={stock.shiftedPaymentMonths} size="md" />
             </div>
+            {/* Mobile: badge stacked below so it doesn't crowd the row */}
+            {stock.exDividendDate && (
+              <div className="md:hidden mt-1.5 flex justify-end">
+                <ExDividendBadge exDividendDate={stock.exDividendDate} />
+              </div>
+            )}
           </>
         )}
 
