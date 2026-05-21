@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { ScoreBadge } from './ScoreBadge'
+import { ExDividendBadge } from './ExDividendBadge'
 import { StockAiSummary } from './StockAiSummary'
 import type { RadarStock } from '../types'
 
@@ -69,9 +70,10 @@ export function RadarStockCard({ stock, onRemove, isRemoving }: RadarStockCardPr
           <div className="flex-1 min-w-0 overflow-hidden">
             <div className="flex justify-between items-start gap-2">
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="text-lg font-bold text-foreground">{stock.symbol}</h3>
                   <ScoreBadge score={stock.dividendScore} label={stock.dividendScoreLabel} />
+                  <ExDividendBadge exDividendDate={stock.exDividendDate} />
                 </div>
                 <p className="text-sm text-muted-foreground truncate" title={stock.name}>
                   {stock.name}

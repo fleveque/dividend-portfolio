@@ -245,6 +245,7 @@ const en = {
     chartTitleFull: 'All time · next 12',
     chartActual: 'Received',
     chartProjected: 'Projected',
+    upcomingExDivs: 'Upcoming ex-dividends · next {{count}} days',
   },
 
   // Stock metrics (shared across card types)
@@ -275,6 +276,9 @@ const en = {
     strong: 'Strong',
     fair: 'Fair',
     weak: 'Weak',
+    exDivToday: 'Ex-div today',
+    exDivTomorrow: 'Ex-div tomorrow',
+    exDivInDays: 'Ex-div in {{count}}d',
     // Dividend month grid
     noSchedule: 'No schedule',
     paysIn: 'Pays in {{months}}',
