@@ -10,6 +10,8 @@ import {
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { usePortfolioInsights } from '../hooks/useAiInsights'
+import { isAiRateLimited } from '../types'
+import { AiRateLimitedNotice } from './AiRateLimitedNotice'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -74,7 +76,11 @@ export function PortfolioInsights({ hasStocks }: PortfolioInsightsProps) {
             </div>
           )}
 
-          {data && !isLoading && (
+          {data && !isLoading && isAiRateLimited(data) && (
+            <AiRateLimitedNotice limit={data.limit} />
+          )}
+
+          {data && !isLoading && !isAiRateLimited(data) && (
             <div className="space-y-4">
               <div className="rounded-lg bg-violet-50 dark:bg-violet-950/30 p-4">
                 <p className="text-sm text-foreground">{data.summary}</p>

@@ -10,7 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_18_165219) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_23_120000) do
+  create_table "ai_requests", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "feature", null: false
+    t.string "provider", null: false
+    t.datetime "created_at", null: false
+    t.index ["user_id", "created_at"], name: "index_ai_requests_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_ai_requests_on_user_id"
+  end
+
   create_table "buy_plan_items", force: :cascade do |t|
     t.integer "buy_plan_id", null: false
     t.integer "stock_id", null: false
@@ -148,6 +157,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_18_165219) do
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
   end
 
+  add_foreign_key "ai_requests", "users"
   add_foreign_key "buy_plan_items", "buy_plans"
   add_foreign_key "buy_plan_items", "stocks"
   add_foreign_key "buy_plans", "users"

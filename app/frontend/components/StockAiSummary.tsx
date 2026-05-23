@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { StockAiSummary as StockAiSummaryType } from '../types'
+import { isAiRateLimited, type StockAiSummary as StockAiSummaryType } from '../types'
+import { AiRateLimitedNotice } from './AiRateLimitedNotice'
 
 interface StockAiSummaryProps {
   stockId: number
@@ -65,7 +66,11 @@ export function StockAiSummary({ stockId }: StockAiSummaryProps) {
             </div>
           )}
 
-          {data && !isLoading && (
+          {data && !isLoading && isAiRateLimited(data) && (
+            <AiRateLimitedNotice limit={data.limit} />
+          )}
+
+          {data && !isLoading && !isAiRateLimited(data) && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Badge variant={verdictVariant[data.verdict]}>

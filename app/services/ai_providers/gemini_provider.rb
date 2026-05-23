@@ -2,34 +2,28 @@ module AiProviders
   class GeminiProvider < BaseProvider
     GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent".freeze
 
+    def name
+      :gemini
+    end
+
     def radar_insights(stocks_data, locale: nil, preferred_currency: nil)
       return empty_radar_insights if stocks_data.blank?
 
-      fingerprint = Digest::MD5.hexdigest(stocks_data.to_json)
       lang = normalized_locale(locale)
       ccy = preferred_currency || "USD"
-      cache_key = "ai/radar/#{fingerprint}/#{lang}/#{ccy}"
-
-      cache_fetch(cache_key) do
-        prompt = build_radar_prompt(stocks_data, lang, ccy)
-        response = call_gemini(prompt, radar_response_schema)
-        parse_response(response)
-      end
+      prompt = build_radar_prompt(stocks_data, lang, ccy)
+      response = call_gemini(prompt, radar_response_schema)
+      parse_response(response)
     end
 
     def portfolio_insights(stocks_data, locale: nil, preferred_currency: nil)
       return empty_portfolio_insights if stocks_data.blank?
 
-      fingerprint = Digest::MD5.hexdigest(stocks_data.to_json)
       lang = normalized_locale(locale)
       ccy = preferred_currency || "USD"
-      cache_key = "ai/portfolio/#{fingerprint}/#{lang}/#{ccy}"
-
-      cache_fetch(cache_key) do
-        prompt = build_portfolio_prompt(stocks_data, lang, ccy)
-        response = call_gemini(prompt, radar_response_schema)
-        parse_response(response)
-      end
+      prompt = build_portfolio_prompt(stocks_data, lang, ccy)
+      response = call_gemini(prompt, radar_response_schema)
+      parse_response(response)
     end
 
     def stock_summary(stock_data, locale: nil, preferred_currency: nil)
@@ -37,13 +31,9 @@ module AiProviders
 
       lang = normalized_locale(locale)
       ccy = preferred_currency || "USD"
-      cache_key = "ai/stock/#{stock_data[:id]}/#{stock_data[:updated_at]}/#{lang}/#{ccy}"
-
-      cache_fetch(cache_key) do
-        prompt = build_stock_prompt(stock_data, lang, ccy)
-        response = call_gemini(prompt, stock_response_schema)
-        parse_response(response)
-      end
+      prompt = build_stock_prompt(stock_data, lang, ccy)
+      response = call_gemini(prompt, stock_response_schema)
+      parse_response(response)
     end
 
     # Generate a social-media post for X and LinkedIn from a content topic.

@@ -275,6 +275,28 @@ export interface RadarInsights {
 }
 
 /**
+ * AI Rate-Limit response — returned by any AiInsightsService endpoint when
+ * the caller has used their daily AI quota. Frontend components check for
+ * `rateLimited === true` and render a friendly notice instead of the data.
+ */
+export interface AiRateLimited {
+  rateLimited: true
+  feature: string
+  limit: number
+  remaining: number
+  resetAt: string
+}
+
+export type RadarInsightsResult = RadarInsights | AiRateLimited
+export type StockAiSummaryResult = StockAiSummary | AiRateLimited
+
+export function isAiRateLimited(
+  result: unknown,
+): result is AiRateLimited {
+  return typeof result === 'object' && result !== null && (result as { rateLimited?: boolean }).rateLimited === true
+}
+
+/**
  * AI Stock Summary
  * Mirrors: AiInsightsService.stock_summary response
  */

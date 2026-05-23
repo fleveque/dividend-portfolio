@@ -20,7 +20,8 @@ module Api
           payload = ContentGenerator.call(
             category: topic[:category],
             topic_key: topic[:topic_key],
-            inputs: inputs
+            inputs: inputs,
+            user: Current.user
           )
 
           draft = ContentDraft.create!(

@@ -494,6 +494,14 @@ const en = {
     caution: 'Caution',
     avoid: 'Avoid',
   },
+
+  // AI rate-limit notice (shown when a user hits their daily AI quota)
+  ai: {
+    rateLimited: {
+      title: 'Daily AI limit reached',
+      body: "You've used your {{limit}} free AI requests today. AI calls cost real money \u2014 we're offering them free for now. Try again tomorrow.",
+    },
+  },
 } as const
 
 export default en
