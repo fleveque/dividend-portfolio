@@ -78,6 +78,33 @@ const en = {
     noTopScored: 'No top scored stocks available.',
     inRadar: 'In Radar',
     addToRadar: 'Add to Radar',
+    tryDemo: 'Try a sample portfolio',
+  },
+
+  // Demo mode
+  demo: {
+    banner: {
+      message: "You're exploring a sample portfolio. Sign up to build your own.",
+      cta: 'Sign up',
+    },
+    loadError: "Couldn't load the demo: {{message}}",
+    nudge: {
+      title: 'Sign up to make this yours',
+      signUp: 'Sign up — it’s free',
+      keepExploring: 'Keep exploring',
+      bodies: {
+        addRadarStock: 'Add stocks to your own radar to track them with target prices and live status.',
+        updateTargetPrice: 'Set your own target prices and get visual cues when stocks dip below.',
+        addHolding: 'Add holdings to track your real portfolio value, yield, and sector mix.',
+        updateHolding: 'Edit your holdings to keep your portfolio in sync with reality.',
+        deleteHolding: 'Manage your holdings — add, edit, and remove them as your portfolio evolves.',
+        addDividend: 'Log dividends to see your income calendar, sector mix, and year-on-year growth.',
+        editDividend: 'Edit dividend entries to correct dates, amounts, or sources.',
+        deleteDividend: 'Manage your dividend history — remove duplicates or mistakes.',
+        importDividends: 'Bulk-import dividends from your broker (Interactive Brokers, CSV, and more).',
+        updateProfile: 'Personalize your account — default currency, locale, and pulse sharing.',
+      },
+    },
   },
 
   // Feature Showcase

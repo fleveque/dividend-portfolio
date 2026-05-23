@@ -18,8 +18,9 @@
  * so it refetches fresh data. This keeps the UI in sync.
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { radarApi } from '../lib/api'
+import { useDemoGuardedMutation } from './useDemoGuardedMutation'
 
 /**
  * Fetch the user's radar (watchlist)
@@ -52,7 +53,7 @@ export function useRadar() {
 export function useAddStock() {
   const queryClient = useQueryClient()
 
-  return useMutation({
+  return useDemoGuardedMutation('addRadarStock', {
     mutationFn: (stockId: number) => radarApi.addStock(stockId),
     onSuccess: () => {
       // Invalidate radar query to refetch updated data
@@ -71,7 +72,7 @@ export function useAddStock() {
 export function useRemoveStock() {
   const queryClient = useQueryClient()
 
-  return useMutation({
+  return useDemoGuardedMutation('addRadarStock', {
     mutationFn: (stockId: number) => radarApi.removeStock(stockId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['radar'] })
@@ -89,7 +90,7 @@ export function useRemoveStock() {
 export function useUpdateTargetPrice() {
   const queryClient = useQueryClient()
 
-  return useMutation({
+  return useDemoGuardedMutation('updateTargetPrice', {
     mutationFn: ({ stockId, price }: { stockId: number; price: number | null }) =>
       radarApi.updateTargetPrice(stockId, price),
     onSuccess: () => {
