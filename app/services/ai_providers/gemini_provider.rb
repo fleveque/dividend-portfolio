@@ -39,15 +39,10 @@ module AiProviders
     # Generate a social-media post for X and LinkedIn from a content topic.
     # Topic shape: { category:, topic_key:, inputs: {…} }. No caching: every
     # button click should produce a fresh draft, not return a stale one.
-    # max_output_tokens needs comfortable headroom because the LinkedIn body
-    # (≤1500 chars) plus X text plus headline plus JSON schema overhead can
-    # spike past lower limits when Gemini's sampling lands on a wordy response
-    # — hitting it caused intermittent "response not valid JSON (truncated)"
-    # errors. 4096 is well within Flash's 8192 cap and leaves slack.
     def social_post(topic, locale: nil)
       lang = normalized_locale(locale)
       prompt = build_social_post_prompt(topic, lang)
-      response = call_gemini(prompt, social_post_response_schema, max_output_tokens: 4096)
+      response = call_gemini(prompt, social_post_response_schema)
       parse_response(response)
     end
 
@@ -70,7 +65,11 @@ module AiProviders
       ENV["GEMINI_API_KEY"]
     end
 
-    def call_gemini(prompt, schema, max_output_tokens: 1024)
+    # 4096 is well within Flash's 8192 cap and leaves slack for Gemini 2.5's
+    # "thinking" tokens, which silently consume the output budget before the
+    # actual response — at 1024 we hit intermittent "response not valid JSON
+    # (truncated)" errors even for short outputs like stock summaries.
+    def call_gemini(prompt, schema, max_output_tokens: 4096)
       raise AiError, "GEMINI_API_KEY is not configured" if api_key.blank?
 
       uri = URI("#{GEMINI_API_URL}?key=#{api_key}")
