@@ -21,6 +21,12 @@ Rails.application.routes.draw do
       # Public anonymous-access endpoints (no auth required)
       resource :demo, only: [ :show ], controller: "demos"
 
+      # Telegram bot webhook — public; auth is via X-Telegram-Bot-Api-Secret-Token.
+      post "telegram/webhook", to: "telegram#webhook"
+
+      # Telegram linking for the authenticated user (Settings page).
+      resource :telegram_link, only: [ :show, :create, :destroy ]
+
       # Stock endpoints - public (no auth required for browsing)
       resources :stocks, only: [ :index, :show ] do
         member do

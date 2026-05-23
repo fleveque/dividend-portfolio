@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_23_120000) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_23_140000) do
   create_table "ai_requests", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "feature", null: false
@@ -141,6 +141,22 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_23_120000) do
     t.index ["symbol"], name: "index_stocks_on_symbol", unique: true
   end
 
+  create_table "user_telegram_links", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "code"
+    t.string "chat_id"
+    t.string "telegram_user_id"
+    t.datetime "linked_at"
+    t.datetime "expires_at"
+    t.boolean "notifications_enabled", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chat_id"], name: "index_user_telegram_links_on_chat_id", unique: true, where: "chat_id IS NOT NULL"
+    t.index ["code"], name: "index_user_telegram_links_on_code", unique: true, where: "code IS NOT NULL"
+    t.index ["user_id"], name: "index_user_telegram_links_active_per_user", unique: true, where: "linked_at IS NOT NULL"
+    t.index ["user_id"], name: "index_user_telegram_links_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email_address", null: false
     t.string "password_digest"
@@ -169,4 +185,5 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_23_120000) do
   add_foreign_key "radar_stocks", "stocks", on_delete: :cascade
   add_foreign_key "radars", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "user_telegram_links", "users"
 end

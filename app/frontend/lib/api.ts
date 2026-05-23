@@ -445,6 +445,29 @@ export interface ProfileUpdate {
   preferredCurrency?: string
 }
 
+// ============================================================================
+// Telegram link API — settings-page integration for connecting Telegram chats
+// ============================================================================
+
+export interface TelegramLinkStatus {
+  connected: boolean
+  telegramUserId?: string
+  linkedAt?: string
+  notificationsEnabled?: boolean
+}
+
+export interface TelegramLinkStart {
+  code: string
+  deepLinkUrl: string
+  expiresAt: string
+}
+
+export const telegramLinkApi = {
+  get: () => apiFetch<TelegramLinkStatus>('/telegram_link'),
+  create: () => apiFetch<TelegramLinkStart>('/telegram_link', { method: 'POST' }),
+  destroy: () => apiFetch<{ unlinked: true }>('/telegram_link', { method: 'DELETE' }),
+}
+
 export const profileApi = {
   get: () => apiFetch<UserProfile>('/profile'),
 

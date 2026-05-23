@@ -8,6 +8,22 @@ module AiProviders
       raise NotImplementedError, "Subclasses must implement #name"
     end
 
+    # Multi-turn chat with optional tool calling. The provider internally
+    # resolves up to `max_tool_rounds` rounds: send messages, receive tool
+    # calls, invoke them, feed results back, repeat — until the LLM emits
+    # plain text. Returns an `AiProviders::ChatResult`.
+    #
+    # @param messages [Array<Hash>] [{ role: "user"|"assistant", text: "..." }]
+    # @param tools [Array<AiProviders::Tool>] tools the LLM may call
+    # @param system [String, nil] system instructions
+    # @param locale [String, nil] "en" / "es"; provider appends a language
+    #                             instruction if non-English
+    # @param max_tool_rounds [Integer] hard cap on tool-call iterations
+    # @return [AiProviders::ChatResult]
+    def chat(messages:, tools: [], system: nil, locale: nil, max_tool_rounds: 3)
+      raise NotImplementedError, "Subclasses must implement #chat"
+    end
+
     # Generate insights for a radar's stock portfolio
     #
     # @param stocks_data [Array<Hash>] array of stock data hashes

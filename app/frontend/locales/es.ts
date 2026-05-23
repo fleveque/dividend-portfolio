@@ -79,6 +79,10 @@ const es = {
     inRadar: 'En Radar',
     addToRadar: 'A\u00f1adir al Radar',
     tryDemo: 'Prueba una cartera de ejemplo',
+    telegramTitle: 'Quantic en Telegram',
+    telegramDescription: 'Pregunta sobre tu cartera en lenguaje natural — ex-divs, totales, precios objetivo — directamente desde Telegram.',
+    telegramExamples: '"¿qué dividendos he recibido este mes?" · "muestra mi radar" · "¿hay ex-divs esta semana?"',
+    telegramConnect: 'Conectar Telegram',
   },
 
   // Demo mode
@@ -382,6 +386,24 @@ const es = {
     failedToUpdate: 'Error al actualizar',
     displayCurrency: 'Moneda de visualizaci\u00f3n',
     displayCurrencyDescription: 'Elige la moneda que se usa para sumar totales multi-divisa. Los precios por acci\u00f3n se mantienen en su moneda de cotizaci\u00f3n.',
+    telegram: {
+      title: 'Conectar Telegram',
+      description: 'Preg\u00fantale a Quantic lo que quieras desde Telegram \u2014 tu radar, cartera, dividendos, pr\u00f3ximas ex-divs. Las respuestas usan IA; tienes 3 solicitudes gratis al d\u00eda.',
+      connect: 'Abrir bot de Telegram',
+      connected: 'Conectado',
+      linkedAt: 'Vinculado {{date}}',
+      disconnect: 'Desconectar',
+      pendingInstructions: 'Telegram deber\u00eda haberse abierto con un mensaje /start. Toca Enviar en Telegram y luego vuelve aqu\u00ed y haz clic en Actualizar.',
+      openInTelegramAgain: 'Abrir Telegram de nuevo',
+      refreshStatus: 'Listo \u2014 actualizar',
+      howItWorks: {
+        summary: 'C\u00f3mo funciona',
+        askExamples: 'Pregunta cosas como "\u00bfqu\u00e9 dividendos he recibido este mes?", "mu\u00e9strame mi radar", "\u00bfhay ex-divs esta semana?".',
+        limit: 'Las llamadas a IA cuestan dinero \u2014 para que sea sostenible, los usuarios no admin tienen 3 solicitudes al d\u00eda.',
+        privacy: 'El bot solo ve tus propios datos. Nada se comparte con otros usuarios. Solo responde en chats privados, no en grupos.',
+        unlinkAnytime: 'Puedes desvincular desde aqu\u00ed en cualquier momento. Nunca te escribimos sin que t\u00fa inicies (hasta que actives notificaciones, llegar\u00e1n m\u00e1s adelante).',
+      },
+    },
   },
 
   // Admin Page
