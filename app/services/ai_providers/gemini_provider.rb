@@ -49,12 +49,15 @@ module AiProviders
     # Generate a social-media post for X and LinkedIn from a content topic.
     # Topic shape: { category:, topic_key:, inputs: {…} }. No caching: every
     # button click should produce a fresh draft, not return a stale one.
-    # Bumped max_output_tokens because the LinkedIn body (≤1500 chars) plus
-    # X text plus headline plus JSON overhead overflows the default 1024.
+    # max_output_tokens needs comfortable headroom because the LinkedIn body
+    # (≤1500 chars) plus X text plus headline plus JSON schema overhead can
+    # spike past lower limits when Gemini's sampling lands on a wordy response
+    # — hitting it caused intermittent "response not valid JSON (truncated)"
+    # errors. 4096 is well within Flash's 8192 cap and leaves slack.
     def social_post(topic, locale: nil)
       lang = normalized_locale(locale)
       prompt = build_social_post_prompt(topic, lang)
-      response = call_gemini(prompt, social_post_response_schema, max_output_tokens: 2048)
+      response = call_gemini(prompt, social_post_response_schema, max_output_tokens: 4096)
       parse_response(response)
     end
 
