@@ -138,6 +138,21 @@ interface RadarResponse {
   stocks: RadarStock[]
 }
 
+// Curated bundle returned by the public /demo endpoint. Each section's shape
+// matches the corresponding endpoint's JSON, so React Query can cache it under
+// the same keys the regular hooks read from (['radar'], ['holdings'], etc.).
+export interface DemoBundle {
+  radar: RadarResponse
+  holdings: unknown
+  dividends: unknown[]
+  chart: unknown
+  chartFull: unknown
+}
+
+export const demoApi = {
+  get: () => apiFetch<DemoBundle>('/demo'),
+}
+
 export const radarApi = {
   /**
    * Get the current user's radar with all stocks

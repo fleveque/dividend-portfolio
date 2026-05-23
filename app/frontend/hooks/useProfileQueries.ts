@@ -1,5 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { profileApi, type ProfileUpdate } from '../lib/api'
+import { useDemoGuardedMutation } from './useDemoGuardedMutation'
 
 export function useProfile() {
   return useQuery({
@@ -12,7 +13,7 @@ export function useProfile() {
 export function useUpdateProfile() {
   const queryClient = useQueryClient()
 
-  return useMutation({
+  return useDemoGuardedMutation('updateProfile', {
     mutationFn: (update: ProfileUpdate) => profileApi.update(update),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] })

@@ -11,7 +11,7 @@
  */
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider } from '../contexts/ThemeContext'
 import { ViewPreferenceProvider } from '../contexts/ViewPreferenceContext'
 import { AuthProvider } from '../contexts/AuthContext'
@@ -28,6 +28,7 @@ import AdminContentDraftsPage from '../pages/AdminContentDraftsPage'
 import PortfolioPage from '../pages/PortfolioPage'
 import DividendsPage from '../pages/DividendsPage'
 import SettingsPage from '../pages/SettingsPage'
+import DemoPage from '../pages/DemoPage'
 
 /**
  * QueryClient Configuration
@@ -78,6 +79,12 @@ function App() {
                     <Route element={<AdminRoute />}>
                       <Route path="/admin" element={<AdminDashboardPage />} />
                       <Route path="/admin/content-drafts" element={<AdminContentDraftsPage />} />
+                    </Route>
+                    <Route element={<DemoPage />}>
+                      <Route path="/demo" element={<Navigate to="/demo/portfolio" replace />} />
+                      <Route path="/demo/radar" element={<RadarPage />} />
+                      <Route path="/demo/portfolio" element={<PortfolioPage />} />
+                      <Route path="/demo/dividends" element={<DividendsPage />} />
                     </Route>
                   </Route>
                 </Routes>

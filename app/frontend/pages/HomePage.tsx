@@ -1,18 +1,21 @@
-import { Loader2, Activity, ExternalLink, Settings } from 'lucide-react'
+import { Loader2, Activity, ExternalLink, Settings, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Logo } from '../components/Logo'
 import { FeatureShowcase } from '../components/FeatureShowcase'
 import { TopScoredShowcase } from '../components/TopScoredShowcase'
 import { CompactStockRow } from '../components/CompactStockRow'
+import { useAuth } from '../contexts/AuthContext'
 import { useLastAddedStocks, useMostAddedStocks, useMostHeldStocks } from '../hooks/useStockQueries'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import pulsePreviewImg from '@/assets/screenshots/pulse-portfolio.webp'
 import { PULSE_URL } from '../lib/pulse'
 
 export function HomePage() {
   const { t } = useTranslation()
+  const { isAuthenticated } = useAuth()
 
   const {
     data: lastAdded,
@@ -49,6 +52,15 @@ export function HomePage() {
         <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
           {t('home.heroSubtitle')}
         </p>
+        {!isAuthenticated && (
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-5">
+            <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Link to="/demo">
+                <Sparkles className="size-4" /> {t('home.tryDemo')}
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Feature Showcase + Top Scored Stocks */}

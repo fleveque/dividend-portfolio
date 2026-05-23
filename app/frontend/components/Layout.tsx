@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Menu } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 import { Logo } from './Logo'
 import { ThemeToggle } from './ThemeToggle'
 import { LanguageToggle } from './LanguageToggle'
+import { DemoBanner } from './DemoBanner'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
@@ -27,8 +28,15 @@ const mobileNavLinkClass = ({ isActive }: { isActive: boolean }) =>
 export function Layout() {
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { t } = useTranslation()
+
+  // /demo/* is the anonymous "try the product" route. The Layout adapts: nav
+  // links point at the demo equivalents, the right-side "Sign in" CTA flips
+  // to a stronger "Sign up", and a banner sits above the header.
+  const isDemo = location.pathname.startsWith('/demo')
+  const navTarget = (path: string) => (isDemo ? `/demo${path}` : path)
 
   const handleLogout = async () => {
     await logout()
@@ -39,6 +47,7 @@ export function Layout() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {isDemo && <DemoBanner />}
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background border-b shadow-sm">
         <div className="container mx-auto px-4">
@@ -51,12 +60,14 @@ export function Layout() {
             <nav className="hidden md:flex items-center gap-2 lg:gap-4">
               <NavLink to="/" end className={navLinkClass}>{t('nav.home')}</NavLink>
 
-              {isAuthenticated && (
+              {(isAuthenticated || isDemo) && (
                 <>
-                  <NavLink to="/radar" className={navLinkClass}>{t('nav.radar')}</NavLink>
-                  <NavLink to="/portfolio" className={navLinkClass}>{t('nav.portfolio')}</NavLink>
-                  <NavLink to="/dividends" className={navLinkClass}>{t('nav.dividends')}</NavLink>
-                  <NavLink to="/settings" className={navLinkClass}>{t('nav.settings')}</NavLink>
+                  <NavLink to={navTarget('/radar')} className={navLinkClass}>{t('nav.radar')}</NavLink>
+                  <NavLink to={navTarget('/portfolio')} className={navLinkClass}>{t('nav.portfolio')}</NavLink>
+                  <NavLink to={navTarget('/dividends')} className={navLinkClass}>{t('nav.dividends')}</NavLink>
+                  {isAuthenticated && (
+                    <NavLink to="/settings" className={navLinkClass}>{t('nav.settings')}</NavLink>
+                  )}
                 </>
               )}
 
@@ -80,7 +91,7 @@ export function Layout() {
                       {t('nav.logout')}
                     </Button>
                   </div>
-                ) : (
+                ) : isDemo ? null : (
                   <Button asChild size="sm">
                     <Link to="/login">{t('nav.signIn')}</Link>
                   </Button>
@@ -110,12 +121,14 @@ export function Layout() {
           <nav className="flex flex-col gap-1 p-4">
             <NavLink to="/" end className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.home')}</NavLink>
 
-            {isAuthenticated && (
+            {(isAuthenticated || isDemo) && (
               <>
-                <NavLink to="/radar" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.radar')}</NavLink>
-                <NavLink to="/portfolio" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.portfolio')}</NavLink>
-                <NavLink to="/dividends" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.dividends')}</NavLink>
-                <NavLink to="/settings" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.settings')}</NavLink>
+                <NavLink to={navTarget('/radar')} className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.radar')}</NavLink>
+                <NavLink to={navTarget('/portfolio')} className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.portfolio')}</NavLink>
+                <NavLink to={navTarget('/dividends')} className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.dividends')}</NavLink>
+                {isAuthenticated && (
+                  <NavLink to="/settings" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.settings')}</NavLink>
+                )}
               </>
             )}
 
@@ -140,7 +153,7 @@ export function Layout() {
                   {t('nav.logout')}
                 </Button>
               </>
-            ) : (
+            ) : isDemo ? null : (
               <Button asChild className="mx-4">
                 <Link to="/login" onClick={closeMobile}>{t('nav.signIn')}</Link>
               </Button>

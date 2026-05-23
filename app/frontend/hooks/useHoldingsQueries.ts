@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { holdingsApi } from '../lib/api'
+import { useDemoGuardedMutation } from './useDemoGuardedMutation'
 import type { CurrencyTotals, Holding, HoldingsResponse } from '../types'
 
 // Recompute per-currency totals after an optimistic delete. The portfolio can
@@ -36,7 +37,7 @@ export function useHoldings() {
 export function useCreateHolding() {
   const queryClient = useQueryClient()
 
-  return useMutation({
+  return useDemoGuardedMutation('addHolding', {
     mutationFn: ({ stockId, quantity, averagePrice }: { stockId: number; quantity: number; averagePrice: number }) =>
       holdingsApi.create(stockId, quantity, averagePrice),
     onSuccess: () => {
@@ -48,7 +49,7 @@ export function useCreateHolding() {
 export function useUpdateHolding() {
   const queryClient = useQueryClient()
 
-  return useMutation({
+  return useDemoGuardedMutation('updateHolding', {
     mutationFn: ({ id, quantity, averagePrice }: { id: number; quantity: number; averagePrice: number }) =>
       holdingsApi.update(id, quantity, averagePrice),
     onSuccess: () => {
@@ -60,7 +61,7 @@ export function useUpdateHolding() {
 export function useDeleteHolding() {
   const queryClient = useQueryClient()
 
-  return useMutation({
+  return useDemoGuardedMutation('deleteHolding', {
     mutationFn: (id: number) => holdingsApi.delete(id),
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: ['holdings'] })

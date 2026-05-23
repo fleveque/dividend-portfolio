@@ -78,6 +78,33 @@ const es = {
     noTopScored: 'No hay acciones con puntuaci\u00f3n disponibles.',
     inRadar: 'En Radar',
     addToRadar: 'A\u00f1adir al Radar',
+    tryDemo: 'Prueba una cartera de ejemplo',
+  },
+
+  // Demo mode
+  demo: {
+    banner: {
+      message: 'Est\u00e1s explorando una cartera de ejemplo. Reg\u00edstrate para crear la tuya.',
+      cta: 'Reg\u00edstrate',
+    },
+    loadError: 'No se pudo cargar el demo: {{message}}',
+    nudge: {
+      title: 'Reg\u00edstrate para que sea tuyo',
+      signUp: 'Reg\u00edstrate \u2014 es gratis',
+      keepExploring: 'Seguir explorando',
+      bodies: {
+        addRadarStock: 'A\u00f1ade acciones a tu propio radar para seguirlas con precios objetivo y estado en vivo.',
+        updateTargetPrice: 'Fija tus propios precios objetivo y recibe se\u00f1ales visuales cuando bajen.',
+        addHolding: 'A\u00f1ade posiciones para ver el valor real de tu cartera, rentabilidad y reparto sectorial.',
+        updateHolding: 'Edita tus posiciones para mantener tu cartera al d\u00eda.',
+        deleteHolding: 'Gestiona tus posiciones \u2014 a\u00f1ade, edita y elimina seg\u00fan evolucione tu cartera.',
+        addDividend: 'Registra dividendos para ver tu calendario de ingresos, reparto sectorial y crecimiento interanual.',
+        editDividend: 'Edita entradas de dividendos para corregir fechas, importes o fuentes.',
+        deleteDividend: 'Gestiona tu historial de dividendos \u2014 elimina duplicados o errores.',
+        importDividends: 'Importa dividendos en lote desde tu broker (Interactive Brokers, CSV y m\u00e1s).',
+        updateProfile: 'Personaliza tu cuenta \u2014 moneda por defecto, idioma y compartir en Pulse.',
+      },
+    },
   },
 
   // Feature Showcase

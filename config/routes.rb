@@ -18,6 +18,9 @@ Rails.application.routes.draw do
   # Versioned namespace allows future API changes without breaking existing clients
   namespace :api do
     namespace :v1 do
+      # Public anonymous-access endpoints (no auth required)
+      resource :demo, only: [ :show ], controller: "demos"
+
       # Stock endpoints - public (no auth required for browsing)
       resources :stocks, only: [ :index, :show ] do
         member do

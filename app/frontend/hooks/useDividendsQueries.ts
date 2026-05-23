@@ -1,10 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   dividendsApi,
   type DividendCreatePayload,
   type DividendUpdatePayload,
   type DividendImportRow,
 } from '../lib/api'
+import { useDemoGuardedMutation } from './useDemoGuardedMutation'
 
 const KEY = ['dividends'] as const
 
@@ -26,7 +27,7 @@ export function useDividendChartData(range?: 'full') {
 
 export function useCreateDividend() {
   const qc = useQueryClient()
-  return useMutation({
+  return useDemoGuardedMutation('addDividend', {
     mutationFn: (payload: DividendCreatePayload) => dividendsApi.create(payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   })
@@ -34,7 +35,7 @@ export function useCreateDividend() {
 
 export function useUpdateDividend() {
   const qc = useQueryClient()
-  return useMutation({
+  return useDemoGuardedMutation('editDividend', {
     mutationFn: ({ id, payload }: { id: number; payload: DividendUpdatePayload }) =>
       dividendsApi.update(id, payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
@@ -43,21 +44,21 @@ export function useUpdateDividend() {
 
 export function useDeleteDividend() {
   const qc = useQueryClient()
-  return useMutation({
+  return useDemoGuardedMutation('deleteDividend', {
     mutationFn: (id: number) => dividendsApi.delete(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   })
 }
 
 export function useDividendImportPreview() {
-  return useMutation({
+  return useDemoGuardedMutation('importDividends', {
     mutationFn: (file: File) => dividendsApi.importPreview(file),
   })
 }
 
 export function useDividendImportApply() {
   const qc = useQueryClient()
-  return useMutation({
+  return useDemoGuardedMutation('importDividends', {
     mutationFn: ({ rows, mapping, source }: { rows: DividendImportRow[]; mapping: Record<string, number>; source?: string }) =>
       dividendsApi.importApply(rows, mapping, source),
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
