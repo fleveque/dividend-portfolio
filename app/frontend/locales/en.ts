@@ -16,6 +16,7 @@ const en = {
   // Common
   common: {
     loading: 'Loading...',
+    beta: 'Beta',
     search: 'Search',
     searching: 'Searching...',
     refresh: 'Refresh',

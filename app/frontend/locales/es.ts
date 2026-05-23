@@ -16,6 +16,7 @@ const es = {
   // Common
   common: {
     loading: 'Cargando...',
+    beta: 'Beta',
     search: 'Buscar',
     searching: 'Buscando...',
     refresh: 'Actualizar',

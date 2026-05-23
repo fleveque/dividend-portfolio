@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { CURRENCY_OPTIONS } from '@/lib/currency'
 import { pulsePortfolioUrl, pulsePortfolioDisplayUrl } from '../lib/pulse'
 
@@ -19,8 +20,8 @@ export function SettingsPage() {
     <div className="container mx-auto px-4 py-8 space-y-8">
       <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
       <DisplayCurrencySection />
-      <TelegramSection />
       <PortfolioSharingSection />
+      <TelegramSection />
     </div>
   )
 }
@@ -233,6 +234,9 @@ function TelegramSection() {
         <CardTitle className="flex items-center gap-2">
           <Send className="size-5 text-sky-500" />
           {t('settings.telegram.title')}
+          <Badge variant="secondary" className="ml-1 text-[10px] uppercase tracking-wider">
+            {t('common.beta')}
+          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
