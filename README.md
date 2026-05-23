@@ -161,6 +161,29 @@ GEMINI_API_KEY=your_gemini_api_key
 
 Without this key, the app works normally but AI insight features will be unavailable.
 
+#### Switching AI providers
+
+The AI layer is provider-agnostic. Gemini is the only implementation today,
+but adding another (Anthropic, OpenAI, etc.) is a 1-day task:
+
+1. Add `app/services/ai_providers/<name>_provider.rb` inheriting from
+   `AiProviders::BaseProvider` and implementing `name`, `radar_insights`,
+   `portfolio_insights`, `stock_summary`, and `social_post`.
+2. Set the provider via the `AI_PROVIDER` env var (e.g. `AI_PROVIDER=anthropic`).
+   Default is `gemini`.
+
+All AI-using code paths go through `AiProviders.current` — never instantiate
+a specific provider class directly.
+
+#### AI usage limits
+
+Non-admin users are capped at **3 AI requests per day** (UTC). Cache hits don't
+count — only actual LLM calls consume quota. The limit applies across every
+AI surface (radar insights, portfolio insights, stock summaries) and is logged
+per user / feature / provider on the `ai_requests` table for cost attribution.
+Admins bypass the limit. To change the cap, edit
+`AiRateLimiter::DAILY_LIMIT`.
+
 ### 6. Install dependencies:
 
     ```

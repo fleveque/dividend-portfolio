@@ -57,13 +57,13 @@ RSpec.describe AiProviders::GeminiProvider, type: :service do
         expect(result[:strengths]).to include("Good diversification")
       end
 
-      it "caches responses" do
+      it "calls the API every time (caching lives in AiInsightsService)" do
         http = stub_gemini_request(gemini_radar_response)
 
         provider.radar_insights(stocks_data)
         provider.radar_insights(stocks_data)
 
-        expect(http).to have_received(:request).once
+        expect(http).to have_received(:request).twice
       end
     end
 

@@ -13,7 +13,7 @@
  * This prevents malicious sites from making requests on behalf of the user.
  */
 
-import type { Stock, StockSearchResult, RadarStock, User, BuyPlanResponse, AdminDashboardStats, AdminUser, RadarInsights, StockAiSummary, HoldingsResponse, Holding, UserProfile } from '../types'
+import type { Stock, StockSearchResult, RadarStock, User, BuyPlanResponse, AdminDashboardStats, AdminUser, RadarInsightsResult, StockAiSummaryResult, HoldingsResponse, Holding, UserProfile } from '../types'
 
 const API_BASE = '/api/v1'
 
@@ -126,7 +126,7 @@ export const stocksApi = {
   /**
    * Get AI-generated summary for a stock (authenticated)
    */
-  getAiSummary: (id: number, locale?: string) => apiFetch<StockAiSummary>(`/stocks/${id}/ai_summary${locale ? `?locale=${locale}` : ''}`),
+  getAiSummary: (id: number, locale?: string) => apiFetch<StockAiSummaryResult>(`/stocks/${id}/ai_summary${locale ? `?locale=${locale}` : ''}`),
 }
 
 // ============================================================================
@@ -188,7 +188,7 @@ export const radarApi = {
   /**
    * Get AI-generated insights for the radar portfolio (authenticated)
    */
-  getInsights: (locale?: string) => apiFetch<RadarInsights>(`/radar/insights${locale ? `?locale=${locale}` : ''}`),
+  getInsights: (locale?: string) => apiFetch<RadarInsightsResult>(`/radar/insights${locale ? `?locale=${locale}` : ''}`),
 }
 
 // ============================================================================
@@ -285,7 +285,7 @@ export const holdingsApi = {
       method: 'DELETE',
     }),
 
-  getInsights: (locale?: string) => apiFetch<RadarInsights>(`/holdings/insights${locale ? `?locale=${locale}` : ''}`),
+  getInsights: (locale?: string) => apiFetch<RadarInsightsResult>(`/holdings/insights${locale ? `?locale=${locale}` : ''}`),
 
   importFromCart: (items: { stock_id: number; quantity: number }[]) =>
     apiFetch<{ imported: number }>('/holdings/import_from_cart', {

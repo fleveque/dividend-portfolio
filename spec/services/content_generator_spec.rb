@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe ContentGenerator do
+  let(:user) { create(:user, :admin) }
   let(:payload) do
     {
       headline: "AAPL is paying its dividend",
@@ -19,7 +20,8 @@ RSpec.describe ContentGenerator do
       result = described_class.call(
         category: "stock_of_the_day",
         topic_key: "AAPL",
-        inputs: { symbol: "AAPL", dividend_yield: 0.6 }
+        inputs: { symbol: "AAPL", dividend_yield: 0.6 },
+        user: user
       )
       expect(result[:headline]).to eq("AAPL is paying its dividend")
     end
@@ -28,7 +30,7 @@ RSpec.describe ContentGenerator do
       allow(AiInsightsService).to receive(:social_post).and_return(nil)
 
       expect {
-        described_class.call(category: "stock_of_the_day", topic_key: "AAPL", inputs: {})
+        described_class.call(category: "stock_of_the_day", topic_key: "AAPL", inputs: {}, user: user)
       }.to raise_error(described_class::GenerationFailed)
     end
 
@@ -36,7 +38,7 @@ RSpec.describe ContentGenerator do
       long = "A" * 300
       allow(AiInsightsService).to receive(:social_post).and_return(payload.merge(x: { text: long }))
 
-      result = described_class.call(category: "stock_of_the_day", topic_key: "AAPL", inputs: {})
+      result = described_class.call(category: "stock_of_the_day", topic_key: "AAPL", inputs: {}, user: user)
 
       expect(result[:x][:text].length).to eq(described_class::X_MAX_LENGTH)
       expect(result[:truncated_x]).to be true
@@ -45,13 +47,13 @@ RSpec.describe ContentGenerator do
     describe 'privacy assertion' do
       it 'raises if the input contains a portfolio_slug reference' do
         expect {
-          described_class.call(category: "pulse_aggregates", topic_key: "X", inputs: { leaked: "portfolio_slug=foo" })
+          described_class.call(category: "pulse_aggregates", topic_key: "X", inputs: { leaked: "portfolio_slug=foo" }, user: user)
         }.to raise_error(described_class::PrivacyViolation, /portfolio_slug/)
       end
 
       it 'raises if the input contains an email address' do
         expect {
-          described_class.call(category: "x", topic_key: "y", inputs: { from: "alice@example.com" })
+          described_class.call(category: "x", topic_key: "y", inputs: { from: "alice@example.com" }, user: user)
         }.to raise_error(described_class::PrivacyViolation, /forbidden/)
       end
 
@@ -60,7 +62,7 @@ RSpec.describe ContentGenerator do
           payload.merge(x: { text: "Email alice@example.com for more!" })
         )
         expect {
-          described_class.call(category: "stock_of_the_day", topic_key: "AAPL", inputs: {})
+          described_class.call(category: "stock_of_the_day", topic_key: "AAPL", inputs: {}, user: user)
         }.to raise_error(described_class::PrivacyViolation)
       end
 
@@ -69,7 +71,7 @@ RSpec.describe ContentGenerator do
           payload.merge(linkedin: { text: "Check out pulse.quantic.es/p/alice" })
         )
         expect {
-          described_class.call(category: "stock_of_the_day", topic_key: "AAPL", inputs: {})
+          described_class.call(category: "stock_of_the_day", topic_key: "AAPL", inputs: {}, user: user)
         }.to raise_error(described_class::PrivacyViolation)
       end
     end

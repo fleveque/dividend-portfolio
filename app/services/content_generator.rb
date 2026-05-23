@@ -17,12 +17,15 @@ class ContentGenerator
   class << self
     # Topic shape: { category:, topic_key:, inputs: {...} }. Returns the parsed
     # payload from the AI provider — controller persists it as a ContentDraft.
-    def call(category:, topic_key:, inputs:, locale: nil)
+    # `user:` is the admin operator who triggered the draft; the rate limiter
+    # bypasses admins, so this never blocks, but the AiRequest row still gets
+    # logged for cost attribution.
+    def call(category:, topic_key:, inputs:, user:, locale: nil)
       topic = { category: category.to_s, topic_key: topic_key, inputs: inputs }
 
       assert_privacy!(inputs)
 
-      payload = AiInsightsService.social_post(topic, locale: locale)
+      payload = AiInsightsService.social_post(topic, user: user, locale: locale)
       raise GenerationFailed, "empty payload from provider" if payload.blank?
 
       enforce_length_guards!(payload)

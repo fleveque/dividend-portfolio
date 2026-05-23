@@ -2,6 +2,12 @@ module AiProviders
   class BaseProvider
     class AiError < StandardError; end
 
+    # Short identifier used for logging / analytics (e.g. on AiRequest rows).
+    # Each subclass must override.
+    def name
+      raise NotImplementedError, "Subclasses must implement #name"
+    end
+
     # Generate insights for a radar's stock portfolio
     #
     # @param stocks_data [Array<Hash>] array of stock data hashes
