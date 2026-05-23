@@ -20,17 +20,17 @@ module Api
         end
 
         link = UserTelegramLink.start_linking!(Current.user)
-        render_success(
+        render_success({
           code: link.code,
           deepLinkUrl: "https://t.me/#{TelegramBot::Client.bot_handle}?start=#{link.code}",
           expiresAt: link.expires_at.iso8601
-        )
+        })
       end
 
       # DELETE /api/v1/telegram_link → { unlinked: true }
       def destroy
         UserTelegramLink.where(user: Current.user).delete_all
-        render_success(unlinked: true)
+        render_success({ unlinked: true })
       end
 
       private
