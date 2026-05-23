@@ -16,9 +16,15 @@ module Api
       def webhook
         return head(:forbidden) unless valid_secret?
 
-        update = params.permit!.to_h
+        # Parse the raw JSON body ourselves — we hand the whole update to a
+        # plain Ruby handler, never to ActiveRecord mass assignment, so the
+        # full Rails params machinery (and Brakeman's MassAssignment warning
+        # for `permit!`) just gets in the way.
+        update = JSON.parse(request.raw_post)
         TelegramBot::Handler.process(update)
         head :ok
+      rescue JSON::ParserError
+        head :ok # silently drop malformed updates; Telegram won't retry 2xx
       end
 
       private
