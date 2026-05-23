@@ -46,6 +46,55 @@ module AiProviders
       parse_response(response)
     end
 
+    # Multi-turn chat with function calling (the bot's NLU layer). Walks the
+    # tool-call loop internally: send → maybe-get-functionCall → invoke local
+    # handler → send result back → repeat (capped at `max_tool_rounds`) →
+    # return the LLM's final text reply.
+    def chat(messages:, tools: [], system: nil, locale: nil, max_tool_rounds: 3)
+      raise AiError, "GEMINI_API_KEY is not configured" if api_key.blank?
+
+      lang = normalized_locale(locale)
+      tools_by_name = tools.index_by(&:name)
+      contents = messages.map { |m| { role: gemini_role(m[:role]), parts: [ { text: m[:text] } ] } }
+      executed_calls = []
+
+      max_tool_rounds.times do
+        response = call_gemini_chat(
+          contents: contents,
+          system: [ system, language_instruction(lang) ].compact.reject(&:empty?).join("\n"),
+          tools: tools
+        )
+
+        parts = response.dig("candidates", 0, "content", "parts") || []
+        function_call = parts.find { |p| p["functionCall"] }&.dig("functionCall")
+
+        unless function_call
+          text = parts.map { |p| p["text"] }.compact.join.strip
+          return ChatResult.new(text: text, tool_calls: executed_calls)
+        end
+
+        tool = tools_by_name[function_call["name"]]
+        if tool.nil?
+          Rails.logger.warn "Gemini called unknown tool: #{function_call["name"]}"
+          return ChatResult.new(text: "", tool_calls: executed_calls)
+        end
+
+        args = function_call["args"] || {}
+        result = tool.invoke(args)
+        executed_calls << { name: tool.name, args: args, result: result }
+
+        # Append the model's functionCall turn + our functionResponse turn so
+        # the next round sees the full history.
+        contents << { role: "model", parts: [ { functionCall: function_call } ] }
+        contents << {
+          role: "user",
+          parts: [ { functionResponse: { name: tool.name, response: { result: result } } } ]
+        }
+      end
+
+      ChatResult.new(text: "", tool_calls: executed_calls)
+    end
+
     private
 
     SUPPORTED_LOCALES = %w[en es].freeze
@@ -101,6 +150,44 @@ module AiProviders
       end
 
       JSON.parse(response.body)
+    end
+
+    # Variant of `call_gemini` for the chat / tool-calling path: no
+    # responseSchema (the model can choose tool calls *or* free text), and
+    # the conversation history (`contents`) plus tool declarations are
+    # passed through verbatim.
+    def call_gemini_chat(contents:, system:, tools:, max_output_tokens: 4096)
+      uri = URI("#{GEMINI_API_URL}?key=#{api_key}")
+      body = {
+        system_instruction: { parts: [ { text: system } ] },
+        contents: contents,
+        generationConfig: {
+          temperature: 0.4,
+          maxOutputTokens: max_output_tokens
+        }
+      }
+      if tools.any?
+        body[:tools] = [
+          { functionDeclarations: tools.map { |t| { name: t.name, description: t.description, parameters: t.parameters } } }
+        ]
+      end
+
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      http.open_timeout = 10
+      http.read_timeout = 30
+
+      request = Net::HTTP::Post.new(uri)
+      request["Content-Type"] = "application/json"
+      request.body = body.to_json
+
+      response = http.request(request)
+      raise AiError, "Gemini API error: #{response.code} #{response.message}" unless response.is_a?(Net::HTTPSuccess)
+      JSON.parse(response.body)
+    end
+
+    def gemini_role(role)
+      role.to_s == "assistant" ? "model" : "user"
     end
 
     def parse_response(response)

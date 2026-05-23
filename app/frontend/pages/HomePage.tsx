@@ -1,4 +1,4 @@
-import { Loader2, Activity, ExternalLink, Settings, Sparkles } from 'lucide-react'
+import { Loader2, Activity, ExternalLink, Settings, Sparkles, Send } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Logo } from '../components/Logo'
@@ -129,6 +129,36 @@ export function HomePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Telegram bot showcase — authenticated only */}
+      {isAuthenticated && (
+        <Card className="mb-8 border-sky-200 dark:border-sky-900/40 bg-gradient-to-r from-sky-50 to-cyan-50 dark:from-sky-950/30 dark:to-cyan-950/20 overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Send className="size-5 text-sky-600 dark:text-sky-400" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
+                    {t('home.telegramTitle')}
+                  </h2>
+                </div>
+                <p className="text-sm sm:text-base text-muted-foreground max-w-2xl">
+                  {t('home.telegramDescription')}
+                </p>
+                <p className="text-xs sm:text-sm text-muted-foreground italic">
+                  {t('home.telegramExamples')}
+                </p>
+              </div>
+              <Link
+                to="/settings#telegram"
+                className="inline-flex items-center gap-1.5 rounded-md bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 text-sm font-medium transition-colors shrink-0"
+              >
+                <Send className="size-3.5" /> {t('home.telegramConnect')}
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stock Lists — three columns on large screens */}
       <div className="grid lg:grid-cols-3 gap-4">

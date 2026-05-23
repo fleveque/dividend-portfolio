@@ -168,7 +168,7 @@ but adding another (Anthropic, OpenAI, etc.) is a 1-day task:
 
 1. Add `app/services/ai_providers/<name>_provider.rb` inheriting from
    `AiProviders::BaseProvider` and implementing `name`, `radar_insights`,
-   `portfolio_insights`, `stock_summary`, and `social_post`.
+   `portfolio_insights`, `stock_summary`, `social_post`, and `chat`.
 2. Set the provider via the `AI_PROVIDER` env var (e.g. `AI_PROVIDER=anthropic`).
    Default is `gemini`.
 
@@ -183,6 +183,40 @@ AI surface (radar insights, portfolio insights, stock summaries) and is logged
 per user / feature / provider on the `ai_requests` table for cost attribution.
 Admins bypass the limit. To change the cap, edit
 `AiRateLimiter::DAILY_LIMIT`.
+
+#### Telegram bot (optional)
+
+Quantic ships with a Telegram bot users can link from their Settings page to
+ask natural-language questions about their radar, portfolio, and dividends
+(e.g. *"what dividends did I get this month?"*, *"any ex-divs this week?"*).
+Each reply uses the configured AI provider and counts toward the user's
+daily AI quota.
+
+One-time operator setup:
+
+1. Open Telegram, message `@BotFather`, run `/newbot`, pick a name and handle
+   (e.g. `QuanticAppBot`). BotFather returns a token.
+2. Optional polish: `/setdescription`, `/setabouttext`, `/setuserpic`.
+3. Add env vars to your environment (1Password for prod):
+   ```sh
+   TELEGRAM_BOT_TOKEN=...        # from @BotFather
+   TELEGRAM_BOT_HANDLE=QuanticAppBot   # without the @
+   TELEGRAM_WEBHOOK_SECRET=...   # random hex; we verify this header on each webhook
+   ```
+4. Register the webhook with Telegram (one-time per environment):
+   ```sh
+   TELEGRAM_WEBHOOK_URL=https://your.host/api/v1/telegram/webhook \
+     bundle exec rails telegram:set_webhook
+   ```
+   Other rake tasks: `telegram:webhook_info`, `telegram:delete_webhook`.
+
+For users: once env vars are set, the "Connect Telegram" card appears in
+Settings. Clicking it issues a one-time deep link
+(`https://t.me/<handle>?start=<code>`), the user taps Send in Telegram, and
+the bot replies confirming the link.
+
+For local dev: use `ngrok http 3000` to expose the webhook publicly while
+testing, then set `TELEGRAM_WEBHOOK_URL` to the ngrok URL + `/api/v1/telegram/webhook`.
 
 ### 6. Install dependencies:
 

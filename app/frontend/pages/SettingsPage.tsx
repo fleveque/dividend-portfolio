@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
-import { Loader2, Check, Activity, ExternalLink, Coins } from 'lucide-react'
+import { Loader2, Check, Activity, ExternalLink, Coins, Send } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import { useProfile, useUpdateProfile } from '../hooks/useProfileQueries'
+import { useTelegramLink, useStartTelegramLinking, useUnlinkTelegram } from '../hooks/useTelegramLink'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { CURRENCY_OPTIONS } from '@/lib/currency'
 import { pulsePortfolioUrl, pulsePortfolioDisplayUrl } from '../lib/pulse'
 
@@ -19,6 +21,7 @@ export function SettingsPage() {
       <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
       <DisplayCurrencySection />
       <PortfolioSharingSection />
+      <TelegramSection />
     </div>
   )
 }
@@ -193,6 +196,109 @@ function PortfolioSharingSection() {
             <Check className="h-4 w-4" /> {t('common.saved')}
           </p>
         )}
+      </CardContent>
+    </Card>
+  )
+}
+
+function TelegramSection() {
+  const { t } = useTranslation()
+  const { data: status, isLoading, refetch } = useTelegramLink()
+  const startLinking = useStartTelegramLinking()
+  const unlink = useUnlinkTelegram()
+  const [pendingUrl, setPendingUrl] = useState<string | null>(null)
+
+  if (isLoading) {
+    return <Card><CardContent className="py-8 flex justify-center"><Loader2 className="animate-spin" /></CardContent></Card>
+  }
+
+  const handleConnect = async () => {
+    const result = await startLinking.mutateAsync()
+    setPendingUrl(result.deepLinkUrl)
+    window.open(result.deepLinkUrl, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleRefresh = () => {
+    setPendingUrl(null)
+    refetch()
+  }
+
+  const handleUnlink = async () => {
+    await unlink.mutateAsync()
+    setPendingUrl(null)
+  }
+
+  return (
+    <Card id="telegram" className="scroll-mt-8">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Send className="size-5 text-sky-500" />
+          {t('settings.telegram.title')}
+          <Badge variant="secondary" className="ml-1 text-[10px] uppercase tracking-wider">
+            {t('common.beta')}
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">{t('settings.telegram.description')}</p>
+
+        {status?.connected ? (
+          <>
+            <div className="rounded-lg border bg-sky-50 dark:bg-sky-950/20 border-sky-200 dark:border-sky-900/40 p-3 text-sm">
+              <p className="flex items-center gap-2 font-medium">
+                <Check className="size-4 text-sky-600 dark:text-sky-400" />
+                {t('settings.telegram.connected')}
+              </p>
+              <p className="text-muted-foreground mt-1">
+                {t('settings.telegram.linkedAt', { date: new Date(status.linkedAt ?? '').toLocaleString() })}
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleUnlink} disabled={unlink.isPending}>
+              {t('settings.telegram.disconnect')}
+            </Button>
+          </>
+        ) : pendingUrl ? (
+          <>
+            <Alert>
+              <AlertDescription className="text-sm">
+                {t('settings.telegram.pendingInstructions')}
+              </AlertDescription>
+            </Alert>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild size="sm" className="bg-sky-600 hover:bg-sky-700 text-white">
+                <a href={pendingUrl} target="_blank" rel="noopener noreferrer">
+                  {t('settings.telegram.openInTelegramAgain')}
+                </a>
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleRefresh} disabled={startLinking.isPending}>
+                {t('settings.telegram.refreshStatus')}
+              </Button>
+            </div>
+          </>
+        ) : (
+          <Button onClick={handleConnect} disabled={startLinking.isPending} className="bg-sky-600 hover:bg-sky-700 text-white">
+            {startLinking.isPending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+            {t('settings.telegram.connect')}
+          </Button>
+        )}
+
+        {startLinking.isError && (
+          <Alert variant="destructive">
+            <AlertDescription>
+              {startLinking.error instanceof Error ? startLinking.error.message : t('settings.failedToUpdate')}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <details className="text-sm text-muted-foreground">
+          <summary className="cursor-pointer font-medium text-foreground">{t('settings.telegram.howItWorks.summary')}</summary>
+          <ul className="list-disc pl-5 mt-2 space-y-1.5">
+            <li>{t('settings.telegram.howItWorks.askExamples')}</li>
+            <li>{t('settings.telegram.howItWorks.limit')}</li>
+            <li>{t('settings.telegram.howItWorks.privacy')}</li>
+            <li>{t('settings.telegram.howItWorks.unlinkAnytime')}</li>
+          </ul>
+        </details>
       </CardContent>
     </Card>
   )

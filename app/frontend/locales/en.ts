@@ -16,6 +16,7 @@ const en = {
   // Common
   common: {
     loading: 'Loading...',
+    beta: 'Beta',
     search: 'Search',
     searching: 'Searching...',
     refresh: 'Refresh',
@@ -79,6 +80,10 @@ const en = {
     inRadar: 'In Radar',
     addToRadar: 'Add to Radar',
     tryDemo: 'Try a sample portfolio',
+    telegramTitle: 'Quantic in Telegram',
+    telegramDescription: 'Ask your portfolio anything in natural language — ex-divs, totals, target prices — right from Telegram.',
+    telegramExamples: '"what dividends did I get this month?" · "show my radar" · "any ex-divs this week?"',
+    telegramConnect: 'Connect Telegram',
   },
 
   // Demo mode
@@ -383,6 +388,24 @@ const en = {
     failedToUpdate: 'Failed to update',
     displayCurrency: 'Display Currency',
     displayCurrencyDescription: 'Choose the currency used to sum multi-currency totals. Per-stock prices stay in their listing currency.',
+    telegram: {
+      title: 'Connect Telegram',
+      description: 'Ask Quantic anything from Telegram — your radar, portfolio, dividends, upcoming ex-divs. Replies use AI; you get 3 free requests per day.',
+      connect: 'Open Telegram bot',
+      connected: 'Connected',
+      linkedAt: 'Linked {{date}}',
+      disconnect: 'Disconnect',
+      pendingInstructions: 'Telegram should have opened with a /start message. Tap Send in Telegram, then come back here and click Refresh.',
+      openInTelegramAgain: 'Open Telegram again',
+      refreshStatus: "I'm done — refresh",
+      howItWorks: {
+        summary: 'How it works',
+        askExamples: 'Ask things like "what dividends did I get this month?", "show my radar", "any ex-divs this week?".',
+        limit: 'AI calls cost money — to keep things sustainable, non-admin users get 3 requests per day.',
+        privacy: 'The bot only sees your own data. Nothing is shared with other users. The bot only replies in private chats, not in groups.',
+        unlinkAnytime: 'You can unlink from here at any time. We never message you unprompted (until you opt into notifications, coming later).',
+      },
+    },
   },
 
   // Admin Page
