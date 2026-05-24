@@ -58,13 +58,17 @@ module TelegramBot
       end
 
       link.complete!(chat_id: chat_id, telegram_user_id: from_id)
-      reply(t("start.linked", email: Client.escape_markdown(link.user.email_address)))
+      reply(t("start.linked", email: Client.escape_html(link.user.email_address)))
     end
 
     def dispatch_command_or_nlu
       case text
       when %r{\A/help\b}i
         reply(t("help.body"))
+      when %r{\A/examples\b}i
+        reply(t("examples.body"))
+      when %r{\A/notifications\b}i
+        handle_notifications
       when %r{\A/unlink\b}i
         handle_unlink
       when %r{\A/}
@@ -77,6 +81,26 @@ module TelegramBot
     def handle_unlink
       UserTelegramLink.where(chat_id: chat_id.to_s).delete_all
       reply(t("unlink.done"))
+    end
+
+    # `/notifications` shows status; `/notifications on|off` toggles it.
+    # The same column powers the Settings UI toggle, so changes are
+    # immediately reflected on the web side and vice versa.
+    def handle_notifications
+      arg = text.split(/\s+/, 2)[1].to_s.strip.downcase
+      link = UserTelegramLink.linked.find_by(chat_id: chat_id.to_s)
+      return unless link # already guarded by dispatch caller, defensive
+
+      case arg
+      when "on"
+        link.update!(notifications_enabled: true)
+        reply(t("notifications.on"))
+      when "off"
+        link.update!(notifications_enabled: false)
+        reply(t("notifications.off"))
+      else
+        reply(t(link.notifications_enabled? ? "notifications.status_on" : "notifications.status_off"))
+      end
     end
 
     def handle_question

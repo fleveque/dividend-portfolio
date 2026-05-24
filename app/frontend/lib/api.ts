@@ -465,6 +465,14 @@ export interface TelegramLinkStart {
 export const telegramLinkApi = {
   get: () => apiFetch<TelegramLinkStatus>('/telegram_link'),
   create: () => apiFetch<TelegramLinkStart>('/telegram_link', { method: 'POST' }),
+  update: (updates: { notificationsEnabled?: boolean }) => {
+    const body: Record<string, unknown> = {}
+    if ('notificationsEnabled' in updates) body.notifications_enabled = updates.notificationsEnabled
+    return apiFetch<TelegramLinkStatus>('/telegram_link', {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    })
+  },
   destroy: () => apiFetch<{ unlinked: true }>('/telegram_link', { method: 'DELETE' }),
 }
 

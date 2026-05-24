@@ -397,12 +397,16 @@ const es = {
       pendingInstructions: 'Telegram deber\u00eda haberse abierto con un mensaje /start. Toca Enviar en Telegram y luego vuelve aqu\u00ed y haz clic en Actualizar.',
       openInTelegramAgain: 'Abrir Telegram de nuevo',
       refreshStatus: 'Listo \u2014 actualizar',
+      notifications: {
+        label: 'Notificaciones diarias',
+        description: 'Recibe un resumen diario a las 09:00 UTC: pr\u00f3ximas ex-divs, dividendos recibidos ayer y acciones que han ca\u00eddo por debajo de tu precio objetivo.',
+      },
       howItWorks: {
         summary: 'C\u00f3mo funciona',
         askExamples: 'Pregunta cosas como "\u00bfqu\u00e9 dividendos he recibido este mes?", "mu\u00e9strame mi radar", "\u00bfhay ex-divs esta semana?".',
         limit: 'Las llamadas a IA cuestan dinero \u2014 para que sea sostenible, los usuarios no admin tienen 3 solicitudes al d\u00eda.',
         privacy: 'El bot solo ve tus propios datos. Nada se comparte con otros usuarios. Solo responde en chats privados, no en grupos.',
-        unlinkAnytime: 'Puedes desvincular desde aqu\u00ed en cualquier momento. Nunca te escribimos sin que t\u00fa inicies (hasta que actives notificaciones, llegar\u00e1n m\u00e1s adelante).',
+        unlinkAnytime: 'Puedes desvincular desde aqu\u00ed en cualquier momento. Las notificaciones diarias son opcionales \u2014 puedes activarlas o desactivarlas arriba.',
       },
     },
   },

@@ -25,7 +25,7 @@ Rails.application.routes.draw do
       post "telegram/webhook", to: "telegram#webhook"
 
       # Telegram linking for the authenticated user (Settings page).
-      resource :telegram_link, only: [ :show, :create, :destroy ]
+      resource :telegram_link, only: [ :show, :create, :update, :destroy ]
 
       # Stock endpoints - public (no auth required for browsing)
       resources :stocks, only: [ :index, :show ] do

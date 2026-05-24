@@ -43,6 +43,27 @@ RSpec.describe "Api::V1::TelegramLinks", type: :request do
     end
   end
 
+  describe "PATCH /api/v1/telegram_link" do
+    it "flips notifications_enabled on the active link" do
+      link = UserTelegramLink.create!(user: user, chat_id: "123", telegram_user_id: "u", linked_at: Time.current, notifications_enabled: false)
+      patch "/api/v1/telegram_link", params: { notifications_enabled: true }, as: :json
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)["data"]["notificationsEnabled"]).to be(true)
+      expect(link.reload.notifications_enabled).to be(true)
+    end
+
+    it "accepts string booleans (form-y clients)" do
+      UserTelegramLink.create!(user: user, chat_id: "123", telegram_user_id: "u", linked_at: Time.current, notifications_enabled: true)
+      patch "/api/v1/telegram_link", params: { notifications_enabled: "false" }, as: :json
+      expect(JSON.parse(response.body)["data"]["notificationsEnabled"]).to be(false)
+    end
+
+    it "404s when the user has no active link" do
+      patch "/api/v1/telegram_link", params: { notifications_enabled: true }, as: :json
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
   describe "DELETE /api/v1/telegram_link" do
     it "removes the user's link rows and confirms" do
       UserTelegramLink.create!(user: user, chat_id: "123", telegram_user_id: "u", linked_at: Time.current)

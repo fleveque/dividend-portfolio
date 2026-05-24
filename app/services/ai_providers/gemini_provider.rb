@@ -175,7 +175,10 @@ module AiProviders
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
       http.open_timeout = 10
-      http.read_timeout = 30
+      # 60s ceiling: multi-tool-round chats can legitimately take 20-30s
+      # when Gemini reasons about which tool to call; 30s was clipping some
+      # successful responses and the bot would silently fail.
+      http.read_timeout = 60
 
       request = Net::HTTP::Post.new(uri)
       request["Content-Type"] = "application/json"

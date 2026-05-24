@@ -3,7 +3,7 @@ import { Loader2, Check, Activity, ExternalLink, Coins, Send } from 'lucide-reac
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import { useProfile, useUpdateProfile } from '../hooks/useProfileQueries'
-import { useTelegramLink, useStartTelegramLinking, useUnlinkTelegram } from '../hooks/useTelegramLink'
+import { useTelegramLink, useStartTelegramLinking, useUnlinkTelegram, useUpdateTelegramNotifications } from '../hooks/useTelegramLink'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -206,6 +206,7 @@ function TelegramSection() {
   const { data: status, isLoading, refetch } = useTelegramLink()
   const startLinking = useStartTelegramLinking()
   const unlink = useUnlinkTelegram()
+  const updateNotifications = useUpdateTelegramNotifications()
   const [pendingUrl, setPendingUrl] = useState<string | null>(null)
 
   if (isLoading) {
@@ -253,6 +254,23 @@ function TelegramSection() {
                 {t('settings.telegram.linkedAt', { date: new Date(status.linkedAt ?? '').toLocaleString() })}
               </p>
             </div>
+
+            {/* Daily-digest toggle — opt-in by default. Same column as the
+                bot's `/notifications on|off` command. */}
+            <label className="flex items-start gap-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/40 transition-colors">
+              <input
+                type="checkbox"
+                checked={!!status.notificationsEnabled}
+                onChange={(e) => updateNotifications.mutate(e.target.checked)}
+                disabled={updateNotifications.isPending}
+                className="mt-0.5 size-4 cursor-pointer accent-sky-600"
+              />
+              <div className="flex-1 text-sm">
+                <p className="font-medium text-foreground">{t('settings.telegram.notifications.label')}</p>
+                <p className="text-muted-foreground mt-0.5">{t('settings.telegram.notifications.description')}</p>
+              </div>
+            </label>
+
             <Button variant="outline" size="sm" onClick={handleUnlink} disabled={unlink.isPending}>
               {t('settings.telegram.disconnect')}
             </Button>

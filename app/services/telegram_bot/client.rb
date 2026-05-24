@@ -9,21 +9,39 @@ require "json"
 # rather than raise, so an unrelated message failure doesn't blow up the
 # webhook (which Telegram retries on non-2xx responses, leading to duplicate
 # user-visible messages).
+#
+# Reply format: HTML. MarkdownV2 requires escaping every period, hyphen,
+# parenthesis, etc. — LLMs are bad at that level of precision, and a single
+# missed escape makes Telegram reject the message (the user sees the typing
+# indicator briefly, then nothing). HTML only requires escaping `&`, `<`, `>`
+# — much safer surface area. If Telegram still rejects an HTML send, we
+# retry once as plain text so the user always gets *something*.
 module TelegramBot
   class Client
     API_BASE = "https://api.telegram.org".freeze
 
-    # Characters that MUST be escaped in MarkdownV2 (per Telegram docs).
-    MARKDOWN_V2_ESCAPE = /([_*\[\]()~`>#+\-=|{}.!\\])/.freeze
-
     class << self
-      def send_message(chat_id:, text:, parse_mode: "MarkdownV2", disable_web_page_preview: true)
-        post("sendMessage", {
+      def send_message(chat_id:, text:, parse_mode: "HTML", disable_web_page_preview: true)
+        result = post("sendMessage", {
           chat_id: chat_id,
           text: text,
           parse_mode: parse_mode,
           disable_web_page_preview: disable_web_page_preview
         })
+
+        # If Telegram rejected the formatted message (most likely cause:
+        # malformed HTML from the LLM), retry once with no parse_mode so
+        # the user at least gets the unformatted reply.
+        if result && result["ok"] == false && parse_mode
+          Rails.logger.warn "Telegram rejected formatted send; retrying as plain text"
+          result = post("sendMessage", {
+            chat_id: chat_id,
+            text: text,
+            disable_web_page_preview: disable_web_page_preview
+          })
+        end
+
+        result
       end
 
       def send_typing(chat_id:)
@@ -47,11 +65,15 @@ module TelegramBot
         post("getWebhookInfo", {})
       end
 
-      # Escape arbitrary text for safe interpolation into a MarkdownV2 message.
-      # NB: callers building richly-formatted strings should escape *data*
-      # portions only, not the surrounding markdown.
-      def escape_markdown(text)
-        text.to_s.gsub(MARKDOWN_V2_ESCAPE, '\\\\\1')
+      # Escape arbitrary text for safe interpolation into an HTML message.
+      # Per https://core.telegram.org/bots/api#html-style only `&`, `<`, `>`
+      # need escaping inside body text (attribute values would also need `"`,
+      # but we don't emit those).
+      def escape_html(text)
+        text.to_s
+          .gsub("&", "&amp;")
+          .gsub("<", "&lt;")
+          .gsub(">", "&gt;")
       end
 
       def bot_token

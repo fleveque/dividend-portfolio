@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_23_140000) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_25_120001) do
   create_table "ai_requests", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "feature", null: false
@@ -94,6 +94,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_23_140000) do
     t.integer "radar_id", null: false
     t.integer "stock_id", null: false
     t.decimal "target_price"
+    t.datetime "notified_below_target_at"
     t.index ["radar_id", "stock_id"], name: "index_radar_stocks_on_radar_id_and_stock_id"
     t.index ["stock_id", "radar_id"], name: "index_radar_stocks_on_stock_id_and_radar_id"
   end
@@ -148,7 +149,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_23_140000) do
     t.string "telegram_user_id"
     t.datetime "linked_at"
     t.datetime "expires_at"
-    t.boolean "notifications_enabled", default: true, null: false
+    t.boolean "notifications_enabled", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["chat_id"], name: "index_user_telegram_links_on_chat_id", unique: true, where: "chat_id IS NOT NULL"
