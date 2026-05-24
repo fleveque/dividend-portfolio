@@ -197,7 +197,7 @@ One-time operator setup:
 1. Open Telegram, message `@BotFather`, run `/newbot`, pick a name and handle
    (e.g. `QuanticAppBot`). BotFather returns a token.
 2. Optional polish: `/setdescription`, `/setabouttext`, `/setuserpic`.
-3. Add env vars to your environment (1Password for prod):
+3. Add env vars to your environment (Bitwarden for prod):
    ```sh
    TELEGRAM_BOT_TOKEN=...        # from @BotFather
    TELEGRAM_BOT_HANDLE=QuanticAppBot   # without the @
@@ -296,25 +296,50 @@ If you fork this project, update these files with your own server, domains, and 
 
 - `config/deploy.yml` — production server IP, domains, and container registry
 - `config/deploy.beta.yml` — beta domain
-- `.kamal/secrets` and `.kamal/secrets.beta` — fetch secrets from 1Password (no raw values)
+- `.kamal/secrets` and `.kamal/secrets.beta` — fetch secrets from Bitwarden (no raw values)
 
-Deploy secrets live in a 1Password vault and are pulled at deploy time by `.kamal/secrets`
-via `kamal secrets fetch --adapter 1password`. The only GitHub Actions secrets you need:
+Deploy secrets live in two Secure Note items in a personal
+[Bitwarden](https://bitwarden.com/) vault (`quantic-prod` and `quantic-beta`,
+each holding the relevant keys as custom fields), pulled at deploy time
+by `.kamal/secrets` via `kamal secrets fetch --adapter bitwarden`. The
+GitHub Actions secrets you need:
 
 | Secret | Description |
 |---|---|
 | `SSH_PRIVATE_KEY` | SSH key authorized on your server |
-| `OP_SERVICE_ACCOUNT_TOKEN` | 1Password service account token — `.kamal/secrets` uses it to fetch all other secrets |
+| `BW_ACCOUNT` | Your Bitwarden login email (kept out of git) |
+| `BW_CLIENTID` | Bitwarden personal API key — client_id (Account Settings → Security → Keys) |
+| `BW_CLIENTSECRET` | Bitwarden personal API key — client_secret |
+| `BW_PASSWORD` | Bitwarden master password — used to unlock the vault non-interactively in CI |
 
-`.github/workflows/deploy.yml` also sets two plain (non-secret) env values — `OP_ACCOUNT` and
-`OP_VAULT` — that select the 1Password account and vault.
+The deploy workflow installs the `bw` CLI via `npm install -g @bitwarden/cli`,
+configures the EU server, runs `bw login --apikey`, then
+`bw unlock --raw --passwordenv BW_PASSWORD` and exports the resulting
+`BW_SESSION` to `$GITHUB_ENV`. Kamal sees status=unlocked and skips its
+own login attempt — it just inherits the session and runs `bw get item ...`
+against the vault.
+
+#### Switching back to 1Password
+
+The current Bitwarden setup replaced an earlier 1Password integration.
+The 1P version is preserved verbatim at `.kamal/secrets.1password.example`
+(and `.kamal/secrets.beta.1password.example`). To roll back:
+
+```sh
+cp .kamal/secrets.1password.example .kamal/secrets
+cp .kamal/secrets.beta.1password.example .kamal/secrets.beta
+```
+
+Then revert the BW-related changes in `.github/workflows/deploy.yml`
+(swap the "Install Bitwarden CLI" step for `1password/install-cli-action@v3`,
+and the `BW_*` env vars for `OP_SERVICE_ACCOUNT_TOKEN` / `OP_ACCOUNT` / `OP_VAULT`).
 
 #### Local development
 
 Copy the sample files and fill in your values (both are gitignored; `direnv` loads `.env`):
 
 ```
-cp env.sample .env       # fill in OP_SERVICE_ACCOUNT_TOKEN + dev config
+cp env.sample .env       # fill in BW_CLIENTID + BW_CLIENTSECRET + BW_PASSWORD + dev config
 cp envrc.sample .envrc
 direnv allow
 ```
