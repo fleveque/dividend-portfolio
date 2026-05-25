@@ -139,6 +139,8 @@ const en = {
         title: 'Dividend income',
         thisMonth: 'This month',
         last12m: 'Last 12 months',
+        moreCurrencies_one: '+ {{count}} more currency',
+        moreCurrencies_other: '+ {{count}} more currencies',
       },
       buyPlanTeaser: {
         title: 'Your next picks',
