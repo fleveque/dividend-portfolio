@@ -41,6 +41,7 @@ const es = {
     tapRowToExpand: 'Toca una fila para ver detalles',
     clickToEdit: 'Clic para editar',
     clear: 'Limpiar',
+    investor: 'inversor',
   },
 
   // Theme
@@ -114,6 +115,23 @@ const es = {
       subtitle: 'Gratis, sin conexión a tu bróker. Prueba una cartera de ejemplo o regístrate para crear la tuya.',
       primary: 'Prueba el demo',
       secondary: 'Regístrate',
+    },
+
+    dashboard: {
+      greetingMorning: 'Buenos días, {{name}}',
+      greetingAfternoon: 'Buenas tardes, {{name}}',
+      greetingEvening: 'Buenas noches, {{name}}',
+      quickStats: {
+        holdingsLabel: 'posiciones',
+        radarLabel: 'en el radar',
+        nextExDiv: 'Próximo ex-div: {{symbol}} en {{daysAway}}d',
+        noUpcoming: 'Sin ex-divs próximas',
+      },
+      emptyPortfolio: {
+        title: 'Añade tu primera posición',
+        body: 'Calcula rentabilidad real, previsión de dividendos y mix sectorial. Apenas un minuto.',
+        cta: 'Ir a la cartera',
+      },
     },
   },
 

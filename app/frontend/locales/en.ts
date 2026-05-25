@@ -41,6 +41,7 @@ const en = {
     tapRowToExpand: 'Tap a row to expand details',
     clickToEdit: 'Click to edit',
     clear: 'Clear',
+    investor: 'investor',
   },
 
   // Theme
@@ -114,6 +115,23 @@ const en = {
       subtitle: 'Free, no broker connection required. Try a sample portfolio or sign up to build your own.',
       primary: 'Try the demo',
       secondary: 'Sign up',
+    },
+
+    dashboard: {
+      greetingMorning: 'Good morning, {{name}}',
+      greetingAfternoon: 'Good afternoon, {{name}}',
+      greetingEvening: 'Good evening, {{name}}',
+      quickStats: {
+        holdingsLabel: 'holdings',
+        radarLabel: 'on radar',
+        nextExDiv: 'Next ex-div: {{symbol}} in {{daysAway}}d',
+        noUpcoming: 'No upcoming ex-div dates',
+      },
+      emptyPortfolio: {
+        title: 'Add your first holding',
+        body: "Track real yield, dividend forecast, and sector mix. Takes a minute.",
+        cta: 'Go to portfolio',
+      },
     },
   },
 
