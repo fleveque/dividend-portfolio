@@ -93,6 +93,12 @@ const en = {
       tagline: 'Free · No broker connection required · Open source',
     },
 
+    community: {
+      marqueeDiscover: 'What investors are watching',
+      marqueeWatching: 'Trending in the community',
+      liveBadge: 'Live',
+    },
+
     howItWorks: {
       title: 'From watchlist to dividend income in 3 steps',
       step1Title: 'Build your radar',

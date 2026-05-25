@@ -93,6 +93,12 @@ const es = {
       tagline: 'Gratis · Sin conexión a tu bróker · Código abierto',
     },
 
+    community: {
+      marqueeDiscover: 'Lo que la comunidad sigue',
+      marqueeWatching: 'Tendencias de la comunidad',
+      liveBadge: 'En vivo',
+    },
+
     howItWorks: {
       title: 'De la lista a los dividendos en 3 pasos',
       step1Title: 'Construye tu radar',

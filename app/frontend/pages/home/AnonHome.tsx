@@ -8,6 +8,7 @@ import pulsePreviewImg from '@/assets/screenshots/pulse-portfolio.webp'
 import { PULSE_URL } from '../../lib/pulse'
 import { StockListCard } from './shared/StockListCard'
 import { HeroAurora } from './shared/HeroAurora'
+import { CommunityStrip } from './shared/CommunityStrip'
 import { HowItWorks } from './anon/HowItWorks'
 import { FinalCTA } from './anon/FinalCTA'
 
@@ -23,6 +24,8 @@ export function AnonHome() {
       <HeroAurora variant="anon" />
 
       <div className="container mx-auto px-4 pb-8 space-y-12 md:space-y-16">
+        <CommunityStrip framing="discover" />
+
         <HowItWorks />
 
         {/* Top-Scored leaderboard — real product output, gradient-bordered. */}
