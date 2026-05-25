@@ -20,6 +20,7 @@ RSpec.describe "Api::V1::Profiles", type: :request do
         expect(json["data"]["emailAddress"]).to eq(user.email_address)
         expect(json["data"]["portfolioSlug"]).to be_nil
         expect(json["data"]["preferredCurrency"]).to eq("USD")
+        expect(json["data"]["locale"]).to eq("en")
       end
     end
   end
@@ -63,6 +64,20 @@ RSpec.describe "Api::V1::Profiles", type: :request do
 
       it "rejects an unsupported currency" do
         patch "/api/v1/profile", params: { preferred_currency: "XYZ" }
+
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "updates the locale" do
+        patch "/api/v1/profile", params: { locale: "es" }
+
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)["data"]["locale"]).to eq("es")
+        expect(user.reload.locale).to eq("es")
+      end
+
+      it "rejects an unsupported locale" do
+        patch "/api/v1/profile", params: { locale: "fr" }
 
         expect(response).to have_http_status(:unprocessable_entity)
       end

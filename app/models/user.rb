@@ -1,4 +1,8 @@
 class User < ApplicationRecord
+  # Locales supported by the React frontend (see app/frontend/locales/) and
+  # the Telegram bot (see TelegramBot::Copy). Kept in sync manually.
+  SUPPORTED_LOCALES = %w[en es].freeze
+
   has_secure_password validations: false
   has_many :sessions, dependent: :destroy
   has_many :dividends, dependent: :delete_all
@@ -13,6 +17,7 @@ class User < ApplicationRecord
     format: { with: /\A[a-z0-9][a-z0-9-]{1,38}[a-z0-9]\z/, message: "must be 3-40 lowercase alphanumeric characters or hyphens" },
     if: -> { portfolio_slug.present? }
   validates :preferred_currency, presence: true, inclusion: { in: Stock::CURRENCY_SYMBOLS.keys }
+  validates :locale, presence: true, inclusion: { in: SUPPORTED_LOCALES }
 
   after_commit :publish_portfolio_slug_change, if: :saved_change_to_portfolio_slug?
 

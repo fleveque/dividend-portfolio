@@ -443,6 +443,7 @@ export const dividendsApi = {
 export interface ProfileUpdate {
   portfolioSlug?: string | null
   preferredCurrency?: string
+  locale?: string
 }
 
 // ============================================================================
@@ -483,6 +484,7 @@ export const profileApi = {
     const body: Record<string, unknown> = {}
     if ('portfolioSlug' in update) body.portfolio_slug = update.portfolioSlug
     if ('preferredCurrency' in update) body.preferred_currency = update.preferredCurrency
+    if ('locale' in update) body.locale = update.locale
     return apiFetch<UserProfile>('/profile', {
       method: 'PATCH',
       body: JSON.stringify(body),

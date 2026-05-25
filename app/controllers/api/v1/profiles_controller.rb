@@ -22,12 +22,13 @@ module Api
           id: Current.user.id,
           emailAddress: Current.user.email_address,
           portfolioSlug: Current.user.portfolio_slug,
-          preferredCurrency: Current.user.preferred_currency
+          preferredCurrency: Current.user.preferred_currency,
+          locale: Current.user.locale
         }
       end
 
       def profile_params
-        permitted = params.permit(:portfolio_slug, :preferred_currency)
+        permitted = params.permit(:portfolio_slug, :preferred_currency, :locale)
         permitted[:portfolio_slug] = nil if permitted.key?(:portfolio_slug) && permitted[:portfolio_slug].blank?
         permitted
       end
