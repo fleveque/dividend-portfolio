@@ -41,6 +41,7 @@ const en = {
     tapRowToExpand: 'Tap a row to expand details',
     clickToEdit: 'Click to edit',
     clear: 'Clear',
+    investor: 'investor',
   },
 
   // Theme
@@ -69,8 +70,10 @@ const en = {
     heroSubtitle: 'AI-enhanced dividend investing. Track your portfolio, set target prices on your radar, plan purchases, and get intelligent insights \u2014 all in one place.',
     pulseTitle: 'Pulse \u2014 Share your portfolio with the community',
     pulseDescription: 'Publish a live view of your portfolio: dividend yield, sector breakdown, and what you hold. See how other investors structure theirs.',
+    pulseAnonDescription: 'A live community of dividend investors. Browse what others hold, what they target, and how they structure their portfolios.',
+    pulseAnonSignup: 'Sign up to share yours',
     pulseOpenSettings: 'Opt in from Settings',
-    pulseSeeCommunity: 'See what others are sharing \u2192',
+    pulseSeeCommunity: 'See the community',
     pulsePreviewAlt: 'Example shared portfolio on Pulse',
     mostAddedToRadar: 'Most Added to Radar',
     mostHeldInPortfolios: 'Most Held in Portfolios',
@@ -84,6 +87,64 @@ const en = {
     telegramDescription: 'Ask your portfolio anything in natural language — ex-divs, totals, target prices — right from Telegram.',
     telegramExamples: '"what dividends did I get this month?" · "show my radar" · "any ex-divs this week?"',
     telegramConnect: 'Connect Telegram',
+    telegramAnonCta: 'Sign up to connect',
+
+    hero: {
+      headlinePrefix: 'Track your',
+      rotatorWords: ['dividends', 'yield-on-cost', 'ex-div dates', 'radar targets'],
+      subtitle: 'AI-enhanced dividend investing. Build your watchlist, track your portfolio, plan purchases — all in one place.',
+      signupCta: 'Sign up free',
+      tagline: 'Free · No broker connection required · Open source',
+    },
+
+    community: {
+      marqueeDiscover: 'What investors are watching',
+      marqueeWatching: 'Trending in the community',
+      liveBadge: 'Live',
+    },
+
+    howItWorks: {
+      title: 'From watchlist to dividend income in 3 steps',
+      step1Title: 'Build your radar',
+      step1Body: 'Add stocks with target prices. We track price, score, and ex-div dates.',
+      step2Title: 'Track your portfolio',
+      step2Body: 'Log holdings to get live yield, sector mix, and dividend forecast.',
+      step3Title: 'Get AI insights',
+      step3Body: 'Plain-language analysis of your portfolio and radar — risks, gaps, opportunities.',
+    },
+
+    finalCta: {
+      title: 'Start your radar in 30 seconds',
+      subtitle: 'Free, no broker connection required. Try a sample portfolio or sign up to build your own.',
+      primary: 'Try the demo',
+      secondary: 'Sign up',
+    },
+
+    dashboard: {
+      greetingMorning: 'Good morning, {{name}}',
+      greetingAfternoon: 'Good afternoon, {{name}}',
+      greetingEvening: 'Good evening, {{name}}',
+      quickStats: {
+        holdingsLabel: 'holdings',
+        radarLabel: 'on radar',
+        nextExDiv: 'Next ex-div: {{symbol}} in {{daysAway}}d',
+        noUpcoming: 'No upcoming ex-div dates',
+      },
+      emptyPortfolio: {
+        title: 'Add your first holding',
+        body: "Track real yield, dividend forecast, and sector mix. Takes a minute.",
+        cta: 'Go to portfolio',
+      },
+      incomeMini: {
+        title: 'Dividend income',
+        thisMonth: 'This month',
+        last12m: 'Last 12 months',
+      },
+      buyPlanTeaser: {
+        title: 'Your next picks',
+        viewAll: 'View full buy plan',
+      },
+    },
   },
 
   // Demo mode

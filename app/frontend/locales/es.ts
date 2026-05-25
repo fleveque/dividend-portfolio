@@ -41,6 +41,7 @@ const es = {
     tapRowToExpand: 'Toca una fila para ver detalles',
     clickToEdit: 'Clic para editar',
     clear: 'Limpiar',
+    investor: 'inversor',
   },
 
   // Theme
@@ -70,7 +71,9 @@ const es = {
     pulseTitle: 'Pulse \u2014 Comparte tu cartera con la comunidad',
     pulseDescription: 'Publica una vista en vivo de tu cartera: rendimiento, sectores y qu\u00e9 acciones tienes. Insp\u00edrate viendo c\u00f3mo otros inversores estructuran las suyas.',
     pulseOpenSettings: 'Activar en Ajustes',
-    pulseSeeCommunity: 'Ver qu\u00e9 comparte la comunidad \u2192',
+    pulseSeeCommunity: 'Ver la comunidad',
+    pulseAnonDescription: 'Una comunidad viva de inversores en dividendos. Mira qu\u00e9 tienen otros, qu\u00e9 precios objetivo manejan y c\u00f3mo estructuran sus carteras.',
+    pulseAnonSignup: 'Reg\u00edstrate para compartir la tuya',
     pulsePreviewAlt: 'Ejemplo de cartera compartida en Pulse',
     mostAddedToRadar: 'M\u00e1s a\u00f1adidos al Radar',
     mostHeldInPortfolios: 'M\u00e1s mantenidos en Carteras',
@@ -84,6 +87,64 @@ const es = {
     telegramDescription: 'Pregunta sobre tu cartera en lenguaje natural — ex-divs, totales, precios objetivo — directamente desde Telegram.',
     telegramExamples: '"¿qué dividendos he recibido este mes?" · "muestra mi radar" · "¿hay ex-divs esta semana?"',
     telegramConnect: 'Conectar Telegram',
+    telegramAnonCta: 'Regístrate para conectar',
+
+    hero: {
+      headlinePrefix: 'Sigue tus',
+      rotatorWords: ['dividendos', 'yield-on-cost', 'fechas ex-div', 'precios objetivo'],
+      subtitle: 'Inversión en dividendos con IA. Construye tu lista, sigue tu cartera, planifica tus compras — todo en un sitio.',
+      signupCta: 'Regístrate gratis',
+      tagline: 'Gratis · Sin conexión a tu bróker · Código abierto',
+    },
+
+    community: {
+      marqueeDiscover: 'Lo que la comunidad sigue',
+      marqueeWatching: 'Tendencias de la comunidad',
+      liveBadge: 'En vivo',
+    },
+
+    howItWorks: {
+      title: 'De la lista a los dividendos en 3 pasos',
+      step1Title: 'Construye tu radar',
+      step1Body: 'Añade acciones con precios objetivo. Seguimos precio, puntuación y fechas ex-div.',
+      step2Title: 'Sigue tu cartera',
+      step2Body: 'Registra tus posiciones para ver rentabilidad en vivo, sectores y previsión de dividendos.',
+      step3Title: 'Recibe análisis con IA',
+      step3Body: 'Análisis en lenguaje natural de tu cartera y radar — riesgos, huecos, oportunidades.',
+    },
+
+    finalCta: {
+      title: 'Empieza tu radar en 30 segundos',
+      subtitle: 'Gratis, sin conexión a tu bróker. Prueba una cartera de ejemplo o regístrate para crear la tuya.',
+      primary: 'Prueba el demo',
+      secondary: 'Regístrate',
+    },
+
+    dashboard: {
+      greetingMorning: 'Buenos días, {{name}}',
+      greetingAfternoon: 'Buenas tardes, {{name}}',
+      greetingEvening: 'Buenas noches, {{name}}',
+      quickStats: {
+        holdingsLabel: 'posiciones',
+        radarLabel: 'en el radar',
+        nextExDiv: 'Próximo ex-div: {{symbol}} en {{daysAway}}d',
+        noUpcoming: 'Sin ex-divs próximas',
+      },
+      emptyPortfolio: {
+        title: 'Añade tu primera posición',
+        body: 'Calcula rentabilidad real, previsión de dividendos y mix sectorial. Apenas un minuto.',
+        cta: 'Ir a la cartera',
+      },
+      incomeMini: {
+        title: 'Ingresos por dividendos',
+        thisMonth: 'Este mes',
+        last12m: 'Últimos 12 meses',
+      },
+      buyPlanTeaser: {
+        title: 'Tus próximas compras',
+        viewAll: 'Ver plan completo',
+      },
+    },
   },
 
   // Demo mode
