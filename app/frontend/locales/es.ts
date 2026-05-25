@@ -174,6 +174,8 @@ const es = {
     failedToLoadRadar: 'Error al cargar el radar',
     failedToRemoveStock: 'Error al eliminar acci\u00f3n',
     dividendCalendar: 'Calendario de Dividendos',
+    shareOnPulse: 'Compartir en Pulse',
+    shareOnPulseHint: 'Comparte tu radar en Pulse \u2014 act\u00edvalo en Ajustes',
     switchToCardView: 'Cambiar a vista de tarjetas',
     switchToCompactView: 'Cambiar a vista compacta',
     addToCart: 'A\u00f1adir al Carrito',
@@ -334,7 +336,8 @@ const es = {
 
   // AI Insights
   insights: {
-    title: 'An\u00e1lisis IA de Cartera',
+    portfolioTitle: 'An\u00e1lisis IA de Cartera',
+    radarTitle: 'An\u00e1lisis IA del Radar',
     buyingOpportunities: 'Oportunidades de Compra',
     coverageGaps: 'Meses sin Cobertura de Dividendos',
     riskFlags: 'Alertas de Riesgo',
@@ -380,10 +383,17 @@ const es = {
   settings: {
     title: 'Ajustes',
     portfolioSharing: 'Compartir en Pulse',
-    sharingDescription: 'Pulse es la comunidad de Quantic para compartir carteras. Elige un nombre p\u00fablico para participar \u2014 d\u00e9jalo vac\u00edo para no participar.',
+    sharingDescription: 'Pulse es la comunidad de Quantic para compartir carteras y radares. Elige un nombre p\u00fablico para participar \u2014 d\u00e9jalo vac\u00edo para no participar.',
     portfolioSlug: 'Nombre p\u00fablico',
     slugPlaceholder: 'mi-cartera',
     publicUrl: 'URL p\u00fablica:',
+    sharing: {
+      whatToShare: 'Qu\u00e9 compartir p\u00fablicamente',
+      portfolio: 'Cartera',
+      portfolioDescription: 'Tus posiciones, asignaciones y valor total (en tu moneda de visualizaci\u00f3n).',
+      radar: 'Radar',
+      radarDescription: 'Tu lista de seguimiento con precios objetivo. Sin cantidades ni posiciones \u2014 solo qu\u00e9 est\u00e1s siguiendo y a qu\u00e9 precio.',
+    },
     failedToUpdate: 'Error al actualizar',
     displayCurrency: 'Moneda de visualizaci\u00f3n',
     displayCurrencyDescription: 'Elige la moneda que se usa para sumar totales multi-divisa. Los precios por acci\u00f3n se mantienen en su moneda de cotizaci\u00f3n.',
@@ -550,6 +560,30 @@ const es = {
       title: 'Límite diario de IA alcanzado',
       body: 'Has usado tus {{limit}} solicitudes gratuitas de IA hoy. Las llamadas a la IA cuestan dinero real — las ofrecemos gratis por ahora. Inténtalo de nuevo mañana.',
     },
+  },
+
+  // GICS / Yahoo Finance stock sectors. Looked up by raw provider name
+  // (see translateSector in lib/sectors.ts) — unknown names pass through
+  // verbatim so a new sector never blanks the UI.
+  sectors: {
+    'Basic Materials': 'Materiales Básicos',
+    'Communication Services': 'Servicios de Comunicación',
+    'Consumer Cyclical': 'Consumo Cíclico',
+    'Consumer Defensive': 'Consumo Defensivo',
+    'Consumer Discretionary': 'Consumo Discrecional',
+    'Consumer Staples': 'Consumo Básico',
+    Energy: 'Energía',
+    'Financial Services': 'Servicios Financieros',
+    Financials: 'Finanzas',
+    'Health Care': 'Salud',
+    Healthcare: 'Salud',
+    Industrials: 'Industria',
+    'Information Technology': 'Tecnología de la Información',
+    Materials: 'Materiales',
+    'Real Estate': 'Inmobiliario',
+    Technology: 'Tecnología',
+    Utilities: 'Servicios Públicos',
+    Unknown: 'Desconocido',
   },
 } as const
 

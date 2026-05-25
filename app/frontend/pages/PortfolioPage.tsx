@@ -166,7 +166,7 @@ export function PortfolioPage() {
                 <span className="w-1 h-8 bg-foreground rounded-full"></span>
                 {t('portfolio.title')}
               </CardTitle>
-              {holdings.length > 0 && <PulseShareButton />}
+              {holdings.length > 0 && <PulseShareButton kind="portfolio" />}
             </div>
             {holdingsData && holdings.length > 0 && (
               <PortfolioTotalsHeader

@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { CURRENCY_OPTIONS } from '@/lib/currency'
-import { pulsePortfolioUrl, pulsePortfolioDisplayUrl } from '../lib/pulse'
+import { pulsePortfolioUrl, pulsePortfolioDisplayUrl, pulseRadarUrl, pulseRadarDisplayUrl } from '../lib/pulse'
 
 export function SettingsPage() {
   const { t } = useTranslation()
@@ -169,21 +169,33 @@ function PortfolioSharingSection() {
               </Button>
             )}
           </div>
-          {slug && (
-            <p className="text-xs text-muted-foreground">
-              {t('settings.publicUrl')}{' '}
-              <a
-                href={pulsePortfolioUrl(slug)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-mono inline-flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:underline"
-              >
-                {pulsePortfolioDisplayUrl(slug)}
-                <ExternalLink className="size-3" />
-              </a>
-            </p>
-          )}
         </div>
+
+        {/* What to share — only meaningful when a slug is set. Defaults:
+            portfolio ON (backwards-compat with the current behaviour),
+            radar OFF (opt-in for the new surface). */}
+        {profile?.portfolioSlug && (
+          <div className="space-y-3 pt-2 border-t">
+            <p className="text-sm font-medium text-foreground">{t('settings.sharing.whatToShare')}</p>
+            <ShareToggle
+              label={t('settings.sharing.portfolio')}
+              description={t('settings.sharing.portfolioDescription')}
+              checked={!!profile.sharePortfolio}
+              onChange={(checked) => updateProfile.mutate({ sharePortfolio: checked })}
+              pending={updateProfile.isPending}
+              publicUrl={profile.sharePortfolio ? { url: pulsePortfolioUrl(profile.portfolioSlug), label: pulsePortfolioDisplayUrl(profile.portfolioSlug) } : null}
+            />
+            <ShareToggle
+              label={t('settings.sharing.radar')}
+              description={t('settings.sharing.radarDescription')}
+              checked={!!profile.shareRadar}
+              onChange={(checked) => updateProfile.mutate({ shareRadar: checked })}
+              pending={updateProfile.isPending}
+              publicUrl={profile.shareRadar ? { url: pulseRadarUrl(profile.portfolioSlug), label: pulseRadarDisplayUrl(profile.portfolioSlug) } : null}
+            />
+          </div>
+        )}
+
         {updateProfile.isError && (
           <Alert variant="destructive">
             <AlertDescription>
@@ -198,6 +210,53 @@ function PortfolioSharingSection() {
         )}
       </CardContent>
     </Card>
+  )
+}
+
+// Single labelled checkbox row used for both "Share portfolio" and
+// "Share radar" inside the Pulse sharing card. Shows the resulting
+// public URL when the toggle is on so the user sees exactly what they're
+// exposing.
+function ShareToggle({
+  label,
+  description,
+  checked,
+  onChange,
+  pending,
+  publicUrl,
+}: {
+  label: string
+  description: string
+  checked: boolean
+  onChange: (checked: boolean) => void
+  pending: boolean
+  publicUrl: { url: string; label: string } | null
+}) {
+  return (
+    <label className="flex items-start gap-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/40 transition-colors">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        disabled={pending}
+        className="mt-0.5 size-4 cursor-pointer accent-purple-600"
+      />
+      <div className="flex-1 text-sm">
+        <p className="font-medium text-foreground">{label}</p>
+        <p className="text-muted-foreground mt-0.5">{description}</p>
+        {publicUrl && (
+          <a
+            href={publicUrl.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-xs inline-flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:underline mt-1"
+          >
+            {publicUrl.label}
+            <ExternalLink className="size-3" />
+          </a>
+        )}
+      </div>
+    </label>
   )
 }
 
