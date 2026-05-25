@@ -71,7 +71,9 @@ const es = {
     pulseTitle: 'Pulse \u2014 Comparte tu cartera con la comunidad',
     pulseDescription: 'Publica una vista en vivo de tu cartera: rendimiento, sectores y qu\u00e9 acciones tienes. Insp\u00edrate viendo c\u00f3mo otros inversores estructuran las suyas.',
     pulseOpenSettings: 'Activar en Ajustes',
-    pulseSeeCommunity: 'Ver qu\u00e9 comparte la comunidad \u2192',
+    pulseSeeCommunity: 'Ver la comunidad',
+    pulseAnonDescription: 'Una comunidad viva de inversores en dividendos. Mira qu\u00e9 tienen otros, qu\u00e9 precios objetivo manejan y c\u00f3mo estructuran sus carteras.',
+    pulseAnonSignup: 'Reg\u00edstrate para compartir la tuya',
     pulsePreviewAlt: 'Ejemplo de cartera compartida en Pulse',
     mostAddedToRadar: 'M\u00e1s a\u00f1adidos al Radar',
     mostHeldInPortfolios: 'M\u00e1s mantenidos en Carteras',
@@ -85,6 +87,7 @@ const es = {
     telegramDescription: 'Pregunta sobre tu cartera en lenguaje natural — ex-divs, totales, precios objetivo — directamente desde Telegram.',
     telegramExamples: '"¿qué dividendos he recibido este mes?" · "muestra mi radar" · "¿hay ex-divs esta semana?"',
     telegramConnect: 'Conectar Telegram',
+    telegramAnonCta: 'Regístrate para conectar',
 
     hero: {
       headlinePrefix: 'Sigue tus',

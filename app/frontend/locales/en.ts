@@ -70,8 +70,10 @@ const en = {
     heroSubtitle: 'AI-enhanced dividend investing. Track your portfolio, set target prices on your radar, plan purchases, and get intelligent insights \u2014 all in one place.',
     pulseTitle: 'Pulse \u2014 Share your portfolio with the community',
     pulseDescription: 'Publish a live view of your portfolio: dividend yield, sector breakdown, and what you hold. See how other investors structure theirs.',
+    pulseAnonDescription: 'A live community of dividend investors. Browse what others hold, what they target, and how they structure their portfolios.',
+    pulseAnonSignup: 'Sign up to share yours',
     pulseOpenSettings: 'Opt in from Settings',
-    pulseSeeCommunity: 'See what others are sharing \u2192',
+    pulseSeeCommunity: 'See the community',
     pulsePreviewAlt: 'Example shared portfolio on Pulse',
     mostAddedToRadar: 'Most Added to Radar',
     mostHeldInPortfolios: 'Most Held in Portfolios',
@@ -85,6 +87,7 @@ const en = {
     telegramDescription: 'Ask your portfolio anything in natural language — ex-divs, totals, target prices — right from Telegram.',
     telegramExamples: '"what dividends did I get this month?" · "show my radar" · "any ex-divs this week?"',
     telegramConnect: 'Connect Telegram',
+    telegramAnonCta: 'Sign up to connect',
 
     hero: {
       headlinePrefix: 'Track your',

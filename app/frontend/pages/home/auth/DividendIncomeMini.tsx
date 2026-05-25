@@ -34,6 +34,12 @@ export function DividendIncomeMini() {
   const thisMonth = monthly[monthly.length - 1]?.actual ?? 0
   const max = Math.max(...monthly.map((m) => m.actual ?? 0), 1)
 
+  // Hide entirely if the user has no recorded dividend income in the
+  // window — an empty $0 card with a flat sparkline is just noise for
+  // someone who hasn't logged dividends yet.
+  const total = monthly.reduce((acc, m) => acc + (m.actual ?? 0), 0)
+  if (total === 0) return null
+
   return (
     <Card>
       <CardContent className="p-5">

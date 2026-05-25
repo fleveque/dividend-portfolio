@@ -4,11 +4,10 @@ import { Link } from 'react-router-dom'
 import { useLastAddedStocks, useMostAddedStocks, useMostHeldStocks } from '../../hooks/useStockQueries'
 import { useHoldings } from '../../hooks/useHoldingsQueries'
 import { useRadar } from '../../hooks/useRadarQueries'
+import { useTelegramLink } from '../../hooks/useTelegramLink'
 import { Card, CardContent } from '@/components/ui/card'
 import { PortfolioStatsCard } from '../../components/PortfolioStatsCard'
 import { UpcomingExDividends } from '../../components/UpcomingExDividends'
-import { PortfolioInsights } from '../../components/PortfolioInsights'
-import { RadarInsights } from '../../components/RadarInsights'
 import { StockListCard } from './shared/StockListCard'
 import { CommunityStrip } from './shared/CommunityStrip'
 import { DashboardGreeting } from './auth/DashboardGreeting'
@@ -21,6 +20,7 @@ export function DashboardHome() {
 
   const { data: holdingsData } = useHoldings()
   const { data: radarData } = useRadar()
+  const { data: telegramLink } = useTelegramLink()
   const lastAddedQuery = useLastAddedStocks()
   const mostAddedQuery = useMostAddedStocks()
   const mostHeldQuery = useMostHeldStocks()
@@ -29,6 +29,7 @@ export function DashboardHome() {
   const radarStocks = radarData?.stocks ?? []
   const hasHoldings = holdings.length > 0
   const hasRadarStocks = radarStocks.length > 0
+  const telegramConnected = telegramLink?.connected ?? false
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8 md:space-y-10">
@@ -41,23 +42,19 @@ export function DashboardHome() {
         <EmptyPortfolioCTA />
       )}
 
-      {/* Today's actions + dividend income — two-col on lg, single col
-          below. Each side can render null and the layout collapses. */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        {(hasHoldings || hasRadarStocks) && (
-          <UpcomingExDividends holdings={holdings} radarStocks={radarStocks} />
-        )}
-        <DividendIncomeMini />
-      </div>
+      {/* Today's actions: upcoming ex-divs (UpcomingExDividends returns
+          null when there's nothing in the next 14 days). */}
+      {(hasHoldings || hasRadarStocks) && (
+        <UpcomingExDividends holdings={holdings} radarStocks={radarStocks} />
+      )}
+
+      {/* Dividend income mini (returns null when there's no recorded
+          dividend income). Single-column so a missing sibling doesn't
+          leave a gap on the right. */}
+      <DividendIncomeMini />
 
       {/* Buy plan teaser — hidden when the cart is empty. */}
       <BuyPlanTeaser />
-
-      {/* AI insights pair — both lazy-fetch on expand. */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <PortfolioInsights hasStocks={hasHoldings} />
-        <RadarInsights hasStocks={hasRadarStocks} />
-      </div>
 
       {/* Community signals below personal data. */}
       <CommunityStrip framing="watching" />
@@ -84,7 +81,9 @@ export function DashboardHome() {
         />
       </div>
 
-      {/* Telegram bot — already auth-only. */}
+      {/* Telegram bot — hidden once already connected (the user has
+          already done the thing this banner is asking them to do). */}
+      {!telegramConnected && (
       <Card className="border-sky-200 dark:border-sky-900/40 bg-gradient-to-r from-sky-50 to-cyan-50 dark:from-sky-950/30 dark:to-cyan-950/20 overflow-hidden">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
@@ -111,6 +110,7 @@ export function DashboardHome() {
           </div>
         </CardContent>
       </Card>
+      )}
     </div>
   )
 }

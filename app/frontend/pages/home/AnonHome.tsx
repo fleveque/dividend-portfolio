@@ -1,4 +1,4 @@
-import { Activity, ExternalLink, Settings } from 'lucide-react'
+import { Activity, ExternalLink, ArrowRight, Send } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { TopScoredShowcase } from '../../components/TopScoredShowcase'
@@ -49,23 +49,24 @@ export function AnonHome() {
                   </h2>
                 </div>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  {t('home.pulseDescription')}
+                  {t('home.pulseAnonDescription')}
                 </p>
                 <div className="flex flex-wrap items-center gap-3">
-                  <Link
-                    to="/settings#portfolio-sharing"
-                    className="inline-flex items-center gap-1.5 rounded-md bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 text-sm font-medium transition-colors"
-                  >
-                    <Settings className="size-3.5" /> {t('home.pulseOpenSettings')}
-                  </Link>
                   <a
                     href={PULSE_URL}
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 text-sm font-medium transition-colors"
+                  >
+                    <Activity className="size-3.5" /> {t('home.pulseSeeCommunity')}
+                    <ExternalLink className="size-3" />
+                  </a>
+                  <Link
+                    to="/signup"
                     className="inline-flex items-center gap-1 text-sm font-medium text-purple-700 dark:text-purple-300 hover:underline"
                   >
-                    {t('home.pulseSeeCommunity')} <ExternalLink className="size-3.5" />
-                  </a>
+                    {t('home.pulseAnonSignup')} <ArrowRight className="size-3.5" />
+                  </Link>
                 </div>
               </div>
               <div className="flex justify-center md:justify-end">
@@ -86,6 +87,34 @@ export function AnonHome() {
                   />
                 </a>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Telegram bot showcase — anon variant, links to signup. */}
+        <Card className="border-sky-200 dark:border-sky-900/40 bg-gradient-to-r from-sky-50 to-cyan-50 dark:from-sky-950/30 dark:to-cyan-950/20 overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Send className="size-5 text-sky-600 dark:text-sky-400" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
+                    {t('home.telegramTitle')}
+                  </h2>
+                </div>
+                <p className="text-sm sm:text-base text-muted-foreground max-w-2xl">
+                  {t('home.telegramDescription')}
+                </p>
+                <p className="text-xs sm:text-sm text-muted-foreground italic">
+                  {t('home.telegramExamples')}
+                </p>
+              </div>
+              <Link
+                to="/signup"
+                className="inline-flex items-center gap-1.5 rounded-md bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 text-sm font-medium transition-colors shrink-0"
+              >
+                <Send className="size-3.5" /> {t('home.telegramAnonCta')}
+              </Link>
             </div>
           </CardContent>
         </Card>
