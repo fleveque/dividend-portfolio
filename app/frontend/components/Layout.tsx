@@ -188,6 +188,10 @@ export function Layout() {
                 >
                   Francesc Leveque
                 </a>
+                {' · '}
+                <Link to="/faq" className="hover:underline">
+                  {t('footer.faq')}
+                </Link>
               </p>
             </div>
           </div>
