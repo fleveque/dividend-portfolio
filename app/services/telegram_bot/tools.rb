@@ -12,6 +12,7 @@ module TelegramBot
         get_dividend_summary(user),
         get_recent_dividends(user),
         get_upcoming_ex_divs(user),
+        get_dividend_calendar(user),
         get_stock(user)
       ]
     end
@@ -67,7 +68,7 @@ module TelegramBot
     def get_upcoming_ex_divs(user)
       AiProviders::Tool.new(
         name: "get_upcoming_ex_divs",
-        description: "Stocks (held + on radar) with an ex-dividend date in the next N days.",
+        description: "Stocks (held + on radar) with a known ex-dividend date in the next N days. Use this for 'any ex-divs this week?' type questions where you want the specific upcoming ex-div dates.",
         parameters: {
           type: "object",
           properties: {
@@ -76,6 +77,21 @@ module TelegramBot
           required: []
         },
         handler: ->(days: 7, **) { GetUpcomingExDivs.call(user: user, days: days.to_i) }
+      )
+    end
+
+    def get_dividend_calendar(user)
+      AiProviders::Tool.new(
+        name: "get_dividend_calendar",
+        description: "Projects expected dividend payments for the user's held stocks in a target calendar month. Use this for 'what dividends do I get next month?' / 'income in November?' — it walks each stock's recurring payment_months schedule rather than relying on the specific ex_dividend_date field.",
+        parameters: {
+          type: "object",
+          properties: {
+            month_offset: { type: "integer", description: "Months from now (0 = this month, 1 = next month, default 1, max 12)." }
+          },
+          required: []
+        },
+        handler: ->(month_offset: 1, **) { GetDividendCalendar.call(user: user, month_offset: month_offset.to_i) }
       )
     end
 

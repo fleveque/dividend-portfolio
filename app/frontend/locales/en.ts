@@ -398,12 +398,16 @@ const en = {
       pendingInstructions: 'Telegram should have opened with a /start message. Tap Send in Telegram, then come back here and click Refresh.',
       openInTelegramAgain: 'Open Telegram again',
       refreshStatus: "I'm done — refresh",
+      notifications: {
+        label: 'Daily notifications',
+        description: 'Get a daily summary at 09:00 UTC: upcoming ex-divs, dividends received yesterday, and stocks that crossed below your target price.',
+      },
       howItWorks: {
         summary: 'How it works',
         askExamples: 'Ask things like "what dividends did I get this month?", "show my radar", "any ex-divs this week?".',
         limit: 'AI calls cost money — to keep things sustainable, non-admin users get 3 requests per day.',
         privacy: 'The bot only sees your own data. Nothing is shared with other users. The bot only replies in private chats, not in groups.',
-        unlinkAnytime: 'You can unlink from here at any time. We never message you unprompted (until you opt into notifications, coming later).',
+        unlinkAnytime: 'You can unlink from here at any time. Daily notifications are opt-in and you can toggle them above.',
       },
     },
   },

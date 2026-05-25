@@ -7,3 +7,8 @@ production:
     class: RefreshFxRatesJob
     queue: default
     schedule: "<%= ENV.fetch('FX_REFRESH_SCHEDULE', 'every 24 hours') %>"
+  telegram_daily_digest:
+    class: Telegram::DailyDigestJob
+    queue: default
+    # Fixed 09:00 UTC daily — opt-in via Settings or `/notifications on`.
+    schedule: "every day at 9:00am"

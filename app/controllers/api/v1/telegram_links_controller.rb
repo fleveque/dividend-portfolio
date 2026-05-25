@@ -27,6 +27,23 @@ module Api
         })
       end
 
+      # PATCH /api/v1/telegram_link → updated link status
+      # body: { notifications_enabled: bool }
+      # Settings page calls this when the user toggles the daily-digest
+      # switch. The bot's `/notifications on|off` command writes the same
+      # column, so the two surfaces stay in sync.
+      def update
+        link = UserTelegramLink.linked.find_by(user: Current.user)
+        return render_error("Telegram is not connected", status: :not_found) unless link
+
+        params_hash = params.permit(:notifications_enabled).to_h
+        if params_hash.key?("notifications_enabled")
+          link.update!(notifications_enabled: ActiveModel::Type::Boolean.new.cast(params_hash["notifications_enabled"]))
+        end
+
+        render_success(serialize(link))
+      end
+
       # DELETE /api/v1/telegram_link → { unlinked: true }
       def destroy
         UserTelegramLink.where(user: Current.user).delete_all

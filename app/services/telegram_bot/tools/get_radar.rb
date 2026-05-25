@@ -19,6 +19,7 @@ module TelegramBot
       def self.serialize(stock, radar)
         target = radar.radar_stocks.find { |rs| rs.stock_id == stock.id }&.target_price
         status = compute_status(stock.price, target)
+        decorated = StockDecorator.new(stock)
         {
           symbol: stock.symbol,
           name: stock.name,
@@ -27,6 +28,15 @@ module TelegramBot
           target_price: target&.to_f,
           status: status,
           dividend_yield: stock.dividend_yield&.to_f,
+          payout_ratio: stock.payout_ratio&.to_f,
+          pe_ratio: stock.pe_ratio&.to_f,
+          # Valuation context — lets the LLM answer "near 52w low",
+          # "above MA200", "below midpoint" without a dedicated tool.
+          fifty_two_week_high: stock.fifty_two_week_high&.to_f,
+          fifty_two_week_low: stock.fifty_two_week_low&.to_f,
+          fifty_two_week_range_position: decorated.fifty_two_week_range_position,
+          ma_50: stock.ma_50&.to_f,
+          ma_200: stock.ma_200&.to_f,
           sector: stock.sector
         }
       end
