@@ -40,7 +40,9 @@ module Api
               usersWithSlug: users_with_slug,
               adoptionRate: User.count.positive? ? (users_with_slug.to_f / User.count * 100).round(1) : 0
             },
-            activity: activity_payload
+            activity: activity_payload,
+            ai: ai_payload,
+            telegram: telegram_payload
           })
         end
 
@@ -103,6 +105,74 @@ module Api
             week_start = first_week_start + i.weeks
             { weekStart: week_start.iso8601, count: weekly[week_start] || 0 }
           end
+        end
+
+        # AI cost / usage observability. We don't have separate logging for
+        # cache hits or denials, so:
+        #   - `callsToday|7d|30d` count actual LLM hits (AiRequest rows).
+        #   - `usersAtQuotaToday` counts users whose today-count equals the
+        #     daily limit (≈ "users that bumped into the cap today").
+        # `byProvider` is a placeholder bucket — only `gemini` populates it
+        # today, but the provider column is there for the day we add a
+        # second adapter.
+        def ai_payload
+          {
+            callsToday: AiRequest.where("created_at >= ?", Time.current.utc.beginning_of_day).count,
+            callsLast7d: AiRequest.where("created_at >= ?", 7.days.ago).count,
+            callsLast30d: AiRequest.where("created_at >= ?", 30.days.ago).count,
+            byFeature: AiRequest.where("created_at >= ?", 30.days.ago).group(:feature).count,
+            byProvider: AiRequest.where("created_at >= ?", 30.days.ago).group(:provider).count,
+            topUsers: top_ai_users(30),
+            usersAtQuotaToday: users_at_quota_today,
+            dailyLimit: AiRateLimiter::DAILY_LIMIT
+          }
+        end
+
+        def telegram_payload
+          linked = UserTelegramLink.linked
+          {
+            linkedUsers: linked.count,
+            linkedLast7d: linked.where("linked_at >= ?", 7.days.ago).count,
+            linkedLast30d: linked.where("linked_at >= ?", 30.days.ago).count,
+            notificationsEnabled: linked.where(notifications_enabled: true).count,
+            botQuestionsLast7d: AiRequest.where(feature: "telegram_chat").where("created_at >= ?", 7.days.ago).count,
+            botQuestionsLast30d: AiRequest.where(feature: "telegram_chat").where("created_at >= ?", 30.days.ago).count,
+            topBotUsers: top_bot_users(30)
+          }
+        end
+
+        TOP_USERS_LIMIT = 10
+
+        def top_ai_users(days)
+          counts = AiRequest.where("created_at >= ?", days.days.ago).group(:user_id).count
+          serialize_top_users(counts)
+        end
+
+        def top_bot_users(days)
+          counts = AiRequest.where(feature: "telegram_chat")
+                            .where("created_at >= ?", days.days.ago)
+                            .group(:user_id).count
+          serialize_top_users(counts)
+        end
+
+        def serialize_top_users(counts_by_user_id)
+          top_ids = counts_by_user_id.sort_by { |_, c| -c }.first(TOP_USERS_LIMIT).to_h
+          emails_by_id = User.where(id: top_ids.keys).pluck(:id, :email_address).to_h
+          top_ids.map do |user_id, count|
+            { email: emails_by_id[user_id] || "(deleted)", count: count }
+          end
+        end
+
+        # Number of users who have already hit the daily AI cap today.
+        # A user is "at quota" when today's actual call count equals the
+        # rate-limiter's DAILY_LIMIT. Admins are excluded — they bypass the
+        # limiter (see AiRateLimiter#allow?).
+        def users_at_quota_today
+          counts = AiRequest.where("created_at >= ?", Time.current.utc.beginning_of_day)
+                            .group(:user_id).count
+          at_quota_ids = counts.select { |_, c| c >= AiRateLimiter::DAILY_LIMIT }.keys
+          return 0 if at_quota_ids.empty?
+          User.where(id: at_quota_ids, admin: false).count
         end
       end
     end

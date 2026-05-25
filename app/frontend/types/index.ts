@@ -356,6 +356,25 @@ export interface AdminDashboardStats {
     usersTouchingHoldings7d: number
     activeUsersTrend: { weekStart: string; count: number }[]
   }
+  ai: {
+    callsToday: number
+    callsLast7d: number
+    callsLast30d: number
+    byFeature: Record<string, number>
+    byProvider: Record<string, number>
+    topUsers: { email: string; count: number }[]
+    usersAtQuotaToday: number
+    dailyLimit: number
+  }
+  telegram: {
+    linkedUsers: number
+    linkedLast7d: number
+    linkedLast30d: number
+    notificationsEnabled: number
+    botQuestionsLast7d: number
+    botQuestionsLast30d: number
+    topBotUsers: { email: string; count: number }[]
+  }
 }
 
 /**

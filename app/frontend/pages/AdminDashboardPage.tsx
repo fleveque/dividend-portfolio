@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { Loader2, FileText, Users, Database, Briefcase, Coins, Share2 } from 'lucide-react'
+import { Loader2, FileText, Users, Database, Briefcase, Coins, Share2, Sparkles, Send } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -107,6 +107,66 @@ function ActiveUsersTrend({ buckets }: { buckets: ActiveUsersTrendBucket[] }) {
             </span>
           ))}
         </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function BreakdownCard({ title, entries, emptyLabel }: { title: string; entries: [string, number][]; emptyLabel: string }) {
+  const sorted = [...entries].sort((a, b) => b[1] - a[1])
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <p className="text-sm font-medium text-foreground mb-3">{title}</p>
+        {sorted.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{emptyLabel}</p>
+        ) : (
+          <ul className="space-y-1.5">
+            {sorted.map(([key, count]) => (
+              <li key={key} className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground font-mono">{key}</span>
+                <span className="font-semibold tabular-nums">{count}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+function TopUsersCard({
+  title,
+  users,
+  countLabel,
+  emptyLabel,
+}: {
+  title: string
+  users: { email: string; count: number }[]
+  countLabel: string
+  emptyLabel: string
+}) {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <p className="text-sm font-medium text-foreground mb-3">{title}</p>
+        {users.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{emptyLabel}</p>
+        ) : (
+          <Table>
+            <TableBody>
+              {users.map((u) => (
+                <TableRow key={u.email}>
+                  <TableCell className="text-sm py-2">{u.email}</TableCell>
+                  <TableCell className="text-sm py-2 text-right font-semibold tabular-nums w-20">
+                    <span className="text-muted-foreground text-xs font-normal mr-2">{countLabel}</span>
+                    {u.count}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
     </Card>
   )
@@ -311,6 +371,55 @@ export function AdminDashboardPage() {
             <StatCard label={t('admin.activity.usersTouchingHoldings7d')} value={stats.activity.usersTouchingHoldings7d} />
           </div>
           <ActiveUsersTrend buckets={stats.activity.activeUsersTrend} />
+        </section>
+      )}
+
+      {/* AI Usage Section */}
+      {stats?.ai && (
+        <section className="mb-10">
+          <SectionHeader icon={Sparkles} title={t('admin.ai.title')} accent="amber" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
+            <StatCard label={t('admin.ai.callsToday')} value={stats.ai.callsToday} accent="amber" hero />
+            <StatCard label={t('admin.ai.callsLast7d')} value={stats.ai.callsLast7d} />
+            <StatCard label={t('admin.ai.callsLast30d')} value={stats.ai.callsLast30d} />
+            <StatCard
+              label={t('admin.ai.usersAtQuotaToday')}
+              value={`${stats.ai.usersAtQuotaToday} / ${stats.ai.dailyLimit}`}
+            />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <BreakdownCard
+              title={t('admin.ai.byFeature')}
+              entries={Object.entries(stats.ai.byFeature)}
+              emptyLabel={t('admin.ai.noActivity')}
+            />
+            <TopUsersCard
+              title={t('admin.ai.topUsers')}
+              users={stats.ai.topUsers}
+              countLabel={t('admin.ai.callsHeader')}
+              emptyLabel={t('admin.ai.noActivity')}
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Telegram Usage Section */}
+      {stats?.telegram && (
+        <section className="mb-10">
+          <SectionHeader icon={Send} title={t('admin.telegram.title')} accent="blue" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+            <StatCard label={t('admin.telegram.linkedUsers')} value={stats.telegram.linkedUsers} accent="blue" hero />
+            <StatCard label={t('admin.telegram.linkedLast7d')} value={stats.telegram.linkedLast7d} />
+            <StatCard label={t('admin.telegram.linkedLast30d')} value={stats.telegram.linkedLast30d} />
+            <StatCard label={t('admin.telegram.notificationsEnabled')} value={stats.telegram.notificationsEnabled} />
+            <StatCard label={t('admin.telegram.botQuestionsLast7d')} value={stats.telegram.botQuestionsLast7d} />
+          </div>
+          <TopUsersCard
+            title={t('admin.telegram.topBotUsers')}
+            users={stats.telegram.topBotUsers}
+            countLabel={t('admin.telegram.questionsHeader')}
+            emptyLabel={t('admin.telegram.noActivity')}
+          />
         </section>
       )}
 
