@@ -171,7 +171,7 @@ export function Layout() {
 
       <footer className="bg-background border-t py-6 sm:py-8">
         <div className="container mx-auto px-4 space-y-4">
-          <p className="text-[11px] leading-relaxed text-muted-foreground/80 text-center max-w-3xl mx-auto">
+          <p className="text-[11px] leading-relaxed text-muted-foreground/80 text-center">
             {t('footer.disclaimer')}
           </p>
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
