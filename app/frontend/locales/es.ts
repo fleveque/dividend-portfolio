@@ -6,6 +6,7 @@ const es = {
     portfolio: 'Cartera',
     dividends: 'Dividendos',
     settings: 'Ajustes',
+    faq: 'FAQ',
     admin: 'Admin',
     menu: 'Men\u00fa',
     navigationMenu: 'Men\u00fa de navegaci\u00f3n',
@@ -63,6 +64,140 @@ const es = {
   footer: {
     builtWith: 'Hecho con Ruby on Rails, React, TypeScript y Tailwind CSS',
     disclaimer: 'La información en Quantic se proporciona únicamente con fines informativos y educativos. Es de carácter general, no tiene en cuenta tu situación financiera personal y no constituye asesoramiento de inversión, financiero, fiscal o legal — ni una recomendación para comprar o vender ningún valor. Invertir conlleva riesgos, incluida la posible pérdida del capital; los resultados pasados no son un indicador fiable de los resultados futuros. Los datos de mercado provienen de proveedores terceros y pueden estar retrasados o ser inexactos. Antes de tomar cualquier decisión de inversión, considera tus objetivos, horizonte temporal, tolerancia al riesgo y diversificación, y consulta a un profesional financiero cualificado. Quantic no es un asesor financiero registrado ni un intermediario bursátil.',
+    faq: 'Preguntas frecuentes',
+  },
+
+  // FAQ Page
+  faq: {
+    title: 'Preguntas frecuentes',
+    subtitle: '¿No encuentras lo que buscas? Abre un issue en GitHub.',
+    notFound: {
+      body: '¿No has encontrado tu pregunta? Cuéntanoslo.',
+      cta: 'Abrir un issue en GitHub',
+    },
+    sections: {
+      gettingStarted: 'Empezar',
+      portfolioRadar: 'Cartera y Radar',
+      dividends: 'Dividendos',
+      ai: 'Análisis con IA',
+      pulse: 'Pulse (compartir con la comunidad)',
+      telegram: 'Bot de Telegram',
+      dataPrivacy: 'Datos y privacidad',
+    },
+    gettingStarted: {
+      free: {
+        q: '¿Quantic es gratis?',
+        a: 'Sí. Quantic es gratis para uso personal. Dependemos de APIs externas con coste real (datos de mercado, IA), por lo que el uso automatizado intensivo puede tener límites — pero el uso diario para invertir es gratuito.',
+      },
+      broker: {
+        q: '¿Necesito conectar mi bróker?',
+        a: 'No hace falta conectar el bróker. Introduces tus posiciones manualmente o importas los dividendos desde un CSV que exportes en tu bróker. Tus credenciales nunca salen de tus manos.',
+      },
+      tryWithoutSignup: {
+        q: '¿Puedo probar Quantic sin registrarme?',
+        a: 'Sí. Haz clic en "Prueba una cartera de ejemplo" en la home para explorar una cuenta demo pre-cargada. Sin registro, sin email.',
+      },
+      portfolioVsRadar: {
+        q: '¿Cuál es la diferencia entre Cartera y Radar?',
+        a: 'La Cartera es lo que realmente tienes — cantidades, precios medios, valor real. El Radar es tu lista de seguimiento — acciones que vigilas con precios objetivo opcionales. La misma acción puede estar en ambos.',
+      },
+    },
+    portfolioRadar: {
+      addHolding: {
+        q: '¿Cómo añado una posición?',
+        a: 'Ve a Cartera, busca la acción, haz clic en Añadir. Introduce la cantidad y el precio medio. Más tarde puedes añadir más acciones (el precio medio se actualiza automáticamente) o eliminar posiciones.',
+      },
+      multiCurrency: {
+        q: '¿Puedo seguir acciones en varias monedas?',
+        a: 'Sí. Cada posición se mantiene en su moneda de cotización. Configura una moneda preferida en Ajustes y convertimos los totales por moneda a un único total mostrado usando tipos de cambio diarios.',
+      },
+      yoc: {
+        q: '¿Qué significa "Yield on Cost"?',
+        a: 'Yield on Cost = dividendo anual por acción ÷ tu precio medio de compra × 100. Mide la rentabilidad que aseguraste cuando compraste, sin importar lo que haya hecho la cotización desde entonces.',
+      },
+      targetPrice: {
+        q: '¿Qué es un precio objetivo?',
+        a: 'Tu umbral personal de compra para una acción — el precio al que considerarías añadirla. Configúralo en una acción del Radar y verás la diferencia con el precio actual (por encima/por debajo) para detectar oportunidades.',
+      },
+      communityTarget: {
+        q: '¿De dónde sale el "precio objetivo medio de la comunidad"?',
+        a: 'Promediamos los precios objetivo configurados por todos los usuarios que siguen la misma acción. Para proteger los objetivos individuales, solo mostramos la media cuando al menos 3 usuarios han configurado uno.',
+      },
+      score: {
+        q: '¿Qué significa la puntuación de dividendo?',
+        a: 'Una puntuación de 0–10 que resume la salud del dividendo de una acción: payout ratio, crecimiento del dividendo, rentabilidad y consistencia. Más alto es mejor. 7+ es "Strong", 5–7 "Fair", por debajo de 5 "Weak".',
+      },
+    },
+    dividends: {
+      upcoming: {
+        q: '¿Cómo se calculan los próximos dividendos?',
+        a: 'Para cada posición sacamos del proveedor de datos la próxima fecha ex-dividendo y el importe esperado por acción, multiplicado por tu cantidad. El dashboard muestra los próximos 14 días.',
+      },
+      import: {
+        q: '¿Puedo importar dividendos desde mi bróker?',
+        a: 'Sí. En la página de Dividendos, haz clic en Importar. Sube un CSV de tu bróker; lo procesamos, te enseñamos una vista previa y confirmas antes de guardar nada.',
+      },
+      brokerSupport: {
+        q: '¿Qué brókeres están soportados en la importación?',
+        a: 'Actualmente Interactive Brokers y MyInvestor. Añadir un nuevo bróker significa escribir un parser — abre un issue en GitHub con un CSV de ejemplo y lo consideraremos.',
+      },
+      unsupportedBroker: {
+        q: '¿Y si mi bróker no está soportado?',
+        a: 'Añade los dividendos manualmente en la página de Dividendos. O abre un issue en GitHub pidiendo soporte para tu bróker — adjunta un CSV de ejemplo.',
+      },
+    },
+    ai: {
+      model: {
+        q: '¿Qué modelo de IA usáis?',
+        a: 'Actualmente usamos Gemini de Google (2.5 Flash). La integración es agnóstica de proveedor — podemos cambiar a OpenAI o Anthropic en función de las necesidades de cada tarea, sin afectar a la UI.',
+      },
+      limit: {
+        q: '¿Hay un límite de uso de IA?',
+        a: 'Los usuarios no admin tienen 3 peticiones de IA al día entre todas las funciones (análisis, resúmenes, chat de Telegram). Las llamadas a la IA cuestan dinero real; el límite mantiene el servicio gratis para todos.',
+      },
+      privacy: {
+        q: '¿Mis datos se envían al proveedor de IA?',
+        a: 'Solo los datos necesarios para el prompt — las acciones implicadas, tus objetivos, tus dividendos. Nunca enviamos tu email, contraseña ni nada fuera de la petición concreta. Los prompts no se retienen.',
+      },
+    },
+    pulse: {
+      what: {
+        q: '¿Qué es Pulse?',
+        a: 'Pulse es la comunidad de Quantic en pulse.quantic.es. Los usuarios pueden activar el compartir su cartera (posiciones + sectores) y/o su radar (lista + precios objetivo) bajo un slug público.',
+      },
+      whoSees: {
+        q: '¿Quién puede ver mi cartera compartida?',
+        a: 'Cualquiera con la URL. Las páginas de Pulse son públicamente accesibles sin cuenta. No compartas si no estás cómodo con eso — es opt-in justamente por este motivo.',
+      },
+      optOut: {
+        q: '¿Cómo dejo de compartir?',
+        a: 'Ajustes → Compartir en Pulse → desactiva el interruptor de la superficie que quieras dejar de compartir. Los datos se eliminan de Pulse inmediatamente.',
+      },
+    },
+    telegram: {
+      connect: {
+        q: '¿Cómo conecto Telegram?',
+        a: 'Ajustes → Conectar Telegram → haz clic en "Abrir el bot de Telegram". Pulsa Enviar en Telegram, vuelve aquí y haz clic en Actualizar. Tu cuenta de Telegram queda enlazada.',
+      },
+      what: {
+        q: '¿Qué le puedo preguntar al bot?',
+        a: 'Pregúntale cosas como "¿qué dividendos he recibido este mes?", "muéstrame mi radar", "¿hay ex-divs esta semana?". El bot responde usando tus datos reales a través de la IA.',
+      },
+    },
+    dataPrivacy: {
+      stockData: {
+        q: '¿De dónde vienen los datos de las acciones?',
+        a: 'Precios, dividendos, fechas ex-div y fundamentales vienen de Yahoo Finance (con Alpha Vantage como fallback). Los datos se cachean 1 hora para mantenernos dentro de los límites gratuitos.',
+      },
+      accuracy: {
+        q: '¿Cómo de precisos son los datos?',
+        a: 'Lo mejor posible. Las APIs externas a veces sirven datos desactualizados o incorrectos, especialmente el día de un ex-dividendo o justo después de un split. Verifica siempre contra el extracto oficial de tu bróker antes de actuar.',
+      },
+      sell: {
+        q: '¿Vendéis mis datos?',
+        a: 'No. Quantic no tiene publicidad, ni tracking de terceros, ni venta de datos. Somos un proyecto paralelo de un solo desarrollador, no una empresa de datos.',
+      },
+    },
   },
 
   // Home Page

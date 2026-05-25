@@ -74,6 +74,8 @@ export function Layout() {
                 </>
               )}
 
+              <NavLink to="/faq" className={navLinkClass}>{t('nav.faq')}</NavLink>
+
               {isAuthenticated && user?.admin && (
                 <NavLink to="/admin" className={navLinkClass}>{t('nav.admin')}</NavLink>
               )}
@@ -135,6 +137,8 @@ export function Layout() {
               </>
             )}
 
+            <NavLink to="/faq" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.faq')}</NavLink>
+
             {isAuthenticated && user?.admin && (
               <NavLink to="/admin" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.admin')}</NavLink>
             )}
@@ -188,6 +192,10 @@ export function Layout() {
                 >
                   Francesc Leveque
                 </a>
+                {' · '}
+                <Link to="/faq" className="hover:underline">
+                  {t('footer.faq')}
+                </Link>
               </p>
             </div>
           </div>

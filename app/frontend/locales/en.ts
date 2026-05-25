@@ -6,6 +6,7 @@ const en = {
     portfolio: 'Portfolio',
     dividends: 'Dividends',
     settings: 'Settings',
+    faq: 'FAQ',
     admin: 'Admin',
     menu: 'Menu',
     navigationMenu: 'Navigation menu',
@@ -63,6 +64,140 @@ const en = {
   footer: {
     builtWith: 'Built with Ruby on Rails, React, TypeScript, and Tailwind CSS',
     disclaimer: 'The information on Quantic is provided for informational and educational purposes only. It is general in nature, does not take into account your personal financial situation, and does not constitute investment, financial, tax, or legal advice — nor a recommendation to buy or sell any security. Investing involves risk, including possible loss of principal; past performance is not a reliable indicator of future results. Market data comes from third-party providers and may be delayed or inaccurate. Before making any investment decision, consider your objectives, time horizon, risk tolerance, and diversification, and consult a qualified financial professional. Quantic is not a registered investment adviser or broker-dealer.',
+    faq: 'Frequently Asked Questions',
+  },
+
+  // FAQ Page
+  faq: {
+    title: 'Frequently Asked Questions',
+    subtitle: "Quick answers to the most common questions about Quantic. Can't find what you need? Open an issue on GitHub.",
+    notFound: {
+      body: "Didn't find your question? We'd love to hear from you.",
+      cta: 'Open an issue on GitHub',
+    },
+    sections: {
+      gettingStarted: 'Getting started',
+      portfolioRadar: 'Portfolio & Radar',
+      dividends: 'Dividends',
+      ai: 'AI insights',
+      pulse: 'Pulse (community sharing)',
+      telegram: 'Telegram bot',
+      dataPrivacy: 'Data & privacy',
+    },
+    gettingStarted: {
+      free: {
+        q: 'Is Quantic free?',
+        a: "Yes. Quantic is free for personal use. We rely on third-party APIs that cost real money (stock data, AI), so heavy automated use may be rate-limited — but everyday investing is free.",
+      },
+      broker: {
+        q: 'Do I need to connect my broker?',
+        a: "No broker connection required. You enter your holdings manually or import dividend transactions from a CSV your broker exports. Your broker credentials never leave your hands.",
+      },
+      tryWithoutSignup: {
+        q: 'Can I try Quantic without signing up?',
+        a: 'Yes. Click "Try a sample portfolio" on the home page to explore a pre-populated demo account. No signup, no email.',
+      },
+      portfolioVsRadar: {
+        q: "What's the difference between Portfolio and Radar?",
+        a: "Your Portfolio is what you actually own — quantities, average prices, real value. Your Radar is your watchlist — stocks you're tracking with optional target prices. The same stock can be in both.",
+      },
+    },
+    portfolioRadar: {
+      addHolding: {
+        q: 'How do I add a holding?',
+        a: 'Go to Portfolio, search for the stock, click Add. Enter quantity and average price. You can add more shares later (the average price updates automatically) or remove holdings entirely.',
+      },
+      multiCurrency: {
+        q: 'Can I track stocks in multiple currencies?',
+        a: 'Yes. Each holding stays in its listing currency. Set a preferred currency in Settings and we convert per-currency totals into a single display total using daily FX rates.',
+      },
+      yoc: {
+        q: 'What does "Yield on Cost" mean?',
+        a: "Yield on Cost = annual dividend per share ÷ your average purchase price × 100. It measures the yield you locked in when you bought, regardless of what the share price has done since.",
+      },
+      targetPrice: {
+        q: "What's a target price?",
+        a: "Your personal buy threshold for a stock — the price at which you'd consider adding it. Set it on a Radar stock and we'll show the gap to the current price (above/below) to flag opportunities.",
+      },
+      communityTarget: {
+        q: 'Where does the "community average target" come from?',
+        a: 'We average the target prices set by all users tracking the same stock. To protect individual targets, we only show the average once at least 3 users have set one.',
+      },
+      score: {
+        q: 'What does the dividend score mean?',
+        a: "A 0–10 score that summarizes a stock's dividend health: payout ratio, dividend growth, yield, and consistency. Higher is better. 7+ is 'Strong', 5–7 'Fair', below 5 'Weak'.",
+      },
+    },
+    dividends: {
+      upcoming: {
+        q: 'How are upcoming dividends calculated?',
+        a: "From each holding's stock data we pull the next ex-dividend date and the expected per-share amount, multiplied by your quantity. The dashboard shows the next 14 days.",
+      },
+      import: {
+        q: 'Can I import dividends from my broker?',
+        a: "Yes. On the Dividends page, click Import. Upload a CSV from your broker; we parse it, show you a preview, and you confirm before anything is saved.",
+      },
+      brokerSupport: {
+        q: 'Which brokers does the import support?',
+        a: "Currently Interactive Brokers and MyInvestor (Spain). Adding a new broker means writing a small parser — open a GitHub issue with a sample CSV and we'll consider it.",
+      },
+      unsupportedBroker: {
+        q: "What if my broker isn't supported?",
+        a: 'Add dividends manually on the Dividends page. Or open a GitHub issue requesting a parser for your broker — include a sample CSV.',
+      },
+    },
+    ai: {
+      model: {
+        q: 'Which AI model do you use?',
+        a: "We currently use Google's Gemini (2.5 Flash). The integration is provider-agnostic — we can swap to OpenAI or Anthropic depending on what each task needs, without affecting the UI.",
+      },
+      limit: {
+        q: 'Is there an AI usage limit?',
+        a: 'Non-admin users get 3 AI requests per day across all features (insights, summaries, Telegram chat). AI calls cost real money; the limit keeps the service free for everyone.',
+      },
+      privacy: {
+        q: 'Is my data sent to the AI provider?',
+        a: "Only the data needed for the prompt — the stocks involved, your targets, your dividends. We never send your email, password, or anything outside the specific request. Prompts are not retained.",
+      },
+    },
+    pulse: {
+      what: {
+        q: 'What is Pulse?',
+        a: 'Pulse is the Quantic community at pulse.quantic.es. Users can opt in to share their portfolio (holdings + sectors) and/or their radar (watchlist + target prices) under a public slug.',
+      },
+      whoSees: {
+        q: 'Who can see my shared portfolio?',
+        a: "Anyone with the URL. Pulse pages are publicly accessible without an account. Don't share if you're not comfortable with that — it's opt-in for exactly this reason.",
+      },
+      optOut: {
+        q: 'How do I stop sharing?',
+        a: 'Settings → Share on Pulse → uncheck the toggle for the surface you want to stop sharing. The data is removed from Pulse immediately.',
+      },
+    },
+    telegram: {
+      connect: {
+        q: 'How do I connect Telegram?',
+        a: 'Settings → Connect Telegram → click "Open Telegram bot". Tap Send in Telegram, then come back here and click Refresh. Your Telegram account is now linked.',
+      },
+      what: {
+        q: 'What can I ask the bot?',
+        a: 'Ask things like "what dividends did I get this month?", "show my radar", "any ex-divs this week?". The bot answers using your real data via AI.',
+      },
+    },
+    dataPrivacy: {
+      stockData: {
+        q: 'Where does stock data come from?',
+        a: 'Stock prices, dividends, ex-div dates, and fundamentals come from Yahoo Finance (with Alpha Vantage as a fallback). Data is cached for 1 hour to stay within free-tier limits.',
+      },
+      accuracy: {
+        q: 'How accurate is the data?',
+        a: "Best-effort. Third-party APIs occasionally serve stale or wrong data, especially on the day of an ex-dividend or right after a split. Always verify against your broker's official statement before acting.",
+      },
+      sell: {
+        q: 'Do you sell my data?',
+        a: "No. Quantic has no advertising, no third-party analytics tracking, and no data sales. We're a one-developer side project, not a data company.",
+      },
+    },
   },
 
   // Home Page

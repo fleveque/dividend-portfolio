@@ -29,6 +29,7 @@ import PortfolioPage from '../pages/PortfolioPage'
 import DividendsPage from '../pages/DividendsPage'
 import SettingsPage from '../pages/SettingsPage'
 import DemoPage from '../pages/DemoPage'
+import FaqPage from '../pages/FaqPage'
 
 /**
  * QueryClient Configuration
@@ -70,6 +71,7 @@ function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignUpPage />} />
+                    <Route path="/faq" element={<FaqPage />} />
                     <Route element={<ProtectedRoute />}>
                       <Route path="/radar" element={<RadarPage />} />
                       <Route path="/portfolio" element={<PortfolioPage />} />
