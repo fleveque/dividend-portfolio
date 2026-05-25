@@ -17,15 +17,18 @@ export function DividendIncomeMini() {
 
   const currency = profile?.preferredCurrency ?? 'USD'
 
-  // Aggregate "actual" income across currencies (raw monthly buckets are
-  // per-currency; for the mini view we pick the user's preferred currency
-  // if it's present, otherwise fall back to the first bucket).
+  // The server returns 12 past + 12 future buckets per currency; we only
+  // want the *past* months for this mini (history, not projection). Past
+  // months are exactly the ones where `actual !== null` — that filter is
+  // more robust than slicing by index in case the server window changes.
   const monthly = useMemo(() => {
     if (!chartData) return null
     const buckets = chartData.byCurrency[currency] ?? Object.values(chartData.byCurrency)[0]
     if (!buckets) return null
-    // Last 12 months only.
-    return buckets.slice(-12)
+    const past = buckets.filter((b) => b.actual !== null)
+    // Keep the most recent 12 months — handles wider windows
+    // (e.g. range=full) gracefully.
+    return past.slice(-12)
   }, [chartData, currency])
 
   if (isLoading) return null
