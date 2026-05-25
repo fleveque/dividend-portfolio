@@ -62,6 +62,7 @@ const es = {
   // Footer
   footer: {
     builtWith: 'Hecho con Ruby on Rails, React, TypeScript y Tailwind CSS',
+    disclaimer: 'La información en Quantic se proporciona únicamente con fines informativos y educativos. Es de carácter general, no tiene en cuenta tu situación financiera personal y no constituye asesoramiento de inversión, financiero, fiscal o legal — ni una recomendación para comprar o vender ningún valor. Invertir conlleva riesgos, incluida la posible pérdida del capital; los resultados pasados no son un indicador fiable de los resultados futuros. Los datos de mercado provienen de proveedores terceros y pueden estar retrasados o ser inexactos. Antes de tomar cualquier decisión de inversión, considera tus objetivos, horizonte temporal, tolerancia al riesgo y diversificación, y consulta a un profesional financiero cualificado. Quantic no es un asesor financiero registrado ni un intermediario bursátil.',
   },
 
   // Home Page
