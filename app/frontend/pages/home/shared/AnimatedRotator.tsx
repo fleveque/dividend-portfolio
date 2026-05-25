@@ -22,11 +22,18 @@ export function AnimatedRotator({ words, intervalMs = 3000, className }: Props) 
     return () => window.clearInterval(id)
   }, [intervalMs, words.length, reducedMotion])
 
+  // The caller's `className` (e.g. gradient + bg-clip-text + text-transparent)
+  // must land on the visible spans, *not* the positioning wrapper —
+  // otherwise the wrapper's `color: transparent` cascades down and the
+  // rotating word renders invisible.
+  const visibleSpanClass = `whitespace-nowrap ${className ?? ''}`
+
   return (
-    <span className={`relative inline-block align-baseline ${className ?? ''}`}>
+    <span className="relative inline-block align-baseline">
       {/* Reserve max-width via a hidden sizing span so the line above
-          doesn't reflow as the visible word rotates. */}
-      <span aria-hidden className="invisible whitespace-nowrap">
+          doesn't reflow as the visible word rotates. Keeps the gradient
+          classes so its width matches the visible word's rendering. */}
+      <span aria-hidden className={`invisible ${visibleSpanClass}`}>
         {words.reduce((longest, w) => (w.length > longest.length ? w : longest), '')}
       </span>
       <AnimatePresence mode="wait" initial={false}>
@@ -36,7 +43,7 @@ export function AnimatedRotator({ words, intervalMs = 3000, className }: Props) 
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '-0.6em', opacity: 0 }}
           transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-          className="absolute inset-0 whitespace-nowrap"
+          className={`absolute inset-0 ${visibleSpanClass}`}
         >
           {words[index]}
         </m.span>
