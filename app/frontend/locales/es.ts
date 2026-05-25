@@ -93,6 +93,16 @@ const es = {
       tagline: 'Gratis · Sin conexión a tu bróker · Código abierto',
     },
 
+    howItWorks: {
+      title: 'De la lista a los dividendos en 3 pasos',
+      step1Title: 'Construye tu radar',
+      step1Body: 'Añade acciones con precios objetivo. Seguimos precio, puntuación y fechas ex-div.',
+      step2Title: 'Sigue tu cartera',
+      step2Body: 'Registra tus posiciones para ver rentabilidad en vivo, sectores y previsión de dividendos.',
+      step3Title: 'Recibe análisis con IA',
+      step3Body: 'Análisis en lenguaje natural de tu cartera y radar — riesgos, huecos, oportunidades.',
+    },
+
     finalCta: {
       title: 'Empieza tu radar en 30 segundos',
       subtitle: 'Gratis, sin conexión a tu bróker. Prueba una cartera de ejemplo o regístrate para crear la tuya.',

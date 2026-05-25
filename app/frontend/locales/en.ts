@@ -93,6 +93,16 @@ const en = {
       tagline: 'Free · No broker connection required · Open source',
     },
 
+    howItWorks: {
+      title: 'From watchlist to dividend income in 3 steps',
+      step1Title: 'Build your radar',
+      step1Body: 'Add stocks with target prices. We track price, score, and ex-div dates.',
+      step2Title: 'Track your portfolio',
+      step2Body: 'Log holdings to get live yield, sector mix, and dividend forecast.',
+      step3Title: 'Get AI insights',
+      step3Body: 'Plain-language analysis of your portfolio and radar — risks, gaps, opportunities.',
+    },
+
     finalCta: {
       title: 'Start your radar in 30 seconds',
       subtitle: 'Free, no broker connection required. Try a sample portfolio or sign up to build your own.',

@@ -1,7 +1,6 @@
 import { Activity, ExternalLink, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { FeatureShowcase } from '../../components/FeatureShowcase'
 import { TopScoredShowcase } from '../../components/TopScoredShowcase'
 import { useLastAddedStocks, useMostAddedStocks, useMostHeldStocks } from '../../hooks/useStockQueries'
 import { Card, CardContent } from '@/components/ui/card'
@@ -9,6 +8,7 @@ import pulsePreviewImg from '@/assets/screenshots/pulse-portfolio.webp'
 import { PULSE_URL } from '../../lib/pulse'
 import { StockListCard } from './shared/StockListCard'
 import { HeroAurora } from './shared/HeroAurora'
+import { HowItWorks } from './anon/HowItWorks'
 import { FinalCTA } from './anon/FinalCTA'
 
 export function AnonHome() {
@@ -22,20 +22,17 @@ export function AnonHome() {
     <div>
       <HeroAurora variant="anon" />
 
-      <div className="container mx-auto px-4 pb-8 space-y-8">
-        {/* Feature Showcase + Top Scored Stocks */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-          <Card className="lg:col-span-3">
-            <CardContent className="px-6 pt-4 pb-5">
-              <FeatureShowcase />
-            </CardContent>
-          </Card>
-          <Card className="lg:col-span-2">
+      <div className="container mx-auto px-4 pb-8 space-y-12 md:space-y-16">
+        <HowItWorks />
+
+        {/* Top-Scored leaderboard — real product output, gradient-bordered. */}
+        <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-emerald-500/40 via-cyan-500/30 to-blue-500/30 p-[1px]">
+          <div className="rounded-[calc(var(--radius-lg)-1px)] bg-card">
             <CardContent className="px-6 pt-4 pb-5">
               <TopScoredShowcase />
             </CardContent>
-          </Card>
-        </div>
+          </div>
+        </Card>
 
         {/* Pulse Banner — community-first reframe with preview */}
         <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 overflow-hidden">
