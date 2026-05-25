@@ -139,6 +139,8 @@ const es = {
         title: 'Ingresos por dividendos',
         thisMonth: 'Este mes',
         last12m: 'Últimos 12 meses',
+        moreCurrencies_one: '+ {{count}} moneda más',
+        moreCurrencies_other: '+ {{count}} monedas más',
       },
       buyPlanTeaser: {
         title: 'Tus próximas compras',

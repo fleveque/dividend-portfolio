@@ -1,9 +1,11 @@
 import { Send } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
+import { useMemo } from 'react'
 import { useLastAddedStocks, useMostAddedStocks, useMostHeldStocks } from '../../hooks/useStockQueries'
 import { useHoldings } from '../../hooks/useHoldingsQueries'
 import { useRadar } from '../../hooks/useRadarQueries'
+import { useDividendChartData } from '../../hooks/useDividendsQueries'
 import { useTelegramLink } from '../../hooks/useTelegramLink'
 import { Card, CardContent } from '@/components/ui/card'
 import { PortfolioStatsCard } from '../../components/PortfolioStatsCard'
@@ -20,6 +22,7 @@ export function DashboardHome() {
 
   const { data: holdingsData } = useHoldings()
   const { data: radarData } = useRadar()
+  const { data: chartData } = useDividendChartData()
   const { data: telegramLink } = useTelegramLink()
   const lastAddedQuery = useLastAddedStocks()
   const mostAddedQuery = useMostAddedStocks()
@@ -28,8 +31,35 @@ export function DashboardHome() {
   const holdings = holdingsData?.holdings ?? []
   const radarStocks = radarData?.stocks ?? []
   const hasHoldings = holdings.length > 0
-  const hasRadarStocks = radarStocks.length > 0
   const telegramConnected = telegramLink?.connected ?? false
+
+  // Lift the empty-state checks so the layout can collapse to a single
+  // column when one half is null. Mirrors the in-window filter inside
+  // UpcomingExDividends, and counts any past-month income across all
+  // currencies for the mini.
+  const hasUpcomingExDivs = useMemo(() => {
+    const startOfToday = new Date()
+    startOfToday.setHours(0, 0, 0, 0)
+    const horizon = new Date(startOfToday)
+    horizon.setDate(horizon.getDate() + 14)
+    const inWindow = (d: string | null) => {
+      if (!d) return false
+      const x = new Date(d)
+      return !Number.isNaN(x.getTime()) && x >= startOfToday && x <= horizon
+    }
+    return (
+      holdings.some((h) => inWindow(h.stock.exDividendDate)) ||
+      radarStocks.some((r) => inWindow(r.exDividendDate))
+    )
+  }, [holdings, radarStocks])
+
+  const hasDividendIncome = useMemo(() => {
+    if (!chartData) return false
+    for (const buckets of Object.values(chartData.byCurrency)) {
+      if (buckets.some((b) => (b.actual ?? 0) > 0)) return true
+    }
+    return false
+  }, [chartData])
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8 md:space-y-10">
@@ -42,16 +72,22 @@ export function DashboardHome() {
         <EmptyPortfolioCTA />
       )}
 
-      {/* Today's actions: upcoming ex-divs (UpcomingExDividends returns
-          null when there's nothing in the next 14 days). */}
-      {(hasHoldings || hasRadarStocks) && (
-        <UpcomingExDividends holdings={holdings} radarStocks={radarStocks} />
+      {/* Upcoming ex-divs + dividend income — side-by-side when both
+          have data, single full-width column when only one does. The
+          grid class flips based on the lifted checks above so a missing
+          sibling doesn't leave a blank column. */}
+      {(hasUpcomingExDivs || hasDividendIncome) && (
+        <div
+          className={`grid gap-4 ${
+            hasUpcomingExDivs && hasDividendIncome ? 'lg:grid-cols-2' : ''
+          }`}
+        >
+          {hasDividendIncome && <DividendIncomeMini />}
+          {hasUpcomingExDivs && (
+            <UpcomingExDividends holdings={holdings} radarStocks={radarStocks} />
+          )}
+        </div>
       )}
-
-      {/* Dividend income mini (returns null when there's no recorded
-          dividend income). Single-column so a missing sibling doesn't
-          leave a gap on the right. */}
-      <DividendIncomeMini />
 
       {/* Buy plan teaser — hidden when the cart is empty. */}
       <BuyPlanTeaser />
