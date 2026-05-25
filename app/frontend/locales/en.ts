@@ -148,7 +148,7 @@ const en = {
     ai: {
       model: {
         q: 'Which AI model do you use?',
-        a: "We currently use Anthropic's Claude (Haiku for stock summaries, Sonnet for portfolio and radar insights). The service is provider-agnostic and can be swapped without affecting the UI.",
+        a: "We currently use Google's Gemini (2.5 Flash). The integration is provider-agnostic — we can swap to OpenAI or Anthropic depending on what each task needs, without affecting the UI.",
       },
       limit: {
         q: 'Is there an AI usage limit?',
