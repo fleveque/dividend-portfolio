@@ -84,6 +84,21 @@ const en = {
     telegramDescription: 'Ask your portfolio anything in natural language — ex-divs, totals, target prices — right from Telegram.',
     telegramExamples: '"what dividends did I get this month?" · "show my radar" · "any ex-divs this week?"',
     telegramConnect: 'Connect Telegram',
+
+    hero: {
+      headlinePrefix: 'Track your',
+      rotatorWords: ['dividends', 'yield-on-cost', 'ex-div dates', 'radar targets'],
+      subtitle: 'AI-enhanced dividend investing. Build your watchlist, track your portfolio, plan purchases — all in one place.',
+      signupCta: 'Sign up free',
+      tagline: 'Free · No broker connection required · Open source',
+    },
+
+    finalCta: {
+      title: 'Start your radar in 30 seconds',
+      subtitle: 'Free, no broker connection required. Try a sample portfolio or sign up to build your own.',
+      primary: 'Try the demo',
+      secondary: 'Sign up',
+    },
   },
 
   // Demo mode

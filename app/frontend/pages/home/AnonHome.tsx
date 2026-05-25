@@ -1,15 +1,15 @@
-import { Activity, ExternalLink, Settings, Sparkles } from 'lucide-react'
+import { Activity, ExternalLink, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { Logo } from '../../components/Logo'
 import { FeatureShowcase } from '../../components/FeatureShowcase'
 import { TopScoredShowcase } from '../../components/TopScoredShowcase'
 import { useLastAddedStocks, useMostAddedStocks, useMostHeldStocks } from '../../hooks/useStockQueries'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import pulsePreviewImg from '@/assets/screenshots/pulse-portfolio.webp'
 import { PULSE_URL } from '../../lib/pulse'
 import { StockListCard } from './shared/StockListCard'
+import { HeroAurora } from './shared/HeroAurora'
+import { FinalCTA } from './anon/FinalCTA'
 
 export function AnonHome() {
   const { t } = useTranslation()
@@ -19,114 +19,100 @@ export function AnonHome() {
   const mostHeldQuery = useMostHeldStocks()
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Hero Section */}
-      <div className="text-center mb-8">
-        <div className="flex justify-center mb-4">
-          <Logo size="lg" showText={false} />
-        </div>
-        <h1 className="text-2xl sm:text-4xl font-bold text-foreground mb-2">
-          {t('home.heroTitle')}
-        </h1>
-        <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
-          {t('home.heroSubtitle')}
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-3 mt-5">
-          <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white">
-            <Link to="/demo">
-              <Sparkles className="size-4" /> {t('home.tryDemo')}
-            </Link>
-          </Button>
-        </div>
-      </div>
+    <div>
+      <HeroAurora variant="anon" />
 
-      {/* Feature Showcase + Top Scored Stocks */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-8">
-        <Card className="lg:col-span-3">
-          <CardContent className="px-6 pt-4 pb-5">
-            <FeatureShowcase />
-          </CardContent>
-        </Card>
-        <Card className="lg:col-span-2">
-          <CardContent className="px-6 pt-4 pb-5">
-            <TopScoredShowcase />
-          </CardContent>
-        </Card>
-      </div>
+      <div className="container mx-auto px-4 pb-8 space-y-8">
+        {/* Feature Showcase + Top Scored Stocks */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+          <Card className="lg:col-span-3">
+            <CardContent className="px-6 pt-4 pb-5">
+              <FeatureShowcase />
+            </CardContent>
+          </Card>
+          <Card className="lg:col-span-2">
+            <CardContent className="px-6 pt-4 pb-5">
+              <TopScoredShowcase />
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Pulse Banner — community-first reframe with preview */}
-      <Card className="mb-8 border-purple-200 dark:border-purple-800 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 overflow-hidden">
-        <CardContent className="p-6">
-          <div className="grid md:grid-cols-2 gap-6 items-center">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Activity className="size-5 text-purple-600 dark:text-purple-400" />
-                <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
-                  {t('home.pulseTitle')}
-                </h2>
+        {/* Pulse Banner — community-first reframe with preview */}
+        <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 overflow-hidden">
+          <CardContent className="p-6">
+            <div className="grid md:grid-cols-2 gap-6 items-center">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Activity className="size-5 text-purple-600 dark:text-purple-400" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
+                    {t('home.pulseTitle')}
+                  </h2>
+                </div>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  {t('home.pulseDescription')}
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    to="/settings#portfolio-sharing"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 text-sm font-medium transition-colors"
+                  >
+                    <Settings className="size-3.5" /> {t('home.pulseOpenSettings')}
+                  </Link>
+                  <a
+                    href={PULSE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-sm font-medium text-purple-700 dark:text-purple-300 hover:underline"
+                  >
+                    {t('home.pulseSeeCommunity')} <ExternalLink className="size-3.5" />
+                  </a>
+                </div>
               </div>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                {t('home.pulseDescription')}
-              </p>
-              <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  to="/settings#portfolio-sharing"
-                  className="inline-flex items-center gap-1.5 rounded-md bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 text-sm font-medium transition-colors"
-                >
-                  <Settings className="size-3.5" /> {t('home.pulseOpenSettings')}
-                </Link>
+              <div className="flex justify-center md:justify-end">
                 <a
                   href={PULSE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm font-medium text-purple-700 dark:text-purple-300 hover:underline"
+                  className="block w-full max-w-[240px] rounded-lg overflow-hidden shadow-lg ring-1 ring-purple-200 dark:ring-purple-800 transition-transform hover:scale-[1.02]"
+                  aria-label={t('home.pulsePreviewAlt')}
                 >
-                  {t('home.pulseSeeCommunity')} <ExternalLink className="size-3.5" />
+                  <img
+                    src={pulsePreviewImg}
+                    alt={t('home.pulsePreviewAlt')}
+                    loading="lazy"
+                    width="800"
+                    height="981"
+                    className="block w-full h-auto"
+                  />
                 </a>
               </div>
             </div>
-            <div className="flex justify-center md:justify-end">
-              <a
-                href={PULSE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full max-w-[240px] rounded-lg overflow-hidden shadow-lg ring-1 ring-purple-200 dark:ring-purple-800 transition-transform hover:scale-[1.02]"
-                aria-label={t('home.pulsePreviewAlt')}
-              >
-                <img
-                  src={pulsePreviewImg}
-                  alt={t('home.pulsePreviewAlt')}
-                  loading="lazy"
-                  width="800"
-                  height="981"
-                  className="block w-full h-auto"
-                />
-              </a>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Stock Lists — three columns on large screens */}
-      <div className="grid lg:grid-cols-3 gap-4">
-        <StockListCard
-          title={t('home.mostAddedToRadar')}
-          data={mostAddedQuery.data}
-          isLoading={mostAddedQuery.isLoading}
-          error={mostAddedQuery.error}
-        />
-        <StockListCard
-          title={t('home.mostHeldInPortfolios')}
-          data={mostHeldQuery.data}
-          isLoading={mostHeldQuery.isLoading}
-          error={mostHeldQuery.error}
-        />
-        <StockListCard
-          title={t('home.recentlyUpdated')}
-          data={lastAddedQuery.data}
-          isLoading={lastAddedQuery.isLoading}
-          error={lastAddedQuery.error}
-        />
+        {/* Stock Lists — three columns on large screens */}
+        <div className="grid lg:grid-cols-3 gap-4">
+          <StockListCard
+            title={t('home.mostAddedToRadar')}
+            data={mostAddedQuery.data}
+            isLoading={mostAddedQuery.isLoading}
+            error={mostAddedQuery.error}
+          />
+          <StockListCard
+            title={t('home.mostHeldInPortfolios')}
+            data={mostHeldQuery.data}
+            isLoading={mostHeldQuery.isLoading}
+            error={mostHeldQuery.error}
+          />
+          <StockListCard
+            title={t('home.recentlyUpdated')}
+            data={lastAddedQuery.data}
+            isLoading={lastAddedQuery.isLoading}
+            error={lastAddedQuery.error}
+          />
+        </div>
+
+        <FinalCTA />
       </div>
     </div>
   )

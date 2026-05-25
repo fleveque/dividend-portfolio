@@ -84,6 +84,21 @@ const es = {
     telegramDescription: 'Pregunta sobre tu cartera en lenguaje natural — ex-divs, totales, precios objetivo — directamente desde Telegram.',
     telegramExamples: '"¿qué dividendos he recibido este mes?" · "muestra mi radar" · "¿hay ex-divs esta semana?"',
     telegramConnect: 'Conectar Telegram',
+
+    hero: {
+      headlinePrefix: 'Sigue tus',
+      rotatorWords: ['dividendos', 'yield-on-cost', 'fechas ex-div', 'precios objetivo'],
+      subtitle: 'Inversión en dividendos con IA. Construye tu lista, sigue tu cartera, planifica tus compras — todo en un sitio.',
+      signupCta: 'Regístrate gratis',
+      tagline: 'Gratis · Sin conexión a tu bróker · Código abierto',
+    },
+
+    finalCta: {
+      title: 'Empieza tu radar en 30 segundos',
+      subtitle: 'Gratis, sin conexión a tu bróker. Prueba una cartera de ejemplo o regístrate para crear la tuya.',
+      primary: 'Prueba el demo',
+      secondary: 'Regístrate',
+    },
   },
 
   // Demo mode
