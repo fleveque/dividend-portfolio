@@ -81,6 +81,24 @@ RSpec.describe "Api::V1::Profiles", type: :request do
 
         expect(response).to have_http_status(:unprocessable_entity)
       end
+
+      it "exposes and updates the sharePortfolio / shareRadar toggles" do
+        get "/api/v1/profile"
+        json = JSON.parse(response.body)["data"]
+        expect(json["sharePortfolio"]).to be(true)  # default
+        expect(json["shareRadar"]).to be(false)     # default
+
+        patch "/api/v1/profile", params: { share_radar: true, share_portfolio: false }
+        expect(response).to have_http_status(:ok)
+        json = JSON.parse(response.body)["data"]
+        expect(json["sharePortfolio"]).to be(false)
+        expect(json["shareRadar"]).to be(true)
+      end
+
+      it "accepts string booleans (form-style clients)" do
+        patch "/api/v1/profile", params: { share_radar: "true" }
+        expect(JSON.parse(response.body)["data"]["shareRadar"]).to be(true)
+      end
     end
   end
 end

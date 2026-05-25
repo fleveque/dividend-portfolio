@@ -1,4 +1,6 @@
 import { useTranslation } from 'react-i18next'
+
+import { translateSector } from '@/lib/sectors'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { PortfolioStats } from '../types'
@@ -98,7 +100,7 @@ function SectorBreakdown({ sectors }: { sectors: PortfolioStats['sectors'] }) {
             key={s.sector}
             className={cn('h-full', SECTOR_COLORS[i % SECTOR_COLORS.length])}
             style={{ width: `${s.percent}%` }}
-            title={`${s.sector}: ${s.percent.toFixed(1)}%`}
+            title={`${translateSector(t, s.sector)}: ${s.percent.toFixed(1)}%`}
           />
         ))}
       </div>
@@ -106,7 +108,7 @@ function SectorBreakdown({ sectors }: { sectors: PortfolioStats['sectors'] }) {
         {sectors.map((s, i) => (
           <li key={s.sector} className="flex items-center gap-2">
             <span className={cn('size-2 rounded-sm', SECTOR_COLORS[i % SECTOR_COLORS.length])} />
-            <span className="text-foreground">{s.sector}</span>
+            <span className="text-foreground">{translateSector(t, s.sector)}</span>
             <span className="text-muted-foreground">{s.percent.toFixed(1)}%</span>
           </li>
         ))}

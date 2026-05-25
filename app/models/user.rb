@@ -19,7 +19,8 @@ class User < ApplicationRecord
   validates :preferred_currency, presence: true, inclusion: { in: Stock::CURRENCY_SYMBOLS.keys }
   validates :locale, presence: true, inclusion: { in: SUPPORTED_LOCALES }
 
-  after_commit :publish_portfolio_slug_change, if: :saved_change_to_portfolio_slug?
+  after_commit :publish_pulse_changes,
+               if: -> { saved_change_to_portfolio_slug? || saved_change_to_share_portfolio? || saved_change_to_share_radar? }
 
   # Find or create a user from OAuth provider data
   def self.from_omniauth(auth)
@@ -35,12 +36,49 @@ class User < ApplicationRecord
 
   private
 
-  def publish_portfolio_slug_change
-    if portfolio_slug.present?
-      NatsPublisher.publish("portfolio.opted_in", PortfolioPayloadBuilder.call(self))
-    else
-      previous_slug = saved_change_to_portfolio_slug.first
-      NatsPublisher.publish("portfolio.opted_out", { slug: previous_slug }) if previous_slug.present?
+  # On any save that touches portfolio_slug / share_portfolio / share_radar,
+  # diff the before/after state for each Pulse surface (portfolio + radar)
+  # and emit the right opted_in / opted_out events. `updated` events are
+  # owned by Holding / RadarStock callbacks — this method handles the
+  # opt-state lifecycle only.
+  def publish_pulse_changes
+    publish_surface_change(:portfolio, share_portfolio?)
+    publish_surface_change(:radar, share_radar?)
+  end
+
+  # Emits `<surface>.opted_in` / `<surface>.opted_out` based on the
+  # *effective shared state* (slug present AND surface toggle on) before
+  # and after the save. Slug changes and toggle changes are both handled
+  # here, so a user clearing their slug fires opt-outs for any currently
+  # active surface.
+  def publish_surface_change(surface, currently_enabled_flag)
+    was_shared = previously_shared?(surface)
+    is_shared = portfolio_slug.present? && currently_enabled_flag
+
+    if is_shared && !was_shared
+      NatsPublisher.publish("#{surface}.opted_in", payload_for(surface))
+    elsif was_shared && !is_shared
+      slug_for_out = saved_change_to_portfolio_slug? ? saved_change_to_portfolio_slug.first : portfolio_slug
+      NatsPublisher.publish("#{surface}.opted_out", { slug: slug_for_out }) if slug_for_out.present?
+    end
+  end
+
+  # Reconstruct the *previous* effective sharing state for `surface` by
+  # looking at saved_change_to_* on the slug and the relevant toggle.
+  # If a column wasn't part of this save its current value is also its
+  # "previous" value.
+  def previously_shared?(surface)
+    prev_slug = saved_change_to_portfolio_slug? ? saved_change_to_portfolio_slug.first : portfolio_slug
+    toggle_change = saved_change_to_share_portfolio if surface == :portfolio
+    toggle_change ||= saved_change_to_share_radar if surface == :radar
+    prev_flag = toggle_change ? toggle_change.first : public_send("share_#{surface}?")
+    prev_slug.present? && prev_flag
+  end
+
+  def payload_for(surface)
+    case surface
+    when :portfolio then PortfolioPayloadBuilder.call(self)
+    when :radar     then RadarPayloadBuilder.call(self)
     end
   end
 end

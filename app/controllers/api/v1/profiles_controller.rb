@@ -23,13 +23,19 @@ module Api
           emailAddress: Current.user.email_address,
           portfolioSlug: Current.user.portfolio_slug,
           preferredCurrency: Current.user.preferred_currency,
-          locale: Current.user.locale
+          locale: Current.user.locale,
+          sharePortfolio: Current.user.share_portfolio,
+          shareRadar: Current.user.share_radar
         }
       end
 
       def profile_params
-        permitted = params.permit(:portfolio_slug, :preferred_currency, :locale)
+        permitted = params.permit(:portfolio_slug, :preferred_currency, :locale, :share_portfolio, :share_radar)
         permitted[:portfolio_slug] = nil if permitted.key?(:portfolio_slug) && permitted[:portfolio_slug].blank?
+        # Coerce form-y string booleans to real booleans so AR doesn't choke.
+        %i[share_portfolio share_radar].each do |k|
+          permitted[k] = ActiveModel::Type::Boolean.new.cast(permitted[k]) if permitted.key?(k)
+        end
         permitted
       end
     end

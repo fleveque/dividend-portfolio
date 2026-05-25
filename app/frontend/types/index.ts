@@ -184,6 +184,8 @@ export interface UserProfile {
   portfolioSlug: string | null
   preferredCurrency: string
   locale: string
+  sharePortfolio: boolean
+  shareRadar: boolean
 }
 
 /**
