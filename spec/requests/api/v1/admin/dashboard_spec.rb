@@ -88,6 +88,94 @@ RSpec.describe "Api::V1::Admin::Dashboard", type: :request do
         end
       end
 
+      describe "ai section" do
+        it "is empty / zeroed when no AI calls have been made" do
+          get "/api/v1/admin/dashboard"
+          ai = JSON.parse(response.body)["data"]["ai"]
+          expect(ai["callsToday"]).to eq(0)
+          expect(ai["callsLast7d"]).to eq(0)
+          expect(ai["callsLast30d"]).to eq(0)
+          expect(ai["byFeature"]).to eq({})
+          expect(ai["byProvider"]).to eq({})
+          expect(ai["topUsers"]).to eq([])
+          expect(ai["usersAtQuotaToday"]).to eq(0)
+          expect(ai["dailyLimit"]).to eq(AiRateLimiter::DAILY_LIMIT)
+        end
+
+        it "aggregates calls by feature, provider, and user over the relevant windows" do
+          alice = create(:user, email_address: "alice@example.com")
+          bob = create(:user, email_address: "bob@example.com")
+          # Today
+          AiRequest.create!(user: alice, feature: "radar_insights", provider: "gemini", created_at: 1.hour.ago)
+          AiRequest.create!(user: alice, feature: "telegram_chat", provider: "gemini", created_at: 2.hours.ago)
+          AiRequest.create!(user: bob, feature: "stock_summary", provider: "gemini", created_at: 30.minutes.ago)
+          # Within 7d window but not today
+          AiRequest.create!(user: bob, feature: "telegram_chat", provider: "gemini", created_at: 3.days.ago)
+          # Outside 30d window
+          AiRequest.create!(user: alice, feature: "radar_insights", provider: "gemini", created_at: 90.days.ago)
+
+          get "/api/v1/admin/dashboard"
+          ai = JSON.parse(response.body)["data"]["ai"]
+          expect(ai["callsToday"]).to eq(3)
+          expect(ai["callsLast7d"]).to eq(4)
+          expect(ai["callsLast30d"]).to eq(4)
+          expect(ai["byFeature"]).to include("radar_insights" => 1, "telegram_chat" => 2, "stock_summary" => 1)
+          expect(ai["byProvider"]).to eq({ "gemini" => 4 })
+          expect(ai["topUsers"]).to contain_exactly(
+            { "email" => "alice@example.com", "count" => 2 },
+            { "email" => "bob@example.com", "count" => 2 }
+          )
+        end
+
+        it "counts non-admin users at quota today" do
+          regular = create(:user)
+          AiRateLimiter::DAILY_LIMIT.times { AiRequest.create!(user: regular, feature: "radar_insights", provider: "gemini") }
+          # Admin going over the cap doesn't count (admins bypass the limiter)
+          admin_2 = create(:user, :admin)
+          (AiRateLimiter::DAILY_LIMIT + 2).times { AiRequest.create!(user: admin_2, feature: "radar_insights", provider: "gemini") }
+
+          get "/api/v1/admin/dashboard"
+          ai = JSON.parse(response.body)["data"]["ai"]
+          expect(ai["usersAtQuotaToday"]).to eq(1)
+        end
+      end
+
+      describe "telegram section" do
+        it "is empty / zeroed when nobody has linked Telegram" do
+          get "/api/v1/admin/dashboard"
+          telegram = JSON.parse(response.body)["data"]["telegram"]
+          expect(telegram["linkedUsers"]).to eq(0)
+          expect(telegram["linkedLast7d"]).to eq(0)
+          expect(telegram["linkedLast30d"]).to eq(0)
+          expect(telegram["notificationsEnabled"]).to eq(0)
+          expect(telegram["botQuestionsLast7d"]).to eq(0)
+          expect(telegram["botQuestionsLast30d"]).to eq(0)
+          expect(telegram["topBotUsers"]).to eq([])
+        end
+
+        it "reports linked users, notifications-enabled, and bot questions over time" do
+          alice = create(:user, email_address: "alice@example.com")
+          bob = create(:user, email_address: "bob@example.com")
+          UserTelegramLink.create!(user: alice, chat_id: "1", telegram_user_id: "u1", linked_at: 1.day.ago, notifications_enabled: true)
+          UserTelegramLink.create!(user: bob, chat_id: "2", telegram_user_id: "u2", linked_at: 10.days.ago, notifications_enabled: false)
+          # Bot questions only count when feature == telegram_chat
+          AiRequest.create!(user: alice, feature: "telegram_chat", provider: "gemini", created_at: 1.day.ago)
+          AiRequest.create!(user: alice, feature: "telegram_chat", provider: "gemini", created_at: 5.days.ago)
+          AiRequest.create!(user: bob, feature: "telegram_chat", provider: "gemini", created_at: 20.days.ago)
+          AiRequest.create!(user: alice, feature: "radar_insights", provider: "gemini") # ignored
+
+          get "/api/v1/admin/dashboard"
+          telegram = JSON.parse(response.body)["data"]["telegram"]
+          expect(telegram["linkedUsers"]).to eq(2)
+          expect(telegram["linkedLast7d"]).to eq(1)
+          expect(telegram["linkedLast30d"]).to eq(2)
+          expect(telegram["notificationsEnabled"]).to eq(1)
+          expect(telegram["botQuestionsLast7d"]).to eq(2)
+          expect(telegram["botQuestionsLast30d"]).to eq(3)
+          expect(telegram["topBotUsers"].first).to eq({ "email" => "alice@example.com", "count" => 2 })
+        end
+      end
+
       describe "activity section" do
         it "exposes active-user, holding-change, and weekly-active-users metrics" do
           # Sessions: one in *this* week (anchored to current week's Monday so
