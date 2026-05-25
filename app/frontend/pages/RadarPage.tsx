@@ -11,6 +11,7 @@ import { CartSummaryBar } from '../components/CartSummaryBar'
 import { CartDrawer } from '../components/CartDrawer'
 import { DividendCalendar } from '../components/DividendCalendar'
 import { RadarInsights } from '../components/RadarInsights'
+import { PulseShareButton } from '../components/PulseShareButton'
 import { useRadar, useAddStock, useRemoveStock } from '../hooks/useRadarQueries'
 import { useStockSearch, useResolveStock } from '../hooks/useStockQueries'
 import { useViewPreference } from '../contexts/ViewPreferenceContext'
@@ -97,11 +98,14 @@ export function RadarPage() {
     <div className="container mx-auto px-4 py-8">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between gap-2">
-            <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2">
-              <span className="w-1 h-8 bg-foreground rounded-full"></span>
-              {t('radar.title')}
-            </CardTitle>
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-2 min-w-0">
+              <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2">
+                <span className="w-1 h-8 bg-foreground rounded-full"></span>
+                {t('radar.title')}
+              </CardTitle>
+              {radarStocks.length > 0 && <PulseShareButton kind="radar" />}
+            </div>
             <BuyPlanModeToggle />
           </div>
         </CardHeader>

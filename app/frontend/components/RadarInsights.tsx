@@ -36,7 +36,7 @@ export function RadarInsights({ hasStocks }: RadarInsightsProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl flex items-center gap-2">
             <Sparkles className="size-5 text-violet-500" />
-            {t('insights.title')}
+            {t('insights.radarTitle')}
           </CardTitle>
           <div className="flex items-center gap-2">
             {isExpanded && (

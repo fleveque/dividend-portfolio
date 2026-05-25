@@ -174,6 +174,8 @@ const en = {
     failedToLoadRadar: 'Failed to load radar',
     failedToRemoveStock: 'Failed to remove stock',
     dividendCalendar: 'Dividend Calendar',
+    shareOnPulse: 'Share on Pulse',
+    shareOnPulseHint: 'Share your radar on Pulse — opt in from Settings',
     switchToCardView: 'Switch to card view',
     switchToCompactView: 'Switch to compact view',
     addToCart: 'Add to Cart',
@@ -335,7 +337,8 @@ const en = {
 
   // AI Insights (shared between radar and portfolio)
   insights: {
-    title: 'AI Portfolio Insights',
+    portfolioTitle: 'AI Portfolio Insights',
+    radarTitle: 'AI Radar Insights',
     buyingOpportunities: 'Buying Opportunities',
     coverageGaps: 'Dividend Coverage Gaps',
     riskFlags: 'Risk Flags',
@@ -558,6 +561,30 @@ const en = {
       title: 'Daily AI limit reached',
       body: "You've used your {{limit}} free AI requests today. AI calls cost real money \u2014 we're offering them free for now. Try again tomorrow.",
     },
+  },
+
+  // GICS / Yahoo Finance stock sectors. Looked up by raw provider name
+  // (see translateSector in lib/sectors.ts) \u2014 unknown names pass through
+  // verbatim so a new sector never blanks the UI.
+  sectors: {
+    'Basic Materials': 'Basic Materials',
+    'Communication Services': 'Communication Services',
+    'Consumer Cyclical': 'Consumer Cyclical',
+    'Consumer Defensive': 'Consumer Defensive',
+    'Consumer Discretionary': 'Consumer Discretionary',
+    'Consumer Staples': 'Consumer Staples',
+    Energy: 'Energy',
+    'Financial Services': 'Financial Services',
+    Financials: 'Financials',
+    'Health Care': 'Health Care',
+    Healthcare: 'Healthcare',
+    Industrials: 'Industrials',
+    'Information Technology': 'Information Technology',
+    Materials: 'Materials',
+    'Real Estate': 'Real Estate',
+    Technology: 'Technology',
+    Utilities: 'Utilities',
+    Unknown: 'Unknown',
   },
 } as const
 
