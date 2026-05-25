@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { Menu } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
+import { useLocaleSync } from '../hooks/useLocaleSync'
 import { Logo } from './Logo'
 import { ThemeToggle } from './ThemeToggle'
 import { LanguageToggle } from './LanguageToggle'
@@ -31,6 +32,8 @@ export function Layout() {
   const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { t } = useTranslation()
+
+  useLocaleSync()
 
   // /demo/* is the anonymous "try the product" route. The Layout adapts: nav
   // links point at the demo equivalents, the right-side "Sign in" CTA flips

@@ -16,6 +16,8 @@ RSpec.describe User, type: :model do
     it { should validate_uniqueness_of(:portfolio_slug) }
     it { should validate_presence_of(:preferred_currency) }
     it { should validate_inclusion_of(:preferred_currency).in_array(Stock::CURRENCY_SYMBOLS.keys) }
+    it { should validate_presence_of(:locale) }
+    it { should validate_inclusion_of(:locale).in_array(User::SUPPORTED_LOCALES) }
   end
 
   describe 'preferred_currency' do

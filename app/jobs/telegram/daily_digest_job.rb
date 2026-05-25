@@ -22,11 +22,7 @@ module Telegram
     private
 
     def deliver_for(link)
-      # No per-user locale storage yet — default to English. The handler's
-      # per-message locale detection (Telegram message.from.language_code)
-      # only works for inbound replies; for batched outbound digests we'd
-      # need a stored preference, which is a future iteration.
-      message = DailyDigest.build(user: link.user, locale: "en")
+      message = DailyDigest.build(user: link.user, locale: link.user.locale)
       return if message.blank? # nothing to say today
 
       TelegramBot::Client.send_message(chat_id: link.chat_id, text: message)

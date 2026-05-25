@@ -33,6 +33,16 @@ RSpec.describe Telegram::DailyDigestJob, type: :job do
       .with(hash_including(chat_id: "42", text: /KO/))
   end
 
+  it "builds the digest in the user's stored locale" do
+    es_user = create(:user, locale: "es")
+    UserTelegramLink.create!(user: es_user, chat_id: "9", telegram_user_id: "u", linked_at: Time.current, notifications_enabled: true)
+    allow(Telegram::DailyDigest).to receive(:build).and_return("digest")
+
+    described_class.perform_now
+
+    expect(Telegram::DailyDigest).to have_received(:build).with(user: es_user, locale: "es")
+  end
+
   it "doesn't abort the batch if one user's digest raises" do
     user_a = create(:user)
     user_b = create(:user)

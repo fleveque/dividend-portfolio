@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_26_070000) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_26_093000) do
   create_table "ai_requests", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "feature", null: false
@@ -171,6 +171,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_26_070000) do
     t.string "preferred_currency", default: "USD", null: false
     t.boolean "share_portfolio", default: true, null: false
     t.boolean "share_radar", default: false, null: false
+    t.string "locale", default: "en", null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["portfolio_slug"], name: "index_users_on_portfolio_slug", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
