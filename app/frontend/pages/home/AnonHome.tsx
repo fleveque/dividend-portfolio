@@ -1,41 +1,22 @@
-import { Loader2, Activity, ExternalLink, Settings, Sparkles } from 'lucide-react'
+import { Activity, ExternalLink, Settings, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Logo } from '../../components/Logo'
 import { FeatureShowcase } from '../../components/FeatureShowcase'
 import { TopScoredShowcase } from '../../components/TopScoredShowcase'
-import { CompactStockRow } from '../../components/CompactStockRow'
 import { useLastAddedStocks, useMostAddedStocks, useMostHeldStocks } from '../../hooks/useStockQueries'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import pulsePreviewImg from '@/assets/screenshots/pulse-portfolio.webp'
 import { PULSE_URL } from '../../lib/pulse'
+import { StockListCard } from './shared/StockListCard'
 
 export function AnonHome() {
   const { t } = useTranslation()
 
-  const {
-    data: lastAdded,
-    isLoading: lastAddedLoading,
-    error: lastAddedError,
-  } = useLastAddedStocks()
-
-  const {
-    data: mostAdded,
-    isLoading: mostAddedLoading,
-    error: mostAddedError,
-  } = useMostAddedStocks()
-
-  const {
-    data: mostHeld,
-    isLoading: mostHeldLoading,
-    error: mostHeldError,
-  } = useMostHeldStocks()
-
-  const topMostAdded = mostAdded?.slice(0, 5)
-  const topLastAdded = lastAdded?.slice(0, 5)
-  const topMostHeld = mostHeld?.slice(0, 5)
+  const lastAddedQuery = useLastAddedStocks()
+  const mostAddedQuery = useMostAddedStocks()
+  const mostHeldQuery = useMostHeldStocks()
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -128,119 +109,24 @@ export function AnonHome() {
 
       {/* Stock Lists — three columns on large screens */}
       <div className="grid lg:grid-cols-3 gap-4">
-        {/* Most Added to Radar */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <span className="w-1 h-5 bg-foreground rounded-full"></span>
-              {t('home.mostAddedToRadar')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {mostAddedLoading && (
-              <div className="flex items-center justify-center p-6">
-                <Loader2 className="size-6 animate-spin text-muted-foreground" />
-                <span className="ml-3 text-muted-foreground text-sm">{t('common.loading')}</span>
-              </div>
-            )}
-
-            {mostAddedError && (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  {mostAddedError instanceof Error ? mostAddedError.message : t('common.failedToLoad')}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {!mostAddedLoading && !mostAddedError && (!topMostAdded || topMostAdded.length === 0) && (
-              <p className="text-muted-foreground text-center py-6 text-sm">{t('common.noStocksFound')}</p>
-            )}
-
-            {!mostAddedLoading && !mostAddedError && topMostAdded && topMostAdded.length > 0 && (
-              <div className="divide-y">
-                {topMostAdded.map((stock) => (
-                  <CompactStockRow key={stock.id} stock={stock} />
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Most Held in Portfolios */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <span className="w-1 h-5 bg-foreground rounded-full"></span>
-              {t('home.mostHeldInPortfolios')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {mostHeldLoading && (
-              <div className="flex items-center justify-center p-6">
-                <Loader2 className="size-6 animate-spin text-muted-foreground" />
-                <span className="ml-3 text-muted-foreground text-sm">{t('common.loading')}</span>
-              </div>
-            )}
-
-            {mostHeldError && (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  {mostHeldError instanceof Error ? mostHeldError.message : t('common.failedToLoad')}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {!mostHeldLoading && !mostHeldError && (!topMostHeld || topMostHeld.length === 0) && (
-              <p className="text-muted-foreground text-center py-6 text-sm">{t('common.noStocksFound')}</p>
-            )}
-
-            {!mostHeldLoading && !mostHeldError && topMostHeld && topMostHeld.length > 0 && (
-              <div className="divide-y">
-                {topMostHeld.map((stock) => (
-                  <CompactStockRow key={stock.id} stock={stock} />
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Recently Updated */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <span className="w-1 h-5 bg-foreground rounded-full"></span>
-              {t('home.recentlyUpdated')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {lastAddedLoading && (
-              <div className="flex items-center justify-center p-6">
-                <Loader2 className="size-6 animate-spin text-muted-foreground" />
-                <span className="ml-3 text-muted-foreground text-sm">{t('common.loading')}</span>
-              </div>
-            )}
-
-            {lastAddedError && (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  {lastAddedError instanceof Error ? lastAddedError.message : t('common.failedToLoad')}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {!lastAddedLoading && !lastAddedError && (!topLastAdded || topLastAdded.length === 0) && (
-              <p className="text-muted-foreground text-center py-6 text-sm">{t('common.noStocksFound')}</p>
-            )}
-
-            {!lastAddedLoading && !lastAddedError && topLastAdded && topLastAdded.length > 0 && (
-              <div className="divide-y">
-                {topLastAdded.map((stock) => (
-                  <CompactStockRow key={stock.id} stock={stock} />
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <StockListCard
+          title={t('home.mostAddedToRadar')}
+          data={mostAddedQuery.data}
+          isLoading={mostAddedQuery.isLoading}
+          error={mostAddedQuery.error}
+        />
+        <StockListCard
+          title={t('home.mostHeldInPortfolios')}
+          data={mostHeldQuery.data}
+          isLoading={mostHeldQuery.isLoading}
+          error={mostHeldQuery.error}
+        />
+        <StockListCard
+          title={t('home.recentlyUpdated')}
+          data={lastAddedQuery.data}
+          isLoading={lastAddedQuery.isLoading}
+          error={lastAddedQuery.error}
+        />
       </div>
     </div>
   )
