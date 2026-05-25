@@ -381,11 +381,18 @@ const en = {
   settings: {
     title: 'Settings',
     portfolioSharing: 'Share on Pulse',
-    sharingDescription: 'Pulse is the Quantic community for sharing portfolios. Pick a public name to opt in — leave it empty to stay private.',
+    sharingDescription: 'Pulse is the Quantic community for sharing portfolios and radars. Pick a public name to opt in — leave it empty to stay private.',
     portfolioSlug: 'Public name',
     slugPlaceholder: 'my-portfolio',
     publicUrl: 'Public URL:',
     failedToUpdate: 'Failed to update',
+    sharing: {
+      whatToShare: 'What to share publicly',
+      portfolio: 'Portfolio',
+      portfolioDescription: 'Your holdings, allocations, and total value (in your display currency).',
+      radar: 'Radar',
+      radarDescription: 'Your watchlist with target prices. No quantities or holdings — just what you’re tracking and at what price.',
+    },
     displayCurrency: 'Display Currency',
     displayCurrencyDescription: 'Choose the currency used to sum multi-currency totals. Per-stock prices stay in their listing currency.',
     telegram: {

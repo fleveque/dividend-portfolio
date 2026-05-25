@@ -443,6 +443,8 @@ export const dividendsApi = {
 export interface ProfileUpdate {
   portfolioSlug?: string | null
   preferredCurrency?: string
+  sharePortfolio?: boolean
+  shareRadar?: boolean
 }
 
 // ============================================================================
@@ -483,6 +485,8 @@ export const profileApi = {
     const body: Record<string, unknown> = {}
     if ('portfolioSlug' in update) body.portfolio_slug = update.portfolioSlug
     if ('preferredCurrency' in update) body.preferred_currency = update.preferredCurrency
+    if ('sharePortfolio' in update) body.share_portfolio = update.sharePortfolio
+    if ('shareRadar' in update) body.share_radar = update.shareRadar
     return apiFetch<UserProfile>('/profile', {
       method: 'PATCH',
       body: JSON.stringify(body),

@@ -183,6 +183,8 @@ export interface UserProfile {
   emailAddress: string
   portfolioSlug: string | null
   preferredCurrency: string
+  sharePortfolio: boolean
+  shareRadar: boolean
 }
 
 /**

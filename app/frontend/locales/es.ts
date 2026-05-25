@@ -380,10 +380,17 @@ const es = {
   settings: {
     title: 'Ajustes',
     portfolioSharing: 'Compartir en Pulse',
-    sharingDescription: 'Pulse es la comunidad de Quantic para compartir carteras. Elige un nombre p\u00fablico para participar \u2014 d\u00e9jalo vac\u00edo para no participar.',
+    sharingDescription: 'Pulse es la comunidad de Quantic para compartir carteras y radares. Elige un nombre p\u00fablico para participar \u2014 d\u00e9jalo vac\u00edo para no participar.',
     portfolioSlug: 'Nombre p\u00fablico',
     slugPlaceholder: 'mi-cartera',
     publicUrl: 'URL p\u00fablica:',
+    sharing: {
+      whatToShare: 'Qu\u00e9 compartir p\u00fablicamente',
+      portfolio: 'Cartera',
+      portfolioDescription: 'Tus posiciones, asignaciones y valor total (en tu moneda de visualizaci\u00f3n).',
+      radar: 'Radar',
+      radarDescription: 'Tu lista de seguimiento con precios objetivo. Sin cantidades ni posiciones \u2014 solo qu\u00e9 est\u00e1s siguiendo y a qu\u00e9 precio.',
+    },
     failedToUpdate: 'Error al actualizar',
     displayCurrency: 'Moneda de visualizaci\u00f3n',
     displayCurrencyDescription: 'Elige la moneda que se usa para sumar totales multi-divisa. Los precios por acci\u00f3n se mantienen en su moneda de cotizaci\u00f3n.',

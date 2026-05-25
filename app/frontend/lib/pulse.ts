@@ -14,3 +14,11 @@ export function pulsePortfolioUrl(slug: string): string {
 export function pulsePortfolioDisplayUrl(slug: string): string {
   return `${PULSE_URL.replace(/^https?:\/\//, '')}/p/${slug}`
 }
+
+export function pulseRadarUrl(slug: string): string {
+  return `${PULSE_URL}/r/${slug}`
+}
+
+export function pulseRadarDisplayUrl(slug: string): string {
+  return `${PULSE_URL.replace(/^https?:\/\//, '')}/r/${slug}`
+}
