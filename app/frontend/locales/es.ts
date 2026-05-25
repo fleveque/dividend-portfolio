@@ -132,6 +132,15 @@ const es = {
         body: 'Calcula rentabilidad real, previsión de dividendos y mix sectorial. Apenas un minuto.',
         cta: 'Ir a la cartera',
       },
+      incomeMini: {
+        title: 'Ingresos por dividendos',
+        thisMonth: 'Este mes',
+        last12m: 'Últimos 12 meses',
+      },
+      buyPlanTeaser: {
+        title: 'Tus próximas compras',
+        viewAll: 'Ver plan completo',
+      },
     },
   },
 

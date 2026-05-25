@@ -132,6 +132,15 @@ const en = {
         body: "Track real yield, dividend forecast, and sector mix. Takes a minute.",
         cta: 'Go to portfolio',
       },
+      incomeMini: {
+        title: 'Dividend income',
+        thisMonth: 'This month',
+        last12m: 'Last 12 months',
+      },
+      buyPlanTeaser: {
+        title: 'Your next picks',
+        viewAll: 'View full buy plan',
+      },
     },
   },
 

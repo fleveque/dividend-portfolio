@@ -13,6 +13,8 @@ import { StockListCard } from './shared/StockListCard'
 import { CommunityStrip } from './shared/CommunityStrip'
 import { DashboardGreeting } from './auth/DashboardGreeting'
 import { EmptyPortfolioCTA } from './auth/EmptyPortfolioCTA'
+import { DividendIncomeMini } from './auth/DividendIncomeMini'
+import { BuyPlanTeaser } from './auth/BuyPlanTeaser'
 
 export function DashboardHome() {
   const { t } = useTranslation()
@@ -39,11 +41,17 @@ export function DashboardHome() {
         <EmptyPortfolioCTA />
       )}
 
-      {/* Today's actions: upcoming ex-divs. Hidden when there's nothing to
-          report (the component itself returns null for an empty list). */}
-      {(hasHoldings || hasRadarStocks) && (
-        <UpcomingExDividends holdings={holdings} radarStocks={radarStocks} />
-      )}
+      {/* Today's actions + dividend income — two-col on lg, single col
+          below. Each side can render null and the layout collapses. */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {(hasHoldings || hasRadarStocks) && (
+          <UpcomingExDividends holdings={holdings} radarStocks={radarStocks} />
+        )}
+        <DividendIncomeMini />
+      </div>
+
+      {/* Buy plan teaser — hidden when the cart is empty. */}
+      <BuyPlanTeaser />
 
       {/* AI insights pair — both lazy-fetch on expand. */}
       <div className="grid gap-4 lg:grid-cols-2">
