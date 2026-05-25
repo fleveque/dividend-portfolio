@@ -6,6 +6,7 @@ const en = {
     portfolio: 'Portfolio',
     dividends: 'Dividends',
     settings: 'Settings',
+    faq: 'FAQ',
     admin: 'Admin',
     menu: 'Menu',
     navigationMenu: 'Navigation menu',

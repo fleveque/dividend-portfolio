@@ -6,6 +6,7 @@ const es = {
     portfolio: 'Cartera',
     dividends: 'Dividendos',
     settings: 'Ajustes',
+    faq: 'FAQ',
     admin: 'Admin',
     menu: 'Men\u00fa',
     navigationMenu: 'Men\u00fa de navegaci\u00f3n',
