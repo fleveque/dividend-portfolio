@@ -41,7 +41,11 @@ function findNextExDiv(holdings: Array<{ stock: { symbol: string; exDividendDate
     if (!d) continue
     const date = new Date(d)
     if (Number.isNaN(date.getTime())) continue
-    const daysAway = Math.ceil((date.getTime() - today.getTime()) / 86_400_000)
+    // Match UpcomingExDividends' rounding so both surfaces agree on
+    // "in Xd" — server ships date-only strings that parse as UTC
+    // midnight; comparing against local midnight gives a fractional
+    // diff, so `round` is the consistent choice across components.
+    const daysAway = Math.round((date.getTime() - today.getTime()) / 86_400_000)
     if (daysAway < 0) continue
     if (!best || daysAway < best.daysAway) {
       best = { symbol: h.stock.symbol, daysAway }
