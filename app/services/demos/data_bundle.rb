@@ -14,6 +14,19 @@ module Demos
   class DataBundle
     UPCOMING_EX_DIV_DAYS = 5
 
+    # Demo investor profile — drives the /demo dashboard (greeting, Path to
+    # Freedom summary). Tuned so the projection lands on a motivational
+    # ~25y horizon given the demo portfolio's size and ~3% blended yield;
+    # tweak only with the resulting ETA in mind ("Beyond 60 years" is a
+    # buzzkill on the showcase).
+    DEMO_PROFILE_DEFAULTS = {
+      email_address: "demo@quantic.app",
+      preferred_currency: "USD",
+      motivation_monthly_invest: 1500,
+      motivation_monthly_objective: 2000,
+      motivation_inflation_pct: 2.5
+    }.freeze
+
     def self.call
       new.call
     end
@@ -23,10 +36,12 @@ module Demos
       holding_records = build_holding_records(stocks)
       radar_records = build_radar_records(stocks)
       dividend_records = build_dividend_records(stocks, holding_records)
+      holdings_section = holdings_payload(holding_records)
 
       {
+        profile: profile_payload(holdings_section[:portfolioStats]),
         radar: radar_payload(radar_records),
-        holdings: holdings_payload(holding_records),
+        holdings: holdings_section,
         dividends: dividend_records.map { |row| serialize_dividend(row) },
         # Default chart: 12 months back + 12 forward (24 months). Full chart:
         # from earliest dividend (~24 months back) + 12 forward (36 months).
@@ -223,9 +238,71 @@ module Demos
       {
         byCurrency: by_currency,
         displayCurrency: by_currency.key?("USD") ? "USD" : by_currency.keys.first,
+        displayMarketValue: market_total.round(2),
         displayYoc: display[:yoc],
         displayCurrentYield: display[:currentYield],
         sectors: sectors
+      }
+    end
+
+    # ─── Profile ────────────────────────────────────────────────────────────
+
+    # Serialised user profile prefilled into the React Query cache so the
+    # /demo dashboard can render the logged-in home without hitting the
+    # auth-only /api/v1/profile endpoint. The motivation summary is
+    # precomputed here (same shape MotivationProjectionService emits) so
+    # the Path to Freedom mini-panel works out of the box.
+    def profile_payload(portfolio_stats)
+      defaults = DEMO_PROFILE_DEFAULTS
+      portfolio_value = portfolio_stats[:displayMarketValue].to_f
+      yield_pct = portfolio_stats[:displayCurrentYield].to_f
+
+      summary = MotivationProjectionService.simulate(
+        portfolio_value: portfolio_value,
+        yield_rate: yield_pct / 100.0,
+        inflation_rate: defaults[:motivation_inflation_pct] / 100.0,
+        monthly_invest_real: defaults[:motivation_monthly_invest],
+        monthly_objective_real: defaults[:motivation_monthly_objective],
+        currency: defaults[:preferred_currency]
+      )
+
+      {
+        id: 9999,
+        emailAddress: defaults[:email_address],
+        portfolioSlug: nil,
+        preferredCurrency: defaults[:preferred_currency],
+        locale: "en",
+        sharePortfolio: false,
+        shareRadar: false,
+        motivationMonthlyInvest: defaults[:motivation_monthly_invest].to_f,
+        motivationMonthlyObjective: defaults[:motivation_monthly_objective].to_f,
+        motivationInflationPct: defaults[:motivation_inflation_pct].to_f,
+        motivationYieldOverridePct: nil,
+        # Tuned in tandem with the monthly_invest above so the back-projected
+        # past actually has multiple data points to draw (high monthly
+        # invest collapses the past quickly to $0). 2 years of visible
+        # history before today reads well on the chart.
+        motivationStartYear: Date.current.year - 2,
+        motivationSummary: serialize_motivation_summary(summary)
+      }
+    end
+
+    def serialize_motivation_summary(summary)
+      return nil unless summary
+
+      {
+        reached: summary.reached,
+        years: summary.years,
+        months: summary.months,
+        days: summary.days,
+        totalDays: summary.total_days,
+        finalPortfolioNominal: summary.final_portfolio_nominal,
+        finalPortfolioReal: summary.final_portfolio_real,
+        totalContributedNominal: summary.total_contributed_nominal,
+        totalYieldEarnedNominal: summary.total_yield_earned_nominal,
+        currentMonthlyDividend: summary.current_monthly_dividend,
+        progressPct: summary.progress_pct,
+        currency: summary.currency
       }
     end
 

@@ -65,6 +65,7 @@ during the rollover.
 - **Dividend Calendar**: Visualize dividend payment schedules across all your stocks. Spot income gaps by month.
 - **Buy Plan Mode**: Plan purchases with a shopping cart — set quantities, see estimated costs, and move to portfolio when ready.
 - **AI-Powered Insights**: Google Gemini analysis for both radar and portfolio — buying opportunities, dividend coverage gaps, risk flags, and per-stock summaries.
+- **Path to Freedom**: Motivational dividend-income projection — feed in your monthly contribution, dividend goal and estimated inflation, and it simulates year-by-year (with reinvested yield and inflation applied to both contributions and the goal) until your portfolio covers the goal. Shows ETA in years/months/days, final portfolio value in nominal and today's-money terms, plus a two-line growth chart and per-year breakdown. A cached mini-panel surfaces progress on the home dashboard.
 - **User Authentication**: Rails 8 built-in authentication + Google OAuth.
 - **Multiple Financial Data Providers**: Pluggable provider pattern supporting Yahoo Finance ([yahoo_finance_client](https://github.com/fleveque/yahoo_finance_client)) and Alpha Vantage.
 - **Stock Logos**: Company logos served by a self-hosted [logo-service](https://github.com/fleveque/logo-service), with fallback to colored initials.

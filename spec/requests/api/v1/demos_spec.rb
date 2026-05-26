@@ -7,10 +7,19 @@ RSpec.describe "Api::V1::Demos", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it "returns the radar / holdings / dividends / chart sections" do
+    it "returns the radar / holdings / dividends / chart / profile sections" do
       get "/api/v1/demo"
       data = JSON.parse(response.body)["data"]
-      expect(data.keys).to contain_exactly("radar", "holdings", "dividends", "chart", "chartFull")
+      expect(data.keys).to contain_exactly("profile", "radar", "holdings", "dividends", "chart", "chartFull")
+    end
+
+    it "ships a demo profile with a precomputed Path to Freedom summary" do
+      get "/api/v1/demo"
+      profile = JSON.parse(response.body)["data"]["profile"]
+      expect(profile["preferredCurrency"]).to eq("USD")
+      expect(profile["motivationMonthlyInvest"]).to be > 0
+      expect(profile["motivationMonthlyObjective"]).to be > 0
+      expect(profile["motivationSummary"]).to include("years", "progressPct", "finalPortfolioReal")
     end
 
     it "ships a non-empty radar with target anchors per stock" do

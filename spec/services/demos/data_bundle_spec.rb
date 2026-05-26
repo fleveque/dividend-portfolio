@@ -38,6 +38,17 @@ RSpec.describe Demos::DataBundle, type: :service do
     end
   end
 
+  describe "profile" do
+    it "ships a demo profile with motivation inputs and a precomputed summary" do
+      profile = bundle[:profile]
+      expect(profile[:preferredCurrency]).to eq("USD")
+      expect(profile[:motivationMonthlyInvest]).to be > 0
+      expect(profile[:motivationMonthlyObjective]).to be > 0
+      expect(profile[:motivationSummary]).to include(:years, :progressPct, :finalPortfolioReal)
+      expect(profile[:motivationSummary][:currency]).to eq("USD")
+    end
+  end
+
   describe "chart projections" do
     it "fills future months with a projected number and leaves past months nil" do
       buckets = bundle[:chart][:byCurrency]["USD"]

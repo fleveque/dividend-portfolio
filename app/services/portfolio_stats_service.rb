@@ -6,8 +6,9 @@ class PortfolioStatsService
   #   {
   #     byCurrency: { "USD" => { yoc: 3.2, currentYield: 2.8 }, "EUR" => {...} },
   #     displayCurrency: "USD",
-  #     displayYoc: 3.0,             # nil if any FX missing
-  #     displayCurrentYield: 2.6,    # nil if any FX missing
+  #     displayMarketValue: 12345.67, # nil if any FX missing
+  #     displayYoc: 3.0,              # nil if any FX missing
+  #     displayCurrentYield: 2.6,     # nil if any FX missing
   #     sectors: [
   #       { sector: "Technology", value: 12300.45, percent: 42.1 },
   #       ...
@@ -33,6 +34,7 @@ class PortfolioStatsService
     {
       byCurrency: by_currency,
       displayCurrency: @preferred,
+      displayMarketValue: display[:market_value],
       displayYoc: display[:yoc],
       displayCurrentYield: display[:current_yield],
       sectors: compute_sectors
@@ -68,7 +70,7 @@ class PortfolioStatsService
       cost   = FxRateService.convert(holding_cost_basis(h), from: from, to: preferred)
       value  = FxRateService.convert(holding_market_value(h), from: from, to: preferred)
 
-      return { yoc: nil, current_yield: nil } if income.nil? || cost.nil? || value.nil?
+      return { market_value: nil, yoc: nil, current_yield: nil } if income.nil? || cost.nil? || value.nil?
 
       converted_income += income.to_f
       converted_cost   += cost.to_f
@@ -76,6 +78,7 @@ class PortfolioStatsService
     end
 
     {
+      market_value: converted_value.round(2),
       yoc: percentage(converted_income, converted_cost),
       current_yield: percentage(converted_income, converted_value)
     }

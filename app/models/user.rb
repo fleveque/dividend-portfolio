@@ -19,8 +19,35 @@ class User < ApplicationRecord
   validates :preferred_currency, presence: true, inclusion: { in: Stock::CURRENCY_SYMBOLS.keys }
   validates :locale, presence: true, inclusion: { in: SUPPORTED_LOCALES }
 
+  # Path to Freedom inputs — bounded above to keep the projection sane
+  # (e.g. inflation/yield > 100% would blow up the chart in one step).
+  validates :motivation_monthly_invest,
+            numericality: { greater_than_or_equal_to: 0, less_than: 1_000_000_000 },
+            allow_nil: true
+  validates :motivation_monthly_objective,
+            numericality: { greater_than_or_equal_to: 0, less_than: 1_000_000_000 },
+            allow_nil: true
+  validates :motivation_inflation_pct,
+            numericality: { greater_than_or_equal_to: -50, less_than_or_equal_to: 100 },
+            allow_nil: true
+  validates :motivation_yield_override_pct,
+            numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 },
+            allow_nil: true
+  validates :motivation_start_year,
+            numericality: { only_integer: true, greater_than_or_equal_to: 1900, less_than_or_equal_to: 2100 },
+            allow_nil: true
+
   after_commit :publish_pulse_changes,
                if: -> { saved_change_to_portfolio_slug? || saved_change_to_share_portfolio? || saved_change_to_share_radar? }
+
+  MOTIVATION_CACHE_TRIGGERS = %i[
+    motivation_monthly_invest motivation_monthly_objective
+    motivation_inflation_pct motivation_yield_override_pct
+    preferred_currency
+  ].freeze
+
+  after_commit :invalidate_motivation_cache,
+               if: -> { MOTIVATION_CACHE_TRIGGERS.any? { |c| saved_change_to_attribute?(c) } }
 
   # Find or create a user from OAuth provider data
   def self.from_omniauth(auth)
@@ -80,5 +107,9 @@ class User < ApplicationRecord
     when :portfolio then PortfolioPayloadBuilder.call(self)
     when :radar     then RadarPayloadBuilder.call(self)
     end
+  end
+
+  def invalidate_motivation_cache
+    MotivationProjectionService.invalidate_cache(self)
   end
 end

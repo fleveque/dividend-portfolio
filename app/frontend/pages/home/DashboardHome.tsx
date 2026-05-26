@@ -16,6 +16,8 @@ import { DashboardGreeting } from './auth/DashboardGreeting'
 import { EmptyPortfolioCTA } from './auth/EmptyPortfolioCTA'
 import { DividendIncomeMini } from './auth/DividendIncomeMini'
 import { BuyPlanTeaser } from './auth/BuyPlanTeaser'
+import { PathToFreedomMini } from './auth/PathToFreedomMini'
+import { useProfile } from '../../hooks/useProfileQueries'
 
 export function DashboardHome() {
   const { t } = useTranslation()
@@ -24,6 +26,7 @@ export function DashboardHome() {
   const { data: radarData } = useRadar()
   const { data: chartData } = useDividendChartData()
   const { data: telegramLink } = useTelegramLink()
+  const { data: profile } = useProfile()
   const lastAddedQuery = useLastAddedStocks()
   const mostAddedQuery = useMostAddedStocks()
   const mostHeldQuery = useMostHeldStocks()
@@ -72,22 +75,35 @@ export function DashboardHome() {
         <EmptyPortfolioCTA />
       )}
 
-      {/* Upcoming ex-divs + dividend income — side-by-side when both
-          have data, single full-width column when only one does. The
-          grid class flips based on the lifted checks above so a missing
-          sibling doesn't leave a blank column. */}
-      {(hasUpcomingExDivs || hasDividendIncome) && (
-        <div
-          className={`grid gap-4 ${
-            hasUpcomingExDivs && hasDividendIncome ? 'lg:grid-cols-2' : ''
-          }`}
-        >
-          {hasDividendIncome && <DividendIncomeMini />}
-          {hasUpcomingExDivs && (
-            <UpcomingExDividends holdings={holdings} radarStocks={radarStocks} />
-          )}
-        </div>
-      )}
+      {/* Mini widgets — at most 2 per row, full-width when alone. Widgets
+          are slotted in priority order; if a third is present it gets its
+          own full-width row below rather than cramming three into one
+          line. */}
+      {(() => {
+        const minis: React.ReactNode[] = []
+        if (hasDividendIncome) minis.push(<DividendIncomeMini key="div" />)
+        if (profile?.motivationSummary) minis.push(<PathToFreedomMini key="freedom" />)
+        if (hasUpcomingExDivs) {
+          minis.push(
+            <UpcomingExDividends
+              key="exdiv"
+              holdings={holdings}
+              radarStocks={radarStocks}
+            />,
+          )
+        }
+        if (minis.length === 0) return null
+        const inGrid = minis.slice(0, 2)
+        const overflow = minis.slice(2)
+        return (
+          <>
+            <div className={`grid gap-4 ${inGrid.length > 1 ? 'lg:grid-cols-2' : ''}`}>
+              {inGrid}
+            </div>
+            {overflow.length > 0 && <div className="space-y-4">{overflow}</div>}
+          </>
+        )
+      })()}
 
       {/* Buy plan teaser — hidden when the cart is empty. */}
       <BuyPlanTeaser />

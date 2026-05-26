@@ -61,13 +61,14 @@ export function Layout() {
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-2 lg:gap-4">
-              <NavLink to="/" end className={navLinkClass}>{t('nav.home')}</NavLink>
+              <NavLink to={isDemo ? '/demo' : '/'} end className={navLinkClass}>{t('nav.home')}</NavLink>
 
               {(isAuthenticated || isDemo) && (
                 <>
                   <NavLink to={navTarget('/radar')} className={navLinkClass}>{t('nav.radar')}</NavLink>
                   <NavLink to={navTarget('/portfolio')} className={navLinkClass}>{t('nav.portfolio')}</NavLink>
                   <NavLink to={navTarget('/dividends')} className={navLinkClass}>{t('nav.dividends')}</NavLink>
+                  <NavLink to={navTarget('/freedom')} className={navLinkClass}>{t('nav.freedom')}</NavLink>
                   {isAuthenticated && (
                     <NavLink to="/settings" className={navLinkClass}>{t('nav.settings')}</NavLink>
                   )}
@@ -124,13 +125,14 @@ export function Layout() {
             <SheetDescription className="sr-only">{t('nav.navigationMenu')}</SheetDescription>
           </SheetHeader>
           <nav className="flex flex-col gap-1 p-4">
-            <NavLink to="/" end className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.home')}</NavLink>
+            <NavLink to={isDemo ? '/demo' : '/'} end className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.home')}</NavLink>
 
             {(isAuthenticated || isDemo) && (
               <>
                 <NavLink to={navTarget('/radar')} className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.radar')}</NavLink>
                 <NavLink to={navTarget('/portfolio')} className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.portfolio')}</NavLink>
                 <NavLink to={navTarget('/dividends')} className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.dividends')}</NavLink>
+                <NavLink to={navTarget('/freedom')} className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.freedom')}</NavLink>
                 {isAuthenticated && (
                   <NavLink to="/settings" className={mobileNavLinkClass} onClick={closeMobile}>{t('nav.settings')}</NavLink>
                 )}

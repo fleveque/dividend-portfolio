@@ -20,6 +20,39 @@ RSpec.describe User, type: :model do
     it { should validate_inclusion_of(:locale).in_array(User::SUPPORTED_LOCALES) }
   end
 
+  describe 'motivation fields' do
+    it 'accepts nil for every motivation input' do
+      expect(build(:user, motivation_monthly_invest: nil,
+                          motivation_monthly_objective: nil,
+                          motivation_inflation_pct: nil,
+                          motivation_yield_override_pct: nil)).to be_valid
+    end
+
+    it 'rejects a negative monthly invest' do
+      expect(build(:user, motivation_monthly_invest: -1)).not_to be_valid
+    end
+
+    it 'rejects a negative monthly objective' do
+      expect(build(:user, motivation_monthly_objective: -1)).not_to be_valid
+    end
+
+    it 'allows a negative inflation pct (deflation scenarios)' do
+      expect(build(:user, motivation_inflation_pct: -1)).to be_valid
+    end
+
+    it 'rejects a wildly large inflation pct' do
+      expect(build(:user, motivation_inflation_pct: 200)).not_to be_valid
+    end
+
+    it 'rejects a negative yield override' do
+      expect(build(:user, motivation_yield_override_pct: -0.1)).not_to be_valid
+    end
+
+    it 'rejects a yield override above 100%' do
+      expect(build(:user, motivation_yield_override_pct: 101)).not_to be_valid
+    end
+  end
+
   describe 'preferred_currency' do
     it 'defaults to USD' do
       expect(create(:user).preferred_currency).to eq("USD")

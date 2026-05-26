@@ -142,6 +142,7 @@ interface RadarResponse {
 // matches the corresponding endpoint's JSON, so React Query can cache it under
 // the same keys the regular hooks read from (['radar'], ['holdings'], etc.).
 export interface DemoBundle {
+  profile: UserProfile
   radar: RadarResponse
   holdings: unknown
   dividends: unknown[]
@@ -446,6 +447,11 @@ export interface ProfileUpdate {
   locale?: string
   sharePortfolio?: boolean
   shareRadar?: boolean
+  motivationMonthlyInvest?: number | null
+  motivationMonthlyObjective?: number | null
+  motivationInflationPct?: number | null
+  motivationYieldOverridePct?: number | null
+  motivationStartYear?: number | null
 }
 
 // ============================================================================
@@ -489,6 +495,18 @@ export const profileApi = {
     if ('locale' in update) body.locale = update.locale
     if ('sharePortfolio' in update) body.share_portfolio = update.sharePortfolio
     if ('shareRadar' in update) body.share_radar = update.shareRadar
+    // Forward nulls (empty string on the server clears the field) so a user
+    // can wipe a motivation input from the form.
+    if ('motivationMonthlyInvest' in update)
+      body.motivation_monthly_invest = update.motivationMonthlyInvest ?? ''
+    if ('motivationMonthlyObjective' in update)
+      body.motivation_monthly_objective = update.motivationMonthlyObjective ?? ''
+    if ('motivationInflationPct' in update)
+      body.motivation_inflation_pct = update.motivationInflationPct ?? ''
+    if ('motivationYieldOverridePct' in update)
+      body.motivation_yield_override_pct = update.motivationYieldOverridePct ?? ''
+    if ('motivationStartYear' in update)
+      body.motivation_start_year = update.motivationStartYear ?? ''
     return apiFetch<UserProfile>('/profile', {
       method: 'PATCH',
       body: JSON.stringify(body),

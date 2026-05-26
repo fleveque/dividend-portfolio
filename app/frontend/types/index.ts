@@ -166,6 +166,7 @@ export interface SectorBreakdown {
 export interface PortfolioStats {
   byCurrency: Record<string, CurrencyYield>
   displayCurrency: string
+  displayMarketValue: number | null
   displayYoc: number | null
   displayCurrentYield: number | null
   sectors: SectorBreakdown[]
@@ -178,6 +179,21 @@ export interface HoldingsResponse {
   portfolioStats: PortfolioStats | null
 }
 
+export interface MotivationSummary {
+  reached: boolean
+  years: number
+  months: number
+  days: number
+  totalDays: number
+  finalPortfolioNominal: number
+  finalPortfolioReal: number
+  totalContributedNominal: number
+  totalYieldEarnedNominal: number
+  currentMonthlyDividend: number
+  progressPct: number
+  currency: string | null
+}
+
 export interface UserProfile {
   id: number
   emailAddress: string
@@ -186,6 +202,12 @@ export interface UserProfile {
   locale: string
   sharePortfolio: boolean
   shareRadar: boolean
+  motivationMonthlyInvest: number | null
+  motivationMonthlyObjective: number | null
+  motivationInflationPct: number | null
+  motivationYieldOverridePct: number | null
+  motivationStartYear: number | null
+  motivationSummary: MotivationSummary | null
 }
 
 /**

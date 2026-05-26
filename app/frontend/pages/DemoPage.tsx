@@ -32,6 +32,7 @@ export function DemoPage() {
       .get()
       .then((bundle) => {
         if (cancelled) return
+        queryClient.setQueryData(['profile'], bundle.profile)
         queryClient.setQueryData(['radar'], bundle.radar)
         queryClient.setQueryData(['holdings'], bundle.holdings)
         queryClient.setQueryData(['dividends'], bundle.dividends)
@@ -52,6 +53,7 @@ export function DemoPage() {
   // the real (empty) user data — not demo data leaking into the account.
   useEffect(() => {
     return () => {
+      queryClient.removeQueries({ queryKey: ['profile'] })
       queryClient.removeQueries({ queryKey: ['radar'] })
       queryClient.removeQueries({ queryKey: ['holdings'] })
       queryClient.removeQueries({ queryKey: ['dividends'] })

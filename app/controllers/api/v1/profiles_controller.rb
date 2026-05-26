@@ -25,16 +25,55 @@ module Api
           preferredCurrency: Current.user.preferred_currency,
           locale: Current.user.locale,
           sharePortfolio: Current.user.share_portfolio,
-          shareRadar: Current.user.share_radar
+          shareRadar: Current.user.share_radar,
+          motivationMonthlyInvest: Current.user.motivation_monthly_invest&.to_f,
+          motivationMonthlyObjective: Current.user.motivation_monthly_objective&.to_f,
+          motivationInflationPct: Current.user.motivation_inflation_pct&.to_f,
+          motivationYieldOverridePct: Current.user.motivation_yield_override_pct&.to_f,
+          motivationStartYear: Current.user.motivation_start_year,
+          motivationSummary: serialize_motivation_summary
+        }
+      end
+
+      def serialize_motivation_summary
+        summary = MotivationProjectionService.cached_summary(Current.user)
+        return nil unless summary
+
+        {
+          reached: summary.reached,
+          years: summary.years,
+          months: summary.months,
+          days: summary.days,
+          totalDays: summary.total_days,
+          finalPortfolioNominal: summary.final_portfolio_nominal,
+          finalPortfolioReal: summary.final_portfolio_real,
+          totalContributedNominal: summary.total_contributed_nominal,
+          totalYieldEarnedNominal: summary.total_yield_earned_nominal,
+          currentMonthlyDividend: summary.current_monthly_dividend,
+          progressPct: summary.progress_pct,
+          currency: summary.currency
         }
       end
 
       def profile_params
-        permitted = params.permit(:portfolio_slug, :preferred_currency, :locale, :share_portfolio, :share_radar)
+        permitted = params.permit(
+          :portfolio_slug, :preferred_currency, :locale,
+          :share_portfolio, :share_radar,
+          :motivation_monthly_invest, :motivation_monthly_objective,
+          :motivation_inflation_pct, :motivation_yield_override_pct,
+          :motivation_start_year
+        )
         permitted[:portfolio_slug] = nil if permitted.key?(:portfolio_slug) && permitted[:portfolio_slug].blank?
         # Coerce form-y string booleans to real booleans so AR doesn't choke.
         %i[share_portfolio share_radar].each do |k|
           permitted[k] = ActiveModel::Type::Boolean.new.cast(permitted[k]) if permitted.key?(k)
+        end
+        # Empty string → nil for the motivation decimals so a user clearing a
+        # field doesn't write a 0 they didn't intend.
+        %i[motivation_monthly_invest motivation_monthly_objective
+           motivation_inflation_pct motivation_yield_override_pct
+           motivation_start_year].each do |k|
+          permitted[k] = nil if permitted.key?(k) && permitted[k].to_s.strip.empty?
         end
         permitted
       end
