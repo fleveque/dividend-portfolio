@@ -30,6 +30,12 @@ RSpec.describe PortfolioStatsService do
         expect(result[:displayCurrentYield]).to be_within(0.01).of(2.6)
       end
 
+      it 'returns the aggregate market value in the display currency' do
+        result = described_class.call(user)
+        # AAPL 2000 + KO 3000 = 5000 USD
+        expect(result[:displayMarketValue]).to be_within(0.01).of(5000)
+      end
+
       it 'groups sectors by market value (in display currency)' do
         result = described_class.call(user)
         sectors = result[:sectors]
@@ -85,6 +91,11 @@ RSpec.describe PortfolioStatsService do
         result = described_class.call(user)
         expect(result[:displayYoc]).to be_nil
         expect(result[:displayCurrentYield]).to be_nil
+      end
+
+      it 'returns nil for displayMarketValue (no partial aggregate)' do
+        result = described_class.call(user)
+        expect(result[:displayMarketValue]).to be_nil
       end
 
       it 'still populates byCurrency' do

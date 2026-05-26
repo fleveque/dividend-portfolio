@@ -14,6 +14,7 @@ class Holding < ApplicationRecord
   end
 
   after_commit :publish_portfolio_updated
+  after_commit :invalidate_motivation_cache
 
   private
 
@@ -21,5 +22,13 @@ class Holding < ApplicationRecord
     return unless user.portfolio_slug.present?
 
     NatsPublisher.publish("portfolio.updated", PortfolioPayloadBuilder.call(user))
+  end
+
+  # The cached motivation summary depends on the user's portfolio value
+  # and current yield, so any holding change (qty edit, add, delete)
+  # invalidates it. Stock price refreshes don't touch holdings, so the
+  # 6h TTL absorbs those — accurate enough for a teaser.
+  def invalidate_motivation_cache
+    MotivationProjectionService.invalidate_cache(user)
   end
 end

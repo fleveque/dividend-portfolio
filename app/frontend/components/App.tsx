@@ -11,7 +11,7 @@
  */
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from '../contexts/ThemeContext'
 import { ViewPreferenceProvider } from '../contexts/ViewPreferenceContext'
 import { AuthProvider } from '../contexts/AuthContext'
@@ -30,6 +30,8 @@ import DividendsPage from '../pages/DividendsPage'
 import SettingsPage from '../pages/SettingsPage'
 import DemoPage from '../pages/DemoPage'
 import FaqPage from '../pages/FaqPage'
+import PathToFreedomPage from '../pages/PathToFreedomPage'
+import DemoDashboardHome from '../pages/home/DemoDashboardHome'
 
 /**
  * QueryClient Configuration
@@ -76,6 +78,7 @@ function App() {
                       <Route path="/radar" element={<RadarPage />} />
                       <Route path="/portfolio" element={<PortfolioPage />} />
                       <Route path="/dividends" element={<DividendsPage />} />
+                      <Route path="/freedom" element={<PathToFreedomPage />} />
                       <Route path="/settings" element={<SettingsPage />} />
                     </Route>
                     <Route element={<AdminRoute />}>
@@ -83,10 +86,11 @@ function App() {
                       <Route path="/admin/content-drafts" element={<AdminContentDraftsPage />} />
                     </Route>
                     <Route element={<DemoPage />}>
-                      <Route path="/demo" element={<Navigate to="/demo/portfolio" replace />} />
+                      <Route path="/demo" element={<DemoDashboardHome />} />
                       <Route path="/demo/radar" element={<RadarPage />} />
                       <Route path="/demo/portfolio" element={<PortfolioPage />} />
                       <Route path="/demo/dividends" element={<DividendsPage />} />
+                      <Route path="/demo/freedom" element={<PathToFreedomPage />} />
                     </Route>
                   </Route>
                 </Routes>

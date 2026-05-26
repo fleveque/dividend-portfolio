@@ -11,6 +11,7 @@ import { HeroAurora } from './shared/HeroAurora'
 import { CommunityStrip } from './shared/CommunityStrip'
 import { HowItWorks } from './anon/HowItWorks'
 import { FinalCTA } from './anon/FinalCTA'
+import { PathToFreedomShowcase } from './anon/PathToFreedomShowcase'
 
 export function AnonHome() {
   const { t } = useTranslation()
@@ -28,14 +29,7 @@ export function AnonHome() {
 
         <HowItWorks />
 
-        {/* Top-Scored leaderboard — real product output, gradient-bordered. */}
-        <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-emerald-500/40 via-cyan-500/30 to-blue-500/30 p-[1px]">
-          <div className="rounded-[calc(var(--radius-lg)-1px)] bg-card">
-            <CardContent className="px-6 pt-4 pb-5">
-              <TopScoredShowcase />
-            </CardContent>
-          </div>
-        </Card>
+        <PathToFreedomShowcase />
 
         {/* Pulse Banner — community-first reframe with preview */}
         <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 overflow-hidden">
@@ -117,6 +111,17 @@ export function AnonHome() {
               </Link>
             </div>
           </CardContent>
+        </Card>
+
+        {/* Top-Scored leaderboard — real product output, gradient-bordered.
+            Placed after all showcase banners so the page leads with the
+            feature pitch before dropping into live community data. */}
+        <Card className="relative overflow-hidden border-transparent bg-gradient-to-br from-emerald-500/40 via-cyan-500/30 to-blue-500/30 p-[1px]">
+          <div className="rounded-[calc(var(--radius-lg)-1px)] bg-card">
+            <CardContent className="px-6 pt-4 pb-5">
+              <TopScoredShowcase />
+            </CardContent>
+          </div>
         </Card>
 
         {/* Stock Lists — three columns on large screens */}

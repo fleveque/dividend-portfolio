@@ -99,6 +99,60 @@ RSpec.describe "Api::V1::Profiles", type: :request do
         patch "/api/v1/profile", params: { share_radar: "true" }
         expect(JSON.parse(response.body)["data"]["shareRadar"]).to be(true)
       end
+
+      it "exposes the motivation inputs (nil by default, default inflation)" do
+        get "/api/v1/profile"
+        data = JSON.parse(response.body)["data"]
+        expect(data["motivationMonthlyInvest"]).to be_nil
+        expect(data["motivationMonthlyObjective"]).to be_nil
+        expect(data["motivationInflationPct"]).to eq(2.5)
+        expect(data["motivationYieldOverridePct"]).to be_nil
+        expect(data["motivationStartYear"]).to be_nil
+      end
+
+      it "updates and clears the motivation_start_year field" do
+        patch "/api/v1/profile", params: { motivation_start_year: "2018" }
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)["data"]["motivationStartYear"]).to eq(2018)
+
+        patch "/api/v1/profile", params: { motivation_start_year: "" }
+        expect(JSON.parse(response.body)["data"]["motivationStartYear"]).to be_nil
+      end
+
+      it "rejects a non-integer motivation_start_year" do
+        patch "/api/v1/profile", params: { motivation_start_year: "1800" }
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "updates the motivation inputs" do
+        patch "/api/v1/profile", params: {
+          motivation_monthly_invest: "1500.50",
+          motivation_monthly_objective: "2500",
+          motivation_inflation_pct: "3.0",
+          motivation_yield_override_pct: "4.5"
+        }
+
+        expect(response).to have_http_status(:ok)
+        data = JSON.parse(response.body)["data"]
+        expect(data["motivationMonthlyInvest"]).to eq(1500.5)
+        expect(data["motivationMonthlyObjective"]).to eq(2500.0)
+        expect(data["motivationInflationPct"]).to eq(3.0)
+        expect(data["motivationYieldOverridePct"]).to eq(4.5)
+      end
+
+      it "clears a motivation field when sent as empty string" do
+        user.update!(motivation_yield_override_pct: 5)
+
+        patch "/api/v1/profile", params: { motivation_yield_override_pct: "" }
+
+        expect(response).to have_http_status(:ok)
+        expect(user.reload.motivation_yield_override_pct).to be_nil
+      end
+
+      it "rejects a negative monthly invest" do
+        patch "/api/v1/profile", params: { motivation_monthly_invest: "-5" }
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
     end
   end
 end
