@@ -11,6 +11,8 @@ interface Props {
   todayLabel: string
   goalLabel: string
   reachedYear: number | null
+  currentAge: number | null
+  ageAxisLabel: string
 }
 
 // Custom SVG, no chart lib — matches the codebase's DividendChart style.
@@ -26,13 +28,18 @@ export function GrowthChart({
   todayLabel,
   goalLabel,
   reachedYear,
+  currentAge,
+  ageAxisLabel,
 }: Props) {
   const W = 720
-  const H = 240
+  // Extra bottom padding when the optional "age" row is rendered so the
+  // year labels and age labels don't overlap.
+  const showAgeRow = currentAge !== null
+  const H = showAgeRow ? 252 : 240
   const padL = 56
   const padR = 16
   const padT = 16
-  const padB = 28
+  const padB = showAgeRow ? 40 : 28
   const innerW = W - padL - padR
   const innerH = H - padT - padB
 
@@ -77,13 +84,7 @@ export function GrowthChart({
     </g>
   ))
 
-  // X-axis year ticks (every ~5y). Span can extend into the past when
-  // the user has set a start year, so we work in offsets from firstYear
-  // and always include 0 (today) and the start as anchor ticks.
-  const xStep = Math.max(1, Math.round(yearSpan / 6))
-  const xTicksSet = new Set<number>([firstYear, 0, lastYear])
-  for (let y = firstYear; y <= lastYear; y += xStep) xTicksSet.add(y)
-  const xTicks = Array.from(xTicksSet).sort((a, b) => a - b)
+  const xTicks = computeXTicks(firstYear, lastYear, reachedYear, innerW)
 
   return (
     <div className="w-full overflow-x-auto">
@@ -158,16 +159,38 @@ export function GrowthChart({
 
         {/* X-axis labels */}
         {xTicks.map((y) => (
-          <text
-            key={y}
-            x={xOf(y)}
-            y={padT + innerH + 16}
-            className="fill-muted-foreground text-[10px]"
-            textAnchor="middle"
-          >
-            {y === 0 ? '0' : y > 0 ? `+${y}y` : `${y}y`}
-          </text>
+          <g key={y}>
+            <text
+              x={xOf(y)}
+              y={padT + innerH + 16}
+              className="fill-muted-foreground text-[10px]"
+              textAnchor="middle"
+            >
+              {y === 0 ? '0' : y > 0 ? `+${y}y` : `${y}y`}
+            </text>
+            {showAgeRow && currentAge !== null && (
+              <text
+                x={xOf(y)}
+                y={padT + innerH + 30}
+                className="fill-muted-foreground/70 text-[10px]"
+                textAnchor="middle"
+              >
+                {currentAge + y}
+              </text>
+            )}
+          </g>
         ))}
+        {showAgeRow && currentAge !== null && (
+          <text
+            x={padL - 8}
+            y={padT + innerH + 30}
+            className="fill-muted-foreground/70 text-[9px] italic"
+            textAnchor="end"
+            dominantBaseline="middle"
+          >
+            {ageAxisLabel}
+          </text>
+        )}
       </svg>
 
       <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 mt-2 text-[11px]">
@@ -182,6 +205,36 @@ export function GrowthChart({
       </div>
     </div>
   )
+}
+
+// X-axis tick selector. Today (0) and the goal year are non-negotiable
+// anchors; firstYear/lastYear come next; step ticks fill the gaps. The
+// collision threshold is pixel-based (`LABEL_MIN_PX`) so it works for
+// any span — a 5-year zoom and an 80-year horizon both keep their
+// labels readable. Without this the chart used to render "-2y 0" or
+// "+37y +38y" as overlapping pairs.
+const LABEL_MIN_PX = 56
+function computeXTicks(
+  firstYear: number,
+  lastYear: number,
+  reachedYear: number | null,
+  innerWidthPx: number,
+): number[] {
+  const span = Math.max(1, lastYear - firstYear)
+  const minDistYears = (LABEL_MIN_PX / innerWidthPx) * span
+  const ticks: number[] = []
+  const tryAdd = (t: number) => {
+    if (t < firstYear || t > lastYear) return
+    if (ticks.some((existing) => Math.abs(existing - t) < minDistYears)) return
+    ticks.push(t)
+  }
+  tryAdd(0)
+  if (reachedYear !== null) tryAdd(reachedYear)
+  tryAdd(lastYear)
+  tryAdd(firstYear)
+  const step = Math.max(1, Math.round(span / 6))
+  for (let y = firstYear; y <= lastYear; y += step) tryAdd(y)
+  return ticks.sort((a, b) => a - b)
 }
 
 // Finer-grained alternative to "1/2/5/10" — keeps the Y axis tight to

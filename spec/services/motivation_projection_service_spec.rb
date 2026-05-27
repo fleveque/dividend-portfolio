@@ -69,6 +69,53 @@ RSpec.describe MotivationProjectionService do
 
       expect(result.progress_pct).to be_within(0.5).of(33.33)
     end
+
+    context 'capital pools' do
+      it 'counts paid-out interest toward the goal when reinvest=false' do
+        with_reinvest = described_class.simulate(
+          portfolio_value: 0, yield_rate: 0.03, inflation_rate: 0.02,
+          monthly_invest_real: 100, monthly_objective_real: 200,
+          interest_capital: 100_000, interest_rate: 0.05,
+          reinvest_interest: true
+        )
+        without_reinvest = described_class.simulate(
+          portfolio_value: 0, yield_rate: 0.03, inflation_rate: 0.02,
+          monthly_invest_real: 100, monthly_objective_real: 200,
+          interest_capital: 100_000, interest_rate: 0.05,
+          reinvest_interest: false
+        )
+        # Without reinvest, $100k * 5% / 12 = $416/mo of interest income
+        # already exceeds the $200/mo goal → reached at year 0.
+        expect(without_reinvest.reached).to be(true)
+        expect(without_reinvest.years).to eq(0)
+        # With reinvest, interest doesn't count as income; goal needs to be
+        # met by dividends alone (which is much slower).
+        expect(with_reinvest.years).to be > 0
+      end
+
+      it 'reports years_sustained_post_goal when the goal is reached' do
+        result = described_class.simulate(
+          portfolio_value: 1_000_000,
+          yield_rate: 0.04, inflation_rate: 0.025,
+          monthly_invest_real: 0, monthly_objective_real: 2000,
+          growth_capital: 200_000, growth_rate: 0.05
+        )
+        # Goal already reached at year 0 (50k/yr passive > 24k/yr target).
+        # Post-goal sustainability depends on SWR vs growth.
+        expect(result.reached).to be(true)
+        expect(result.years_sustained_post_goal).to be > 0
+      end
+
+      it 'returns nil years_sustained_post_goal when goal is not reached' do
+        result = described_class.simulate(
+          portfolio_value: 0, yield_rate: 0.01, inflation_rate: 0.05,
+          monthly_invest_real: 10, monthly_objective_real: 5000,
+          max_years: 30
+        )
+        expect(result.reached).to be(false)
+        expect(result.years_sustained_post_goal).to be_nil
+      end
+    end
   end
 
   describe '.call' do

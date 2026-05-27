@@ -51,6 +51,33 @@ RSpec.describe User, type: :model do
     it 'rejects a yield override above 100%' do
       expect(build(:user, motivation_yield_override_pct: 101)).not_to be_valid
     end
+
+    it 'accepts nil for the capital-pool fields' do
+      expect(build(:user, motivation_interest_capital: nil,
+                          motivation_interest_rate_pct: nil,
+                          motivation_growth_capital: nil,
+                          motivation_growth_rate_pct: nil)).to be_valid
+    end
+
+    it 'rejects a negative interest capital' do
+      expect(build(:user, motivation_interest_capital: -1)).not_to be_valid
+    end
+
+    it 'rejects an interest rate above 100%' do
+      expect(build(:user, motivation_interest_rate_pct: 150)).not_to be_valid
+    end
+
+    it 'rejects a negative growth capital' do
+      expect(build(:user, motivation_growth_capital: -1)).not_to be_valid
+    end
+
+    it 'allows a slightly negative growth rate (down-cycles)' do
+      expect(build(:user, motivation_growth_rate_pct: -5)).to be_valid
+    end
+
+    it 'defaults motivation_reinvest_interest to true' do
+      expect(create(:user).motivation_reinvest_interest).to be(true)
+    end
   end
 
   describe 'preferred_currency' do

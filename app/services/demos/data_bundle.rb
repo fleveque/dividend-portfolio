@@ -263,6 +263,11 @@ module Demos
         inflation_rate: defaults[:motivation_inflation_pct] / 100.0,
         monthly_invest_real: defaults[:motivation_monthly_invest],
         monthly_objective_real: defaults[:motivation_monthly_objective],
+        interest_capital: 5_000.0,
+        interest_rate: 0.04,
+        reinvest_interest: true,
+        growth_capital: 8_000.0,
+        growth_rate: 0.035,
         currency: defaults[:preferred_currency]
       )
 
@@ -283,6 +288,22 @@ module Demos
         # invest collapses the past quickly to $0). 2 years of visible
         # history before today reads well on the chart.
         motivationStartYear: Date.current.year - 2,
+        # A small bond cushion + growth fund so the demo showcases all
+        # three capital pools and a post-goal sustainability number.
+        # Growth rate tuned modest so the distribution-phase chart visibly
+        # depletes within the 60-year horizon — a 7% growth pool would
+        # outpace the inflation-gap withdrawals and never run out.
+        motivationInterestCapital: 5_000.0,
+        motivationInterestRatePct: 4.0,
+        motivationGrowthCapital: 8_000.0,
+        motivationGrowthRatePct: 3.5,
+        motivationReinvestInterest: true,
+        # Showcase the optional age row on the chart X-axis.
+        motivationBirthYear: 1990,
+        # Force distribution at 65 — demo's goal hits at 38y, well
+        # before retirement age, so this doesn't change the projection
+        # but exercises the persisted field for the form.
+        motivationRetirementAge: 65,
         motivationSummary: serialize_motivation_summary(summary)
       }
     end
@@ -302,7 +323,9 @@ module Demos
         totalYieldEarnedNominal: summary.total_yield_earned_nominal,
         currentMonthlyDividend: summary.current_monthly_dividend,
         progressPct: summary.progress_pct,
-        currency: summary.currency
+        currency: summary.currency,
+        yearsSustainedPostGoal: summary.years_sustained_post_goal,
+        yearsUntilCapitalGone: summary.years_until_capital_gone
       }
     end
 

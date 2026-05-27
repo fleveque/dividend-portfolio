@@ -5,51 +5,59 @@ import type { YearSnapshot } from '../../lib/motivation'
 interface Props {
   timeline: YearSnapshot[]
   currency: string
+  totalLabel: string
+  distributionLabel: string
   incomeLabel: string
-  objectiveLabel: string
   yearLabel: string
   todayLabel: string
   goalLabel: string
   reachedYear: number | null
+  acquisitivePowerLossYear: number | null
+  acquisitivePowerLossLabel: string
   currentAge: number | null
   ageAxisLabel: string
 }
 
-// Dividend income over time vs the inflating monthly objective — the
-// freedom-moment chart. Same shape as GrowthChart so the two stack
-// cleanly on the page, but plots `monthlyDividend` and `objectiveNominal`
-// instead of portfolio totals.
-export function DividendIncomeChart({
+// Total capital across all three pools over the full projection — past
+// + accumulation + distribution. The accumulation→distribution
+// inflection (capital peak at goal year) is the "freedom moment" in
+// this view; capital then declines as the SWR draws it down.
+export function TotalCapitalChart({
   timeline,
   currency,
+  totalLabel,
+  distributionLabel,
   incomeLabel,
-  objectiveLabel,
   yearLabel,
   todayLabel,
   goalLabel,
   reachedYear,
+  acquisitivePowerLossYear,
+  acquisitivePowerLossLabel,
   currentAge,
   ageAxisLabel,
 }: Props) {
   const W = 720
   const showAgeRow = currentAge !== null
   const H = showAgeRow ? 232 : 220
+  // Bigger right padding to leave room for the income axis labels.
   const padL = 56
-  const padR = 16
+  const padR = 56
   const padT = 16
   const padB = showAgeRow ? 40 : 28
   const innerW = W - padL - padR
   const innerH = H - padT - padB
 
-  const { maxY, ticks, firstYear, lastYear } = useMemo(() => {
-    const raw = Math.max(
-      1,
-      ...timeline.map((s) => Math.max(s.monthlyDividend, s.objectiveNominal)),
-    )
-    const tight = tightCeil(raw * 1.05)
+  const { maxCapital, maxIncome, capitalTicks, incomeTicks, firstYear, lastYear } = useMemo(() => {
+    const rawCap = Math.max(1, ...timeline.map((s) => s.totalCapital))
+    const rawInc = Math.max(1, ...timeline.map((s) => s.monthlyIncome))
+    const tightCap = tightCeil(rawCap * 1.05)
+    const tightInc = tightCeil(rawInc * 1.1)
     return {
-      maxY: tight,
-      ticks: [0, tight / 4, tight / 2, (tight * 3) / 4, tight],
+      maxCapital: tightCap,
+      maxIncome: tightInc,
+      capitalTicks: [0, tightCap / 4, tightCap / 2, (tightCap * 3) / 4, tightCap],
+      incomeTicks: [0, tightInc / 4, tightInc / 2, (tightInc * 3) / 4, tightInc],
       firstYear: timeline[0]?.year ?? 0,
       lastYear: timeline[timeline.length - 1]?.year ?? 0,
     }
@@ -57,21 +65,33 @@ export function DividendIncomeChart({
 
   const yearSpan = Math.max(1, lastYear - firstYear)
   const xOf = (year: number) => padL + ((year - firstYear) / yearSpan) * innerW
-  const yOf = (v: number) => padT + innerH - (v / maxY) * innerH
+  const yOfCapital = (v: number) => padT + innerH - (v / maxCapital) * innerH
+  const yOfIncome = (v: number) => padT + innerH - (v / maxIncome) * innerH
 
+  // Split path by phase so we can colour accum vs distrib differently.
+  const accumPoints = timeline.filter((s) => s.phase !== 'distrib')
+  const distribPoints = timeline.filter((s) => s.phase === 'distrib')
+  // Distribution path starts from the last accumulation point so the
+  // two segments visually connect without a gap.
+  const distribWithAnchor = distribPoints.length > 0 && accumPoints.length > 0
+    ? [accumPoints[accumPoints.length - 1], ...distribPoints]
+    : distribPoints
+
+  const capitalPathFrom = (pts: YearSnapshot[]) =>
+    pts
+      .map((s, i) => `${i === 0 ? 'M' : 'L'} ${xOf(s.year).toFixed(1)} ${yOfCapital(s.totalCapital).toFixed(1)}`)
+      .join(' ')
   const incomePath = timeline
-    .map((s, i) => `${i === 0 ? 'M' : 'L'} ${xOf(s.year).toFixed(1)} ${yOf(s.monthlyDividend).toFixed(1)}`)
-    .join(' ')
-  const objectivePath = timeline
-    .map((s, i) => `${i === 0 ? 'M' : 'L'} ${xOf(s.year).toFixed(1)} ${yOf(s.objectiveNominal).toFixed(1)}`)
+    .map((s, i) => `${i === 0 ? 'M' : 'L'} ${xOf(s.year).toFixed(1)} ${yOfIncome(s.monthlyIncome).toFixed(1)}`)
     .join(' ')
 
-  const tickEls = ticks.map((v) => (
-    <g key={v}>
-      <line x1={padL} x2={W - padR} y1={yOf(v)} y2={yOf(v)} className="stroke-muted-foreground/15" />
+  // Left axis (capital) ticks + grid lines.
+  const tickEls = capitalTicks.map((v) => (
+    <g key={`cap-${v}`}>
+      <line x1={padL} x2={W - padR} y1={yOfCapital(v)} y2={yOfCapital(v)} className="stroke-muted-foreground/15" />
       <text
         x={padL - 8}
-        y={yOf(v)}
+        y={yOfCapital(v)}
         className="fill-muted-foreground text-[10px]"
         textAnchor="end"
         dominantBaseline="middle"
@@ -79,6 +99,20 @@ export function DividendIncomeChart({
         {compactCurrency(v, currency)}
       </text>
     </g>
+  ))
+  // Right axis (monthly income) — labels only; grid lines stay on the
+  // capital axis to avoid visual clutter from two grid sets.
+  const incomeTickEls = incomeTicks.map((v) => (
+    <text
+      key={`inc-${v}`}
+      x={W - padR + 8}
+      y={yOfIncome(v)}
+      className="fill-sky-600 dark:fill-sky-400 text-[10px]"
+      textAnchor="start"
+      dominantBaseline="middle"
+    >
+      {compactCurrency(v, currency)}
+    </text>
   ))
 
   const xTicks = computeXTicks(firstYear, lastYear, reachedYear, innerW)
@@ -133,26 +167,49 @@ export function DividendIncomeChart({
           </>
         )}
 
-        {/* Objective line first (under the income curve), dashed so it
-            reads as a target rather than a real trajectory. */}
-        <path
-          d={objectivePath}
-          fill="none"
-          className="stroke-amber-500"
-          strokeWidth={2}
-          strokeDasharray="6 4"
-        />
-        <path d={incomePath} fill="none" className="stroke-emerald-500" strokeWidth={2.5} />
+        {acquisitivePowerLossYear !== null && acquisitivePowerLossYear > firstYear && acquisitivePowerLossYear <= lastYear && (
+          <>
+            <line
+              x1={xOf(acquisitivePowerLossYear)}
+              x2={xOf(acquisitivePowerLossYear)}
+              y1={padT}
+              y2={padT + innerH}
+              className="stroke-rose-500/70"
+              strokeDasharray="4 3"
+            />
+            <text
+              x={xOf(acquisitivePowerLossYear) + 4}
+              y={padT + 24}
+              className="fill-rose-600 dark:fill-rose-400 text-[10px] font-semibold"
+            >
+              {acquisitivePowerLossLabel}
+            </text>
+          </>
+        )}
+
+        <path d={capitalPathFrom(accumPoints)} fill="none" className="stroke-emerald-500" strokeWidth={2.5} />
+        {distribWithAnchor.length > 1 && (
+          <path
+            d={capitalPathFrom(distribWithAnchor)}
+            fill="none"
+            className="stroke-rose-500"
+            strokeWidth={2.5}
+          />
+        )}
+
+        <path d={incomePath} fill="none" className="stroke-sky-500" strokeWidth={2} strokeDasharray="4 3" />
+
+        {incomeTickEls}
 
         {timeline.map((s) => (
           <g key={s.year}>
             <circle
               cx={xOf(s.year)}
-              cy={yOf(s.monthlyDividend)}
+              cy={yOfCapital(s.totalCapital)}
               r={6}
               className="fill-transparent"
             >
-              <title>{`${yearLabel} ${s.year} — ${incomeLabel}: ${formatCurrency(s.monthlyDividend, currency)} · ${objectiveLabel}: ${formatCurrency(s.objectiveNominal, currency)}`}</title>
+              <title>{`${yearLabel} ${s.year} — ${totalLabel}: ${formatCurrency(s.totalCapital, currency)} · ${incomeLabel}: ${formatCurrency(s.monthlyIncome, currency)}`}</title>
             </circle>
           </g>
         ))}
@@ -195,14 +252,20 @@ export function DividendIncomeChart({
       <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 mt-2 text-[11px]">
         <span className="inline-flex items-center gap-1.5">
           <span className="inline-block w-3 h-[3px] bg-emerald-500 rounded-full" />
-          <span className="text-muted-foreground">{incomeLabel}</span>
+          <span className="text-muted-foreground">{totalLabel}</span>
         </span>
+        {distribWithAnchor.length > 1 && (
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-block w-3 h-[3px] bg-rose-500 rounded-full" />
+            <span className="text-muted-foreground">{distributionLabel}</span>
+          </span>
+        )}
         <span className="inline-flex items-center gap-1.5">
           <span
-            className="inline-block w-3 h-[3px] bg-amber-500"
-            style={{ background: 'repeating-linear-gradient(to right, currentColor 0 4px, transparent 4px 7px)' }}
+            className="inline-block w-3 h-[3px]"
+            style={{ background: 'repeating-linear-gradient(to right, currentColor 0 3px, transparent 3px 6px)', color: '#0ea5e9' }}
           />
-          <span className="text-muted-foreground">{objectiveLabel}</span>
+          <span className="text-muted-foreground">{incomeLabel}</span>
         </span>
       </div>
     </div>
@@ -252,4 +315,4 @@ function trimDecimalZeros(s: string): string {
   return s.replace(/\.?0+$/, '')
 }
 
-export default DividendIncomeChart
+export default TotalCapitalChart
