@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ProgressBar } from '../components/motivation/ProgressBar'
 import { GrowthChart } from '../components/motivation/GrowthChart'
 import { DividendIncomeChart } from '../components/motivation/DividendIncomeChart'
+import { TotalCapitalChart } from '../components/motivation/TotalCapitalChart'
 import { simulate, formatEta, type MotivationInput } from '../lib/motivation'
 import { formatCurrency, currencySymbol } from '../lib/currency'
 
@@ -25,6 +26,13 @@ interface FormState {
   inflationPct: string
   yieldOverridePct: string
   startYear: string
+  birthYear: string
+  retirementAge: string
+  interestCapital: string
+  interestRatePct: string
+  growthCapital: string
+  growthRatePct: string
+  reinvestInterest: boolean
 }
 
 const emptyForm: FormState = {
@@ -33,6 +41,13 @@ const emptyForm: FormState = {
   inflationPct: '',
   yieldOverridePct: '',
   startYear: '',
+  birthYear: '',
+  retirementAge: '',
+  interestCapital: '',
+  interestRatePct: '',
+  growthCapital: '',
+  growthRatePct: '',
+  reinvestInterest: true,
 }
 
 function parseOrNull(v: string): number | null {
@@ -40,6 +55,12 @@ function parseOrNull(v: string): number | null {
   if (!trimmed) return null
   const n = parseFloat(trimmed.replace(',', '.'))
   return Number.isFinite(n) ? n : null
+}
+
+function formatYears(n: number, locale: string): string {
+  const isEs = locale.startsWith('es')
+  if (isEs) return n === 1 ? 'año' : 'años'
+  return n === 1 ? 'year' : 'years'
 }
 
 export function PathToFreedomPage() {
@@ -77,6 +98,13 @@ export function PathToFreedomPage() {
       inflationPct: profile.motivationInflationPct?.toString() ?? '2.5',
       yieldOverridePct: profile.motivationYieldOverridePct?.toString() ?? '',
       startYear: profile.motivationStartYear?.toString() ?? '',
+      birthYear: profile.motivationBirthYear?.toString() ?? '',
+      retirementAge: profile.motivationRetirementAge?.toString() ?? '',
+      interestCapital: profile.motivationInterestCapital?.toString() ?? '',
+      interestRatePct: profile.motivationInterestRatePct?.toString() ?? '',
+      growthCapital: profile.motivationGrowthCapital?.toString() ?? '',
+      growthRatePct: profile.motivationGrowthRatePct?.toString() ?? '',
+      reinvestInterest: profile.motivationReinvestInterest ?? true,
     })
     setHydrated(true)
   }, [profile, hydrated])
@@ -94,6 +122,13 @@ export function PathToFreedomPage() {
           motivationInflationPct: parseOrNull(form.inflationPct),
           motivationYieldOverridePct: parseOrNull(form.yieldOverridePct),
           motivationStartYear: parseOrNull(form.startYear),
+          motivationInterestCapital: parseOrNull(form.interestCapital),
+          motivationInterestRatePct: parseOrNull(form.interestRatePct),
+          motivationGrowthCapital: parseOrNull(form.growthCapital),
+          motivationGrowthRatePct: parseOrNull(form.growthRatePct),
+          motivationReinvestInterest: form.reinvestInterest,
+          motivationBirthYear: parseOrNull(form.birthYear),
+          motivationRetirementAge: parseOrNull(form.retirementAge),
         },
         {
           onSuccess: () => {
@@ -116,6 +151,15 @@ export function PathToFreedomPage() {
   const yieldOverrideNum = parseOrNull(form.yieldOverridePct)
   const effectiveYieldPct = yieldOverrideNum ?? autoYield ?? 0
 
+  // Current age from birth year — ±1 year precision, fine for the chart
+  // X-axis. Null when unset/invalid so the age row stays hidden.
+  const currentAge = useMemo<number | null>(() => {
+    const by = parseOrNull(form.birthYear)
+    if (by === null) return null
+    const age = new Date().getFullYear() - by
+    return age >= 0 && age < 130 ? age : null
+  }, [form.birthYear])
+
   const simInput: MotivationInput | null = useMemo(() => {
     const monthlyObjectiveNum = parseOrNull(form.monthlyObjective)
     if (monthlyObjectiveNum === null || monthlyObjectiveNum <= 0) return null
@@ -128,6 +172,12 @@ export function PathToFreedomPage() {
     const startYearsAgo = startYearNum !== null && startYearNum < currentYear
       ? currentYear - startYearNum
       : 0
+    // Optional retirement trigger — only active when both birth year
+    // and retirement age are set (otherwise we can't compute years).
+    const retirementAgeNum = parseOrNull(form.retirementAge)
+    const yearsToRetirement = retirementAgeNum !== null && currentAge !== null
+      ? Math.max(0, retirementAgeNum - currentAge)
+      : undefined
     return {
       portfolioValue,
       yieldRate: effectiveYieldPct / 100,
@@ -135,10 +185,27 @@ export function PathToFreedomPage() {
       monthlyInvestReal: monthlyInvestNum,
       monthlyObjectiveReal: monthlyObjectiveNum,
       startYearsAgo,
+      interestCapital: parseOrNull(form.interestCapital) ?? 0,
+      interestRate: (parseOrNull(form.interestRatePct) ?? 0) / 100,
+      reinvestInterest: form.reinvestInterest,
+      growthCapital: parseOrNull(form.growthCapital) ?? 0,
+      growthRate: (parseOrNull(form.growthRatePct) ?? 0) / 100,
+      yearsToRetirement,
     }
-  }, [form, portfolioValue, effectiveYieldPct])
+  }, [form, portfolioValue, effectiveYieldPct, currentAge])
 
   const result = useMemo(() => (simInput ? simulate(simInput) : null), [simInput])
+
+  // All hooks must come BEFORE any conditional return. The early-return
+  // spinner used to sit above these `useMemo`s, which meant the hook
+  // order changed between "loading → not loading" renders and crashed
+  // the page on hard refresh (when the cache wasn't pre-warmed by an
+  // earlier in-app navigation).
+  const accumTimeline = useMemo(
+    () => result?.timeline.filter((s) => s.phase !== 'distrib') ?? [],
+    [result],
+  )
+  const hasDistribution = !!result?.timeline.some((s) => s.phase === 'distrib')
 
   if (profileLoading || holdingsLoading) {
     return (
@@ -272,7 +339,36 @@ export function PathToFreedomPage() {
               onChange={(v) => setForm((f) => ({ ...f, startYear: v }))}
               placeholder={earliestDividendYear?.toString() ?? ''}
             />
+            <NumberField
+              id="birth-year"
+              label={t('freedom.inputs.birthYear')}
+              hint={
+                currentAge !== null
+                  ? t('freedom.inputs.birthYearHintAge', { value: currentAge })
+                  : t('freedom.inputs.birthYearHint')
+              }
+              value={form.birthYear}
+              onChange={(v) => setForm((f) => ({ ...f, birthYear: v }))}
+            />
+            <NumberField
+              id="retirement-age"
+              label={t('freedom.inputs.retirementAge')}
+              hint={
+                currentAge === null
+                  ? t('freedom.inputs.retirementAgeHintNoBirth')
+                  : t('freedom.inputs.retirementAgeHint')
+              }
+              value={form.retirementAge}
+              onChange={(v) => setForm((f) => ({ ...f, retirementAge: v }))}
+            />
           </div>
+
+          <OtherCapitalSection
+            form={form}
+            setForm={setForm}
+            currency={currency}
+          />
+
           {updateProfile.isError && (
             <Alert variant="destructive">
               <AlertDescription>
@@ -292,7 +388,9 @@ export function PathToFreedomPage() {
 
       {result ? (
         <>
-          {/* Insights row */}
+          {/* Insights row — retirement metrics (sustained real income +
+              capital lifetime) sit at the top so the two post-goal
+              numbers can't get lost in the wrap-row. */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
               icon={<Sparkles className="size-4" />}
@@ -304,6 +402,32 @@ export function PathToFreedomPage() {
               }
               tone={result.reached ? 'emerald' : 'amber'}
             />
+            {result.reached && result.yearsSustainedPostGoal !== null && (
+              <StatCard
+                icon={<Sparkles className="size-4" />}
+                label={t('freedom.insights.yearsSustained')}
+                value={
+                  result.yearsSustainedPostGoal >= 80
+                    ? t('freedom.insights.indefinitely')
+                    : `${result.yearsSustainedPostGoal} ${formatYears(result.yearsSustainedPostGoal, i18n.language)}`
+                }
+                tone="amber"
+                hint={t('freedom.insights.yearsSustainedHint')}
+              />
+            )}
+            {result.reached && result.yearsUntilCapitalGone !== null && (
+              <StatCard
+                icon={<TrendingUp className="size-4" />}
+                label={t('freedom.insights.capitalGone')}
+                value={
+                  result.yearsUntilCapitalGone >= 80
+                    ? t('freedom.insights.indefinitely')
+                    : `${result.yearsUntilCapitalGone} ${formatYears(result.yearsUntilCapitalGone, i18n.language)}`
+                }
+                tone="amber"
+                hint={t('freedom.insights.capitalGoneHint')}
+              />
+            )}
             <StatCard
               icon={<TrendingUp className="size-4" />}
               label={t('freedom.insights.finalNominal')}
@@ -340,22 +464,33 @@ export function PathToFreedomPage() {
                 currency={currency}
                 label={t('freedom.progress.todayLabel')}
               />
-              <GrowthChart
-                timeline={result.timeline}
-                currency={currency}
-                contributionsLabel={t('freedom.chart.contributions')}
-                portfolioLabel={t('freedom.chart.portfolio')}
-                yearLabel={t('freedom.chart.year')}
-                todayLabel={t('freedom.chart.today')}
-                goalLabel={t('freedom.chart.goal')}
-                reachedYear={result.reached ? result.years : null}
-              />
+              {/* Accumulation-only timeline for the journey-to-goal charts.
+                  Post-goal entries would show passive income shrinking as
+                  pools are drawn down, which is misleading — the goal
+                  income is sustained by passive + SWR sale, not passive
+                  alone. Distribution belongs on the total-capital chart. */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold">{t('freedom.chart.growthTitle')}</h3>
+                <p className="text-xs text-muted-foreground">{t('freedom.chart.growthSubtitle')}</p>
+                <GrowthChart
+                  timeline={accumTimeline}
+                  currency={currency}
+                  contributionsLabel={t('freedom.chart.contributions')}
+                  portfolioLabel={t('freedom.chart.portfolio')}
+                  yearLabel={t('freedom.chart.year')}
+                  todayLabel={t('freedom.chart.today')}
+                  goalLabel={t('freedom.chart.goal')}
+                  reachedYear={result.reached ? result.years : null}
+                  currentAge={currentAge}
+                  ageAxisLabel={t('freedom.chart.ageAxis')}
+                />
+              </div>
 
               <div className="pt-4 border-t border-border/40 space-y-2">
                 <h3 className="text-sm font-semibold">{t('freedom.dividendChart.title')}</h3>
                 <p className="text-xs text-muted-foreground">{t('freedom.dividendChart.subtitle')}</p>
                 <DividendIncomeChart
-                  timeline={result.timeline}
+                  timeline={accumTimeline}
                   currency={currency}
                   incomeLabel={t('freedom.dividendChart.income')}
                   objectiveLabel={t('freedom.dividendChart.objective')}
@@ -363,8 +498,32 @@ export function PathToFreedomPage() {
                   todayLabel={t('freedom.chart.today')}
                   goalLabel={t('freedom.chart.goal')}
                   reachedYear={result.reached ? result.years : null}
+                  currentAge={currentAge}
+                  ageAxisLabel={t('freedom.chart.ageAxis')}
                 />
               </div>
+
+              {hasDistribution && (
+                <div className="pt-4 border-t border-border/40 space-y-2">
+                  <h3 className="text-sm font-semibold">{t('freedom.capitalChart.title')}</h3>
+                  <p className="text-xs text-muted-foreground">{t('freedom.capitalChart.subtitle')}</p>
+                  <TotalCapitalChart
+                    timeline={result.timeline}
+                    currency={currency}
+                    totalLabel={t('freedom.capitalChart.total')}
+                    distributionLabel={t('freedom.capitalChart.distribution')}
+                    incomeLabel={t('freedom.capitalChart.income')}
+                    yearLabel={t('freedom.chart.year')}
+                    todayLabel={t('freedom.chart.today')}
+                    goalLabel={t('freedom.chart.goal')}
+                    reachedYear={result.reached ? result.years : null}
+                    acquisitivePowerLossYear={result.acquisitivePowerLossYear}
+                    acquisitivePowerLossLabel={t('freedom.capitalChart.lossPoint')}
+                    currentAge={currentAge}
+                    ageAxisLabel={t('freedom.chart.ageAxis')}
+                  />
+                </div>
+              )}
 
               {!result.reached && (
                 <Alert>
@@ -431,6 +590,7 @@ function NumberField({ id, label, hint, value, prefix, suffix, placeholder, onCh
     </div>
   )
 }
+
 
 interface StatCardProps {
   icon: React.ReactNode
@@ -507,6 +667,94 @@ function YearTable({ result, currency }: { result: ReturnType<typeof simulate>; 
         )}
       </CardContent>
     </Card>
+  )
+}
+
+// Optional non-dividend capital pools, collapsed by default to keep the
+// form light for the common case (dividend-only investor). Reinvest
+// checkbox controls whether interest compounds during accumulation —
+// see motivation.ts header for the full semantics.
+function OtherCapitalSection({
+  form,
+  setForm,
+  currency,
+}: {
+  form: FormState
+  setForm: React.Dispatch<React.SetStateAction<FormState>>
+  currency: string
+}) {
+  const { t } = useTranslation()
+  const hasValues = !!(
+    form.interestCapital || form.interestRatePct || form.growthCapital || form.growthRatePct
+  )
+  const [open, setOpen] = useState(hasValues)
+
+  return (
+    <div className="pt-2">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+      >
+        <span>{open ? '−' : '+'}</span>
+        {t('freedom.otherCapital.toggle')}
+      </button>
+      {open && (
+        <div className="mt-3 space-y-4 rounded-md border border-dashed border-border p-4">
+          <p className="text-xs text-muted-foreground">{t('freedom.otherCapital.help')}</p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <NumberField
+              id="interest-capital"
+              label={t('freedom.otherCapital.interestCapital')}
+              hint={t('freedom.otherCapital.interestCapitalHint')}
+              prefix={currencySymbol(currency)}
+              value={form.interestCapital}
+              onChange={(v) => setForm((f) => ({ ...f, interestCapital: v }))}
+            />
+            <NumberField
+              id="interest-rate"
+              label={t('freedom.otherCapital.interestRate')}
+              hint={t('freedom.otherCapital.interestRateHint')}
+              suffix="%"
+              value={form.interestRatePct}
+              onChange={(v) => setForm((f) => ({ ...f, interestRatePct: v }))}
+            />
+          </div>
+          <label className="flex items-start gap-2 text-xs cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={form.reinvestInterest}
+              onChange={(e) => setForm((f) => ({ ...f, reinvestInterest: e.target.checked }))}
+              className="mt-0.5 size-3.5 rounded border-border accent-emerald-600"
+            />
+            <span>
+              <span className="font-medium text-foreground">{t('freedom.otherCapital.reinvest')}</span>
+              <span className="block text-muted-foreground">
+                {t('freedom.otherCapital.reinvestHint')}
+              </span>
+            </span>
+          </label>
+          <div className="grid sm:grid-cols-2 gap-4 pt-1 border-t border-border/40">
+            <NumberField
+              id="growth-capital"
+              label={t('freedom.otherCapital.growthCapital')}
+              hint={t('freedom.otherCapital.growthCapitalHint')}
+              prefix={currencySymbol(currency)}
+              value={form.growthCapital}
+              onChange={(v) => setForm((f) => ({ ...f, growthCapital: v }))}
+            />
+            <NumberField
+              id="growth-rate"
+              label={t('freedom.otherCapital.growthRate')}
+              hint={t('freedom.otherCapital.growthRateHint')}
+              suffix="%"
+              value={form.growthRatePct}
+              onChange={(v) => setForm((f) => ({ ...f, growthRatePct: v }))}
+            />
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 

@@ -153,6 +153,24 @@ RSpec.describe "Api::V1::Profiles", type: :request do
         patch "/api/v1/profile", params: { motivation_monthly_invest: "-5" }
         expect(response).to have_http_status(:unprocessable_entity)
       end
+
+      it "exposes and updates the capital-pool fields" do
+        patch "/api/v1/profile", params: {
+          motivation_interest_capital: "12500.50",
+          motivation_interest_rate_pct: "4.25",
+          motivation_growth_capital: "30000",
+          motivation_growth_rate_pct: "7",
+          motivation_reinvest_interest: "false"
+        }
+
+        expect(response).to have_http_status(:ok)
+        data = JSON.parse(response.body)["data"]
+        expect(data["motivationInterestCapital"]).to eq(12500.5)
+        expect(data["motivationInterestRatePct"]).to eq(4.25)
+        expect(data["motivationGrowthCapital"]).to eq(30000.0)
+        expect(data["motivationGrowthRatePct"]).to eq(7.0)
+        expect(data["motivationReinvestInterest"]).to be(false)
+      end
     end
   end
 end

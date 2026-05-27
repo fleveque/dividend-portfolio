@@ -452,6 +452,13 @@ export interface ProfileUpdate {
   motivationInflationPct?: number | null
   motivationYieldOverridePct?: number | null
   motivationStartYear?: number | null
+  motivationInterestCapital?: number | null
+  motivationInterestRatePct?: number | null
+  motivationGrowthCapital?: number | null
+  motivationGrowthRatePct?: number | null
+  motivationReinvestInterest?: boolean
+  motivationBirthYear?: number | null
+  motivationRetirementAge?: number | null
 }
 
 // ============================================================================
@@ -507,6 +514,20 @@ export const profileApi = {
       body.motivation_yield_override_pct = update.motivationYieldOverridePct ?? ''
     if ('motivationStartYear' in update)
       body.motivation_start_year = update.motivationStartYear ?? ''
+    if ('motivationInterestCapital' in update)
+      body.motivation_interest_capital = update.motivationInterestCapital ?? ''
+    if ('motivationInterestRatePct' in update)
+      body.motivation_interest_rate_pct = update.motivationInterestRatePct ?? ''
+    if ('motivationGrowthCapital' in update)
+      body.motivation_growth_capital = update.motivationGrowthCapital ?? ''
+    if ('motivationGrowthRatePct' in update)
+      body.motivation_growth_rate_pct = update.motivationGrowthRatePct ?? ''
+    if ('motivationReinvestInterest' in update)
+      body.motivation_reinvest_interest = update.motivationReinvestInterest
+    if ('motivationBirthYear' in update)
+      body.motivation_birth_year = update.motivationBirthYear ?? ''
+    if ('motivationRetirementAge' in update)
+      body.motivation_retirement_age = update.motivationRetirementAge ?? ''
     return apiFetch<UserProfile>('/profile', {
       method: 'PATCH',
       body: JSON.stringify(body),

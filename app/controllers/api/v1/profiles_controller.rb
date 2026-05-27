@@ -31,6 +31,13 @@ module Api
           motivationInflationPct: Current.user.motivation_inflation_pct&.to_f,
           motivationYieldOverridePct: Current.user.motivation_yield_override_pct&.to_f,
           motivationStartYear: Current.user.motivation_start_year,
+          motivationInterestCapital: Current.user.motivation_interest_capital&.to_f,
+          motivationInterestRatePct: Current.user.motivation_interest_rate_pct&.to_f,
+          motivationGrowthCapital: Current.user.motivation_growth_capital&.to_f,
+          motivationGrowthRatePct: Current.user.motivation_growth_rate_pct&.to_f,
+          motivationReinvestInterest: Current.user.motivation_reinvest_interest,
+          motivationBirthYear: Current.user.motivation_birth_year,
+          motivationRetirementAge: Current.user.motivation_retirement_age,
           motivationSummary: serialize_motivation_summary
         }
       end
@@ -51,7 +58,9 @@ module Api
           totalYieldEarnedNominal: summary.total_yield_earned_nominal,
           currentMonthlyDividend: summary.current_monthly_dividend,
           progressPct: summary.progress_pct,
-          currency: summary.currency
+          currency: summary.currency,
+          yearsSustainedPostGoal: summary.years_sustained_post_goal,
+          yearsUntilCapitalGone: summary.years_until_capital_gone
         }
       end
 
@@ -61,18 +70,26 @@ module Api
           :share_portfolio, :share_radar,
           :motivation_monthly_invest, :motivation_monthly_objective,
           :motivation_inflation_pct, :motivation_yield_override_pct,
-          :motivation_start_year
+          :motivation_start_year,
+          :motivation_interest_capital, :motivation_interest_rate_pct,
+          :motivation_growth_capital, :motivation_growth_rate_pct,
+          :motivation_reinvest_interest,
+          :motivation_birth_year,
+          :motivation_retirement_age
         )
         permitted[:portfolio_slug] = nil if permitted.key?(:portfolio_slug) && permitted[:portfolio_slug].blank?
         # Coerce form-y string booleans to real booleans so AR doesn't choke.
-        %i[share_portfolio share_radar].each do |k|
+        %i[share_portfolio share_radar motivation_reinvest_interest].each do |k|
           permitted[k] = ActiveModel::Type::Boolean.new.cast(permitted[k]) if permitted.key?(k)
         end
         # Empty string → nil for the motivation decimals so a user clearing a
         # field doesn't write a 0 they didn't intend.
         %i[motivation_monthly_invest motivation_monthly_objective
            motivation_inflation_pct motivation_yield_override_pct
-           motivation_start_year].each do |k|
+           motivation_start_year
+           motivation_interest_capital motivation_interest_rate_pct
+           motivation_growth_capital motivation_growth_rate_pct
+           motivation_birth_year motivation_retirement_age].each do |k|
           permitted[k] = nil if permitted.key?(k) && permitted[k].to_s.strip.empty?
         end
         permitted

@@ -192,6 +192,8 @@ export interface MotivationSummary {
   currentMonthlyDividend: number
   progressPct: number
   currency: string | null
+  yearsSustainedPostGoal: number | null
+  yearsUntilCapitalGone: number | null
 }
 
 export interface UserProfile {
@@ -207,6 +209,13 @@ export interface UserProfile {
   motivationInflationPct: number | null
   motivationYieldOverridePct: number | null
   motivationStartYear: number | null
+  motivationInterestCapital: number | null
+  motivationInterestRatePct: number | null
+  motivationGrowthCapital: number | null
+  motivationGrowthRatePct: number | null
+  motivationReinvestInterest: boolean
+  motivationBirthYear: number | null
+  motivationRetirementAge: number | null
   motivationSummary: MotivationSummary | null
 }
 

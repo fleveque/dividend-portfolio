@@ -36,6 +36,24 @@ class User < ApplicationRecord
   validates :motivation_start_year,
             numericality: { only_integer: true, greater_than_or_equal_to: 1900, less_than_or_equal_to: 2100 },
             allow_nil: true
+  validates :motivation_interest_capital,
+            numericality: { greater_than_or_equal_to: 0, less_than: 1_000_000_000 },
+            allow_nil: true
+  validates :motivation_interest_rate_pct,
+            numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 },
+            allow_nil: true
+  validates :motivation_growth_capital,
+            numericality: { greater_than_or_equal_to: 0, less_than: 1_000_000_000 },
+            allow_nil: true
+  validates :motivation_growth_rate_pct,
+            numericality: { greater_than_or_equal_to: -50, less_than_or_equal_to: 100 },
+            allow_nil: true
+  validates :motivation_birth_year,
+            numericality: { only_integer: true, greater_than_or_equal_to: 1900, less_than_or_equal_to: 2100 },
+            allow_nil: true
+  validates :motivation_retirement_age,
+            numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 130 },
+            allow_nil: true
 
   after_commit :publish_pulse_changes,
                if: -> { saved_change_to_portfolio_slug? || saved_change_to_share_portfolio? || saved_change_to_share_radar? }
@@ -43,6 +61,10 @@ class User < ApplicationRecord
   MOTIVATION_CACHE_TRIGGERS = %i[
     motivation_monthly_invest motivation_monthly_objective
     motivation_inflation_pct motivation_yield_override_pct
+    motivation_start_year
+    motivation_interest_capital motivation_interest_rate_pct
+    motivation_growth_capital motivation_growth_rate_pct
+    motivation_reinvest_interest
     preferred_currency
   ].freeze
 
